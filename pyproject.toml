@@ -25,7 +25,7 @@ image = ["Pillow>=10.0.0"]
 dev = [
     "ruff>=0.5.0",
     "black>=24.0.0",
-    "pyright>=1.1.360",
+    "pyright>=1.1.409",
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
     "textual-dev>=0.1.0",
