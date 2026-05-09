@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rigi"
+version = "0.1.0"
+description = "Rigi isn't a graphics interface, it's terminal. A high-level TUI framework built on Textual."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "reekeer" },
+]
+dependencies = [
+    "textual>=0.80.0",
+    "rich>=13.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/reekeer/Rigi"
+
+[project.optional-dependencies]
+image = ["Pillow>=10.0.0"]
+dev = [
+    "ruff>=0.5.0",
+    "black>=24.0.0",
+    "pyright>=1.1.360",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "textual-dev>=0.1.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rigi"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B008", "UP006", "UP007", "B007", "UP035"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/rigi/__init__.py" = ["F401"]
+"src/rigi/widgets/__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["rigi"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.pyright]
+pythonVersion = "3.10"
+typeCheckingMode = "strict"
+include = ["src/rigi"]
+venvPath = "."
+venv = ".venv"
+reportUnknownMemberType = "none"
+reportUnknownVariableType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownParameterType = "none"
+reportMissingTypeStubs = "none"
+reportAttributeAccessIssue = "warning"
+reportOperatorIssue = "none"
+reportPrivateUsage = "none"
+reportUnusedImport = "none"
+reportPossiblyUnboundVariable = "none"
+reportConstantRedefinition = "none"
+reportUnusedVariable = "none"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
