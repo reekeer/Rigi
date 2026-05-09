@@ -4,5 +4,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    target-branch: dev
     labels:
       - dependencies
+    reviewers:
+      - IMDelewer
