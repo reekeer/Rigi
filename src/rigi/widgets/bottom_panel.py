@@ -9,6 +9,7 @@ from textual.binding import Binding
 from textual.events import Key, MouseDown, MouseMove, MouseUp
 from textual.message import Message
 from textual.reactive import reactive
+from textual.timer import Timer
 from textual.widget import Widget
 from textual.widgets import Button, ContentSwitcher, Input, Label, RichLog, Select, Tab, Tabs
 
@@ -79,6 +80,8 @@ class _LogsView(Widget):
         self._logger_filter: str = "all"
         self._level_filter: str = "all"
         self._known_loggers: list[str] = []
+        self._active: bool = False
+        self._flush_timer: Timer | None = None
 
     def compose(self) -> ComposeResult:
         yield RichLog(highlight=False, markup=True, id="logs-output", auto_scroll=True)
@@ -107,9 +110,24 @@ class _LogsView(Widget):
             yield Button("Clear", id="btn-logs-clear", variant="default")
 
     def on_mount(self) -> None:
-        self.set_interval(0.5, self._flush)
+        pass
+
+    def activate(self) -> None:
+        self._active = True
+        self._reset_seen()
+        self._flush()
+        if self._flush_timer is None:
+            self._flush_timer = self.set_interval(0.5, self._flush)
+
+    def deactivate(self) -> None:
+        self._active = False
+        if self._flush_timer is not None:
+            self._flush_timer.stop()
+            self._flush_timer = None
 
     def _flush(self) -> None:
+        if not self._active:
+            return
         self._refresh_logger_select()
         try:
             view = self.query_one("#logs-output", RichLog)
@@ -229,6 +247,14 @@ class RigiBottomPanel(Widget):
     def watch_active_tab(self, value: str) -> None:
         try:
             self.query_one("#bp-switcher", ContentSwitcher).current = f"bp-{value}"
+        except Exception:
+            pass
+        try:
+            logs_view = self.query_one(_LogsView)
+            if value == "logs":
+                logs_view.activate()
+            else:
+                logs_view.deactivate()
         except Exception:
             pass
 
