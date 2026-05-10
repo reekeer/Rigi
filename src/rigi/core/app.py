@@ -8,31 +8,30 @@ import sys
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
+from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.widget import Widget
 
 from rigi.commands.command import Command
 from rigi.commands.parser import build_cli_parser, parse_inline
+from rigi.commands.provider import RigiCommandProvider
 from rigi.commands.registry import CommandRegistry
 from rigi.core import console as _console
 from rigi.core import log_store
 from rigi.core import platform as _platform_utils
 from rigi.core.dev_commands import register_dev_commands
 from rigi.core.types import HandlerFn, HelpEntry, StatusItem, SubtabDef, TabDef
+from rigi.screens.hamburger import RigiHamburgerScreen
+from rigi.screens.help import RigiHelpScreen
+from rigi.screens.settings import RigiSettingDef, RigiSettingsScreen
 from rigi.themes import DARK as _DEFAULT_THEME
 from rigi.themes import RigiTheme
 from rigi.widgets.border_frame import RigiBorderFrame
 from rigi.widgets.bottom_panel import RigiBottomPanel
 from rigi.widgets.content_area import RigiContentArea
-from rigi.widgets.hamburger_menu import RigiHamburgerScreen, RigiMenuItemData
-from rigi.widgets.help_panel import (
-    RigiHelpScreen,
-    RigiShortcutsBar,
-    extract_help_annotation,
-)
-from rigi.widgets.palette import RigiPaletteScreen
-from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
+from rigi.widgets.hamburger_menu import RigiMenuItemData
+from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import (
     RigiStatusBar,
@@ -64,12 +63,13 @@ class _RigiBody(Widget):
 class RigiApp(App[None]):
     CSS_PATH = str(_CSS_PATH)
 
+    COMMANDS = {RigiCommandProvider}
+
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", priority=True),
         Binding("ctrl+c", "copy_focused", "Copy", show=False, priority=True),
         Binding("ctrl+t", "focus_terminal", "Terminal", show=False),
         Binding("ctrl+h", "show_help", "Help", show=False),
-        Binding("ctrl+p", "open_palette", "Commands", show=False),
         Binding("up", "nav_up", "Up", show=False),
         Binding("down", "nav_down", "Down", show=False),
         Binding("right", "nav_right", "Enter", show=False),
@@ -290,7 +290,7 @@ class RigiApp(App[None]):
         for hook in self._rigi_startup_hooks:
             result = hook(self)
             if asyncio.iscoroutine(result):
-                asyncio.create_task(result)
+                self.run_worker(result, name="rigi-startup-hook")
 
         self._set_terminal_title()
         self.set_focus(None)
@@ -334,7 +334,8 @@ class RigiApp(App[None]):
             _ui_log.error(f"CSS load error ({path.name}): {exc}", exc_info=True)
             self.notify(f"CSS load error ({path.name}): {exc}", severity="error")
 
-    def on_rigi_sidebar_navigation_changed(self, event: RigiSidebar.NavigationChanged) -> None:
+    @on(RigiSidebar.NavigationChanged)
+    def on_sidebar_nav(self, event: RigiSidebar.NavigationChanged) -> None:
         self._navigate_to(event.tab_idx, event.subtab_path)
         self._update_home_button()
 
@@ -353,7 +354,8 @@ class RigiApp(App[None]):
         except Exception:
             pass
 
-    def on__home_button_clicked(self, event: _HomeButton.Clicked) -> None:
+    @on(_HomeButton.Clicked)
+    def on_home_clicked(self, event: _HomeButton.Clicked) -> None:
         event.stop()
         idx = self._home_tab_idx()
         if idx < len(self._rigi_tabs):
@@ -393,10 +395,9 @@ class RigiApp(App[None]):
         except (IndexError, AttributeError):
             return None
 
-    def on_rigi_bottom_panel_command_submitted(
-        self, event: RigiBottomPanel.CommandSubmitted
-    ) -> None:
-        asyncio.create_task(self._handle_command(event.text))
+    @on(RigiBottomPanel.CommandSubmitted)
+    def on_command_submitted(self, event: RigiBottomPanel.CommandSubmitted) -> None:
+        self.run_worker(self._handle_command(event.text), name="rigi-cmd", exclusive=False)
 
     async def _handle_command(self, text: str) -> None:
         stripped = text.strip()
@@ -478,7 +479,8 @@ class RigiApp(App[None]):
             except Exception:
                 self.notify(msg, severity="error", title=f"$ {cmd[:30]}")
 
-    def on__hamburger_button_clicked(self, event: _HamburgerButton.Clicked) -> None:
+    @on(_HamburgerButton.Clicked)
+    def on_hamburger_clicked(self, event: _HamburgerButton.Clicked) -> None:
         event.stop()
         self.push_screen(RigiHamburgerScreen(self._build_hamburger_sections()))
 
@@ -503,7 +505,7 @@ class RigiApp(App[None]):
             RigiMenuItemData("Settings", callback=self._open_settings),
             RigiMenuItemData(
                 "Help",
-                callback=lambda: asyncio.create_task(self.action_show_help()),  # type: ignore[arg-type]
+                callback=lambda: self.run_worker(self.action_show_help(), name="rigi-help"),
             ),
         ]
 
@@ -600,11 +602,6 @@ class RigiApp(App[None]):
 
     async def action_show_help(self) -> None:
         await self.push_screen(RigiHelpScreen(self._rigi_help_entries))
-
-    async def action_open_palette(self) -> None:
-        cmd_name = await self.push_screen_wait(RigiPaletteScreen(self._cmd_registry))
-        if cmd_name:
-            await self._handle_command(cmd_name)
 
     def action_copy_focused(self) -> None:
         text = self._extract_focused_text()

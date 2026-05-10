@@ -51,14 +51,15 @@ from rigi.widgets.border_frame import RigiBorderFrame
 from rigi.widgets.bottom_panel import RigiBottomPanel
 from rigi.widgets.content_area import RigiContentArea
 from rigi.widgets.gauge import RigiGauge, RigiSparkline
+from rigi.screens.hamburger import RigiHamburgerScreen
+from rigi.screens.help import RigiHelpScreen
 from rigi.widgets.hamburger_menu import (
     RigiHamburgerPanel,
-    RigiHamburgerScreen,
     RigiMenuItem,
     RigiMenuItemData,
     RigiMenuPanel,
 )
-from rigi.widgets.help_panel import RigiHelpScreen, RigiShortcutsBar, extract_help_annotation
+from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
 from rigi.widgets.image import RigiImage, TerminalImageProtocol, detect_image_protocol
 from rigi.widgets.mouse import RigiClickable, RigiDraggable, RigiMouseMixin
 from rigi.widgets.palette import RigiPaletteScreen
