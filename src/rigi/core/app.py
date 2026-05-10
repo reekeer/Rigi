@@ -11,6 +11,7 @@ from typing import Any, Awaitable, Callable
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
+from textual.notifications import SeverityLevel
 from textual.widget import Widget
 
 from rigi.commands.command import Command
@@ -32,6 +33,7 @@ from rigi.widgets.bottom_panel import RigiBottomPanel
 from rigi.widgets.content_area import RigiContentArea
 from rigi.widgets.hamburger_menu import RigiMenuItemData
 from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
+from rigi.widgets.notifications import RigiNotificationRack
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import (
     RigiStatusBar,
@@ -119,6 +121,7 @@ class RigiApp(App[None]):
         self._rigi_menu_items: list[tuple[str, str, Callable[[], None]]] = []
         self._rigi_settings: list[RigiSettingDef] = []
 
+        self._disable_notifications = True
         self._register_builtin_commands()
 
     def _register_builtin_commands(self) -> None:
@@ -260,6 +263,7 @@ class RigiApp(App[None]):
                 registry=self._cmd_registry,
                 history_file=history_file,
             )
+        yield RigiNotificationRack()
 
     def on_mount(self) -> None:
         self.title = f"{self._prog_name} v{self._version}"
@@ -296,9 +300,27 @@ class RigiApp(App[None]):
         except Exception:
             pass
 
+    def notify(
+        self,
+        message: str,
+        *,
+        title: str = "",
+        severity: SeverityLevel = "information",
+        timeout: float | None = 5.0,
+        markup: bool = True,
+    ) -> None:
+        if not markup:
+            message = message.replace("[", "\\[")
+        effective_timeout = timeout if timeout is not None else 5.0
+        try:
+            self.query_one(RigiNotificationRack).add_notification(
+                title, message, severity, effective_timeout
+            )
+        except Exception:
+            pass
+
     @property
     def terminal(self) -> str:
-        """Name of the running terminal (kitty, iterm2, wezterm, etc.)."""
         return _console.detect_terminal()
 
     @property

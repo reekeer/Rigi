@@ -439,3 +439,59 @@ RigiBottomPanel #terminal-input {
     color: #e6edf3;
 }
 RigiBottomPanel #terminal-input:focus { border: none; }
+
+RigiNotificationRack {
+    layer: overlay;
+    width: 1fr;
+    height: auto;
+    max-height: 80%;
+    dock: bottom;
+    align: right bottom;
+    margin-bottom: 3;
+    background: transparent;
+    layout: vertical;
+}
+
+RigiNotificationWidget {
+    width: 44;
+    max-width: 50%;
+    height: auto;
+    min-height: 3;
+    margin: 0 1 1 0;
+    padding: 0 1 1 1;
+    background: #161b22;
+    border-left: thick #58a6ff;
+}
+RigiNotificationWidget.notif--warning { border-left: thick #e3b341; }
+RigiNotificationWidget.notif--error { border-left: thick #f85149; }
+
+.notif-header {
+    layout: horizontal;
+    height: 1;
+    width: 100%;
+    background: transparent;
+}
+.notif-title {
+    width: 1fr;
+    height: 1;
+    content-align: left middle;
+    background: transparent;
+}
+.notif-message {
+    width: 100%;
+    height: auto;
+    color: #c9d1d9;
+    background: transparent;
+    margin-top: 1;
+}
+.notif-close {
+    width: 3;
+    min-width: 3;
+    max-width: 3;
+    height: 1;
+    border: none;
+    background: transparent;
+    color: #6e7681;
+    padding: 0;
+}
+.notif-close:hover { color: #f85149; background: transparent; }

@@ -62,6 +62,12 @@ from rigi.widgets.hamburger_menu import (
 from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
 from rigi.widgets.image import RigiImage, TerminalImageProtocol, detect_image_protocol
 from rigi.widgets.mouse import RigiClickable, RigiDraggable, RigiMouseMixin
+from rigi.widgets.notifications import (
+    RigiNotificationRack as RigiNotificationRack,
+)
+from rigi.widgets.notifications import (
+    RigiNotificationWidget as RigiNotificationWidget,
+)
 from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
@@ -126,6 +132,8 @@ __all__ = [
     "extract_help_annotation",
     "RigiGauge",
     "RigiSparkline",
+    "RigiNotificationRack",
+    "RigiNotificationWidget",
     # Platform utilities
     "platform",
     "console",
