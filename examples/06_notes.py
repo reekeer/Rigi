@@ -62,7 +62,10 @@ async def greet(app, name="world", **_):
 ### Settings Panel
 
 ```python
-app.add_setting("General", "Theme", value_fn=lambda: app._theme.name)
+general = app.settings.add_page("General")
+general.settings = [
+    Setting("Theme", description="Active color theme", value_fn=lambda: app._theme.name),
+]
 ```
 """,
     "Keyboard Shortcuts": """# Keyboard Shortcuts

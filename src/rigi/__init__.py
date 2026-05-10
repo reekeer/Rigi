@@ -68,12 +68,13 @@ from rigi.widgets.notifications import (
 from rigi.widgets.notifications import (
     RigiNotificationWidget as RigiNotificationWidget,
 )
+from rigi.core.settings_manager import Setting, SettingsManager, SettingsPage
 from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
 from rigi.widgets.terminal_bar import RigiTerminalBar
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __all__ = [
     # Textual primitives
     "Widget",
@@ -121,6 +122,9 @@ __all__ = [
     "RigiMenuItemData",
     "RigiSettingsScreen",
     "RigiSettingDef",
+    "Setting",
+    "SettingsPage",
+    "SettingsManager",
     "RigiImage",
     "TerminalImageProtocol",
     "detect_image_protocol",
