@@ -146,9 +146,10 @@ class _LogsView(Widget):
             ms = rec.timestamp.microsecond // 1000
             ts = rec.timestamp.strftime("%H:%M:%S") + f".{ms:03d}"
             safe_message = rec.message.replace("[", "\\[")
+            safe_logger = rec.logger_name.replace("[", "\\[")
             view.write(
                 f"[dim]{ts}[/dim] "
-                f"[bold cyan]{rec.logger_name:<20}[/bold cyan] "
+                f"[bold cyan]{safe_logger:<20}[/bold cyan] "
                 f"[{color}]{rec.level:<8}[/{color}] "
                 f"{safe_message}"
             )
@@ -231,7 +232,7 @@ class RigiBottomPanel(Widget):
         yield Tabs(Tab("Terminal", id="tab-terminal"), Tab("Logs", id="tab-logs"))
         with ContentSwitcher(initial="bp-terminal", id="bp-switcher"):
             with Widget(id="bp-terminal"):
-                yield RichLog(highlight=True, markup=True, id="term-history")
+                yield RichLog(highlight=False, markup=True, id="term-history")
                 with Widget(id="input-row"):
                     yield Label(self._prompt_label(focused=False), id="terminal-prompt")
                     yield _TerminalInput(placeholder="", id="terminal-input")
@@ -347,7 +348,8 @@ class RigiBottomPanel(Widget):
             self.query_one("#terminal-input", _TerminalInput).value = ""
         except Exception:
             pass
-        self.write_output(f"[bold green]{self._prompt_text}[/bold green] [dim]$[/dim] {text}")
+        safe_text = text.replace("[", "\\[")
+        self.write_output(f"[bold green]{self._prompt_text}[/bold green] [dim]$[/dim] {safe_text}")
         self.post_message(RigiBottomPanel.CommandSubmitted(text))
 
     def action_complete(self) -> None:

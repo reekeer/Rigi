@@ -477,8 +477,8 @@ class RigiApp(App[None]):
                 )
                 _terminal_log.error(f"Shell command timed out: {cmd}")
                 return
-            out = (stdout.decode(errors="replace") + stderr.decode(errors="replace")).strip()
-            display = out[:1200] if out else "(no output)"
+            raw = (stdout.decode(errors="replace") + stderr.decode(errors="replace")).strip()
+            display = (raw[:1200] if raw else "(no output)").replace("[", "\\[")
             _terminal_log.info(f"Shell command completed: {cmd}")
             try:
                 self.query_one(RigiBottomPanel).write_output(display)
@@ -487,10 +487,11 @@ class RigiApp(App[None]):
         except Exception as exc:
             msg = str(exc)
             _terminal_log.error(f"Shell command failed: {cmd}", exc_info=True)
+            safe_msg = msg.replace("[", "\\[")
             try:
-                self.query_one(RigiBottomPanel).write_output(f"[red]{msg}[/red]")
+                self.query_one(RigiBottomPanel).write_output(f"[red]{safe_msg}[/red]")
             except Exception:
-                self.notify(msg, severity="error", title=f"$ {cmd[:30]}")
+                self.notify(safe_msg, severity="error", title=f"$ {cmd[:30]}")
 
     @on(_HamburgerButton.Clicked)
     def on_hamburger_clicked(self, event: _HamburgerButton.Clicked) -> None:
