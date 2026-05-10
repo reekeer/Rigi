@@ -300,14 +300,10 @@ class RigiApp(App[None]):
         title = f"{self._prog_name} {self._version}"
         seq = _console.set_title(title)
         try:
-            if self._driver is not None:
-                self._driver.write(seq)
+            with open("/dev/tty", "w") as tty:
+                tty.write(seq)
         except Exception:
-            try:
-                with open("/dev/tty", "w") as tty:
-                    tty.write(seq)
-            except Exception:
-                pass
+            pass
 
     @property
     def terminal(self) -> str:
@@ -663,9 +659,10 @@ class RigiApp(App[None]):
 
         return ""
 
-    def open_url(self, url: str) -> bool:
-        """Open *url* in the default browser. Returns True on success."""
-        return _platform_utils.open_url(url)
+    def open_url(self, url: str, *, new_tab: bool = True) -> None:
+        """Open *url* in the default browser."""
+        if not _platform_utils.open_url(url):
+            super().open_url(url, new_tab=new_tab)
 
     def open_path(self, path: str | Path) -> bool:
         """Open a file or directory with the OS default application."""
@@ -675,11 +672,11 @@ class RigiApp(App[None]):
         """Send an OS desktop notification (notify-send / osascript / PowerShell)."""
         return _platform_utils.notify_desktop(title, body, urgency)
 
-    def run_worker(
+    def schedule_task(
         self,
         coro: Any,
         *,
-        name: str = "rigi-worker",
+        name: str = "rigi-task",
         on_done: Callable[[Any], None] | None = None,
     ) -> asyncio.Task[Any]:
         """Schedule *coro* as a background asyncio task.
@@ -695,7 +692,7 @@ class RigiApp(App[None]):
 
         return asyncio.create_task(_wrapped(), name=name)
 
-    def action_quit(self) -> None:
+    async def action_quit(self) -> None:
         try:
             self.query_one(RigiBottomPanel).save_history()
         except Exception:
@@ -718,7 +715,7 @@ class RigiApp(App[None]):
             key=key, label=label, value_fn=value_fn, style=style, refresh_interval=refresh_interval
         )
         self._rigi_status_items.append(item)
-        if self._running:
+        if self.is_running:
             self.query_one(RigiStatusBar).add_item(item)
         return item
 
@@ -746,7 +743,7 @@ class RigiApp(App[None]):
     def register_css(self, path: str | Path) -> None:
         p = Path(path).expanduser().resolve()
         self._rigi_extra_css.append(p)
-        if self._running:
+        if self.is_running:
             self._apply_css_file(p)
 
     def set_theme(self, theme: RigiTheme) -> None:
@@ -815,7 +812,7 @@ class RigiApp(App[None]):
         return False
 
     def invalidate_tab_cache(self, tab_name: str | None = None) -> None:
-        content = self.query_one(RigiContentArea) if self._running else None
+        content = self.query_one(RigiContentArea) if self.is_running else None
 
         def _evict(widget: Widget) -> None:
             if content and widget is content._current:
@@ -872,7 +869,7 @@ class RigiApp(App[None]):
             async def _nav() -> None:
                 app_instance.navigate_to_tab(tab.name)
 
-            app_instance._rigi_startup_hooks.append(lambda _a: _nav())
+            app_instance._rigi_startup_hooks.append(lambda _: _nav())
             app_instance.run()
             return
 
