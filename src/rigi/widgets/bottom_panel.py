@@ -208,7 +208,7 @@ class _LogsView(Widget):
 
     def on_select_changed(self, event: Select.Changed) -> None:
         event.stop()
-        val = str(event.value) if event.value is not Select.BLANK else "all"
+        val = str(event.value) if event.value is not Select.NULL else "all"
         if event.select.id == "sel-logger":
             self._logger_filter = val
         elif event.select.id == "sel-level":
