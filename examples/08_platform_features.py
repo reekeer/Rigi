@@ -139,7 +139,7 @@ def make_features() -> RigiPane:
 - `app.open_url(url)` — open browser cross-platform
 - `app.open_path(path)` — open file/dir with OS app
 - `app.notify_desktop(title, body)` — OS desktop notification
-- `app.schedule_task(coro)` — background async task
+- `app.schedule_task(coro)` — background async task (Textual 8 Worker API)
 
 ### Platform Module
 - `rigi.platform.IS_WINDOWS / IS_MACOS / IS_LINUX / IS_WAYLAND`
@@ -194,7 +194,7 @@ async def _start_metrics(a: RigiApp) -> None:
 
             await asyncio.sleep(1.0)
 
-    asyncio.create_task(_loop())
+    a.schedule_task(_loop())
 
 
 @app.command("open", help="Open a URL or path  (e.g. open https://example.com)")
