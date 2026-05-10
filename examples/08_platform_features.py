@@ -1,13 +1,12 @@
 """Platform & features showcase — gauges, sparklines, clipboard, desktop notify."""
+
 from __future__ import annotations
 
 import asyncio
 import random
-import time
 
-import rigi
 from rigi import RigiApp, TabDef, platform
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane, RigiVPane
+from rigi.layout.pane import RigiCard, RigiPane
 from rigi.widgets import Label, Markdown, RigiGauge, RigiSparkline
 
 app = RigiApp(
@@ -91,6 +90,7 @@ def make_overview() -> RigiPane:
 
 def make_platform() -> RigiPane:
     import sys
+
     return RigiPane(
         RigiCard(
             Markdown(f"""
@@ -168,13 +168,13 @@ app.add_tab(overview_tab)
 app.add_tab(platform_tab)
 app.add_tab(features_tab)
 
-app.add_status("cpu",  "CPU", lambda: f"{_read_cpu_pct():.0f}%",  refresh_interval=2.0)
-app.add_status("mem",  "Mem", lambda: f"{_read_mem_pct():.0f}%",  refresh_interval=3.0)
-app.add_status("os",   "OS",  lambda: platform.PLATFORM_NAME,     refresh_interval=60.0)
+app.add_status("cpu", "CPU", lambda: f"{_read_cpu_pct():.0f}%", refresh_interval=2.0)
+app.add_status("mem", "Mem", lambda: f"{_read_mem_pct():.0f}%", refresh_interval=3.0)
+app.add_status("os", "OS", lambda: platform.PLATFORM_NAME, refresh_interval=60.0)
 
 
 @app.on_startup
-async def _start_metrics(a: RigiApp) -> None:
+async def _start_metrics(a: RigiApp) -> None:  # pyright: ignore[reportUnusedFunction]
     async def _loop() -> None:
         while True:
             cpu = _read_cpu_pct()
@@ -208,8 +208,10 @@ async def cmd_open(app: RigiApp, **kwargs: object) -> None:
         app.notify(f"Opened: {target}", severity="information")
     else:
         ok = app.open_path(target)
-        app.notify(f"Opened: {target}" if ok else f"Failed to open: {target}",
-                   severity="information" if ok else "error")
+        app.notify(
+            f"Opened: {target}" if ok else f"Failed to open: {target}",
+            severity="information" if ok else "error",
+        )
 
 
 @app.command("copy", help="Copy text to clipboard")
@@ -219,23 +221,27 @@ async def cmd_copy(app: RigiApp, **kwargs: object) -> None:
         app.notify("Usage: copy <text>", severity="warning")
         return
     from rigi.core.platform import copy_to_clipboard
+
     ok = copy_to_clipboard(text)
-    app.notify("Copied!" if ok else "Clipboard unavailable",
-               severity="information" if ok else "warning")
+    app.notify(
+        "Copied!" if ok else "Clipboard unavailable", severity="information" if ok else "warning"
+    )
 
 
 @app.command("desktop-notify", help="Send OS desktop notification", aliases=["dn"])
 async def cmd_dn(app: RigiApp, **kwargs: object) -> None:
     text = " ".join(str(v) for v in kwargs.values() if v).strip() or "Hello from Rigi!"
     ok = app.notify_desktop("Rigi", text)
-    app.notify("Notification sent" if ok else "Desktop notifications unavailable",
-               severity="information" if ok else "warning")
+    app.notify(
+        "Notification sent" if ok else "Desktop notifications unavailable",
+        severity="information" if ok else "warning",
+    )
 
 
 @app.command("gauge", help="Demo: set CPU gauge value  (e.g. gauge 75)")
 async def cmd_gauge(app: RigiApp, **kwargs: object) -> None:
     try:
-        val = float(next(iter(kwargs.values())))
+        val = float(str(next(iter(kwargs.values()))))
         if _gauge_cpu is not None:
             _gauge_cpu.value = val
         app.notify(f"CPU gauge → {val:.0f}%", timeout=2)

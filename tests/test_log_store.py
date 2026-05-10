@@ -1,6 +1,7 @@
 """Tests for log store."""
-import logging
+
 from datetime import datetime
+
 from rigi.core import log_store
 
 
@@ -45,11 +46,9 @@ def test_log_store_filter_by_level():
 def test_captured_record_structure():
     """Test CapturedRecord structure."""
     from rigi.core.log_store import CapturedRecord
+
     record = CapturedRecord(
-        timestamp=datetime.now(),
-        logger_name="test",
-        level="INFO",
-        message="test message"
+        timestamp=datetime.now(), logger_name="test", level="INFO", message="test message"
     )
     assert record.timestamp is not None
     assert record.logger_name == "test"

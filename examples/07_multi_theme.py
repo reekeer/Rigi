@@ -1,4 +1,5 @@
 """Theme showcase — demonstrates all built-in themes and custom CSS."""
+
 from __future__ import annotations
 
 import datetime
@@ -17,7 +18,9 @@ app = RigiApp(
 )
 
 app.add_status("theme", "Theme", lambda: app._theme.name.capitalize(), refresh_interval=1.0)
-app.add_status("time",  "Time",  lambda: datetime.datetime.now().strftime("%H:%M"), refresh_interval=1.0)
+app.add_status(
+    "time", "Time", lambda: datetime.datetime.now().strftime("%H:%M"), refresh_interval=1.0
+)
 
 
 def make_showcase():
@@ -85,7 +88,7 @@ def make_widgets():
 
 
 showcase_tab = TabDef(name="Showcase", key="1", icon="", widget_factory=make_showcase)
-widgets_tab  = TabDef(name="Widgets",  key="2", icon="", widget_factory=make_widgets)
+widgets_tab = TabDef(name="Widgets", key="2", icon="", widget_factory=make_widgets)
 app.add_tab(showcase_tab)
 app.add_tab(widgets_tab)
 

@@ -1,8 +1,9 @@
 """Minimal Rigi app — one tab, one card."""
+
 from __future__ import annotations
 
 from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiPane, RigiCard
+from rigi.layout.pane import RigiCard, RigiPane
 from rigi.widgets import Label
 
 app = RigiApp(name="minimal", version="1.0.0", description="Simplest possible Rigi app")

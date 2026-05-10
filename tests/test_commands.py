@@ -1,5 +1,7 @@
 """Tests for command system."""
+
 import pytest
+
 from rigi.commands.command import Command
 from rigi.commands.registry import CommandRegistry
 
@@ -16,10 +18,10 @@ def test_command_creation():
 def test_command_with_handler():
     """Test command with handler."""
     called = []
-    
-    def handler(app=None):
+
+    def handler(_app: object = None) -> None:
         called.append(True)
-    
+
     cmd = Command(name="test", help="Test")
     cmd.set_handler(handler)
     assert cmd.handler is not None
@@ -35,10 +37,10 @@ def test_command_terminal_help():
 def test_command_subcommand_handler():
     """Test subcommand handler registration."""
     cmd = Command(name="test", help="Test")
-    
-    def action_handler(app=None):
+
+    def action_handler(_app: object = None) -> None:
         pass
-    
+
     cmd.add_subcommand_handler("start", action_handler)
     assert "start" in cmd.subcommand_handlers
     assert cmd.subcommand_handlers["start"] == action_handler
@@ -49,7 +51,7 @@ def test_command_args():
     cmd = Command(name="test", help="Test")
     cmd.add_arg("name", help="Name argument", required=True)
     cmd.add_arg("verbose", help="Verbose flag", is_flag=True, short="v")
-    
+
     assert len(cmd.args) == 2
     assert cmd.args[0].name == "name"
     assert cmd.args[0].required is True
@@ -69,7 +71,7 @@ def test_command_registry():
     registry = CommandRegistry()
     cmd = Command(name="test", help="Test")
     registry.register(cmd)
-    
+
     assert registry.get("test") == cmd
     assert cmd in registry.all()
 
@@ -79,7 +81,7 @@ def test_command_registry_aliases():
     registry = CommandRegistry()
     cmd = Command(name="quit", help="Quit", aliases=["exit"])
     registry.register(cmd)
-    
+
     assert registry.get("quit") == cmd
     assert registry.get("exit") == cmd
 
@@ -90,11 +92,11 @@ def test_command_completion():
     cmd.add_arg("verbose", is_flag=True, short="v")
     cmd.add_subcommand(Command(name="start", help="Start"))
     cmd.add_subcommand(Command(name="stop", help="Stop"))
-    
+
     hints = cmd.completion_hints("st")
     assert "start" in hints
     assert "stop" in hints
-    
+
     hints = cmd.completion_hints("--v")
     assert "--verbose" in hints
 
@@ -103,14 +105,14 @@ def test_command_completion():
 async def test_command_execute():
     """Test command execution."""
     called = []
-    
-    async def handler(app=None, name=None):
+
+    async def handler(_app: object = None, name: object = None) -> None:
         called.append(name)
-    
+
     cmd = Command(name="test", help="Test")
     cmd.add_arg("name", required=True)
     cmd.set_handler(handler)
-    
+
     await cmd.execute({"name": "Alice"}, app=None)
     assert called == ["Alice"]
 
@@ -119,19 +121,19 @@ async def test_command_execute():
 async def test_command_execute_with_subcommand_handler():
     """Test command execution with subcommand handler."""
     called = []
-    
-    async def start_handler(app=None):
+
+    async def start_handler(_app: object = None) -> None:
         called.append("start")
-    
-    async def stop_handler(app=None):
+
+    async def stop_handler(_app: object = None) -> None:
         called.append("stop")
-    
+
     cmd = Command(name="service", help="Service control")
     cmd.add_subcommand_handler("start", start_handler)
     cmd.add_subcommand_handler("stop", stop_handler)
-    
+
     await cmd.execute({"action": "start"}, app=None)
     assert called == ["start"]
-    
+
     await cmd.execute({"action": "stop"}, app=None)
     assert called == ["start", "stop"]

@@ -1,7 +1,6 @@
 """Todo app — add/complete/delete tasks via terminal commands."""
-from __future__ import annotations
 
-import datetime
+from __future__ import annotations
 
 from rigi import RigiApp, TabDef
 from rigi.layout.pane import RigiCard, RigiPane
@@ -10,11 +9,11 @@ from rigi.widgets import DataTable, Label
 app = RigiApp(name="todo", version="1.0.0", description="Terminal todo manager", home_tab="Tasks")
 
 _tasks: list[dict[str, object]] = [
-    {"id": 1, "text": "Set up project structure", "done": True,  "priority": "high"},
-    {"id": 2, "text": "Write unit tests",          "done": False, "priority": "high"},
-    {"id": 3, "text": "Add CI pipeline",           "done": False, "priority": "medium"},
-    {"id": 4, "text": "Update documentation",      "done": False, "priority": "low"},
-    {"id": 5, "text": "Code review pass",          "done": False, "priority": "medium"},
+    {"id": 1, "text": "Set up project structure", "done": True, "priority": "high"},
+    {"id": 2, "text": "Write unit tests", "done": False, "priority": "high"},
+    {"id": 3, "text": "Add CI pipeline", "done": False, "priority": "medium"},
+    {"id": 4, "text": "Update documentation", "done": False, "priority": "low"},
+    {"id": 5, "text": "Code review pass", "done": False, "priority": "medium"},
 ]
 _next_id = 6
 
@@ -46,20 +45,25 @@ def make_done():
     done = [t for t in _tasks if t["done"]]
     return RigiPane(
         RigiCard(
-            *[Label(f"[green]✓[/green]  {t['text']}") for t in done] or [Label("[dim]No completed tasks yet[/dim]")],
+            *[Label(f"[green]✓[/green]  {t['text']}") for t in done]
+            or [Label("[dim]No completed tasks yet[/dim]")],
             title=f" Completed ({len(done)})",
         ),
     )
 
 
 tasks_tab = TabDef(name="Tasks", key="1", icon="", widget_factory=make_tasks)
-done_tab  = TabDef(name="Done",  key="2", icon="", widget_factory=make_done)
+done_tab = TabDef(name="Done", key="2", icon="", widget_factory=make_done)
 app.add_tab(tasks_tab)
 app.add_tab(done_tab)
 
-app.add_status("total", "Total",   lambda: str(len(_tasks)),                                  refresh_interval=1.0)
-app.add_status("open",  "Open",    lambda: str(sum(1 for t in _tasks if not t["done"])),       refresh_interval=1.0)
-app.add_status("done",  "Done",    lambda: str(sum(1 for t in _tasks if t["done"])),           refresh_interval=1.0)
+app.add_status("total", "Total", lambda: str(len(_tasks)), refresh_interval=1.0)
+app.add_status(
+    "open", "Open", lambda: str(sum(1 for t in _tasks if not t["done"])), refresh_interval=1.0
+)
+app.add_status(
+    "done", "Done", lambda: str(sum(1 for t in _tasks if t["done"])), refresh_interval=1.0
+)
 
 
 @app.command("add", help="Add a new task")
