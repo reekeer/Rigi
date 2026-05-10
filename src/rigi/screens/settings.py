@@ -1,5 +1,3 @@
-"""RigiSettingsScreen — modal settings panel."""
-
 from __future__ import annotations
 
 import logging
@@ -11,7 +9,7 @@ from textual.binding import Binding
 from textual.message import Message
 from textual.screen import ModalScreen
 from textual.widget import Widget
-from textual.widgets import Input, Label
+from textual.widgets import Button, Input, Label, Switch
 
 _ui_log = logging.getLogger("rigi.ui")
 
@@ -26,6 +24,8 @@ class RigiSettingDef:
         action_fn: Callable[[], None] | None = None,
         action_label: str = "Change",
         write_fn: Callable[[str], None] | None = None,
+        checkbox_fn: Callable[[], bool] | None = None,
+        toggle_fn: Callable[[], None] | None = None,
     ) -> None:
         self.category = category
         self.label = label
@@ -34,6 +34,8 @@ class RigiSettingDef:
         self.action_fn = action_fn
         self.action_label = action_label
         self.write_fn = write_fn
+        self.checkbox_fn = checkbox_fn
+        self.toggle_fn = toggle_fn
         self._current_value: str | None = None
 
     def get_value(self) -> str:
@@ -54,6 +56,15 @@ class RigiSettingDef:
                 self.write_fn(v)
             except Exception as e:
                 _ui_log.error(f"Error setting value for {self.label}: {e}", exc_info=True)
+
+    def get_checked(self) -> bool:
+        if self.checkbox_fn is None:
+            return False
+        try:
+            return self.checkbox_fn()
+        except Exception as e:
+            _ui_log.error(f"Error getting checkbox value for {self.label}: {e}", exc_info=True)
+            return False
 
 
 class _CategoryClicked(Message):
@@ -130,6 +141,24 @@ class _SettingInput(Input):
         self.app.set_focus(None)
 
 
+class _SettingSwitch(Widget):
+    def __init__(self, setting: RigiSettingDef) -> None:
+        super().__init__()
+        self._setting = setting
+
+    def compose(self) -> ComposeResult:
+        yield Switch(value=self._setting.get_checked(), classes="_s-switch")
+
+    @on(Switch.Changed)
+    def on_changed(self, event: Switch.Changed) -> None:
+        event.stop()
+        if self._setting.toggle_fn:
+            try:
+                self._setting.toggle_fn()
+            except Exception as e:
+                _ui_log.error(f"Error toggling setting {self._setting.label}: {e}", exc_info=True)
+
+
 class _SettingItem(Widget):
     def __init__(self, setting: RigiSettingDef) -> None:
         super().__init__()
@@ -139,11 +168,11 @@ class _SettingItem(Widget):
         yield Label(self._setting.label, classes="_s-label")
         if self._setting.description:
             yield Label(self._setting.description, classes="_s-desc")
-        if self._setting.write_fn is not None or (
-            self._setting.value_fn is not None and self._setting.action_fn is None
-        ):
+        if self._setting.checkbox_fn is not None:
+            yield _SettingSwitch(self._setting)
+        elif self._setting.write_fn is not None:
             yield _SettingInput(self._setting)
-        elif self._setting.value_fn or self._setting.action_fn:
+        elif self._setting.value_fn is not None or self._setting.action_fn is not None:
             yield _ValueRow(self._setting)
 
 
@@ -171,7 +200,8 @@ class RigiSettingsScreen(ModalScreen[None]):
     def compose(self) -> ComposeResult:
         with Widget(id="s-outer"):
             with Widget(id="s-titlebar"):
-                yield Label("[dim]ESC to close[/dim]")
+                yield Label("Settings", id="s-title-lbl")
+                yield Button("×", id="s-close-btn")
             with Widget(id="s-body"):
                 with Widget(id="s-categories"):
                     for cat in self._categories:
@@ -184,6 +214,11 @@ class RigiSettingsScreen(ModalScreen[None]):
     def on_mount(self) -> None:
         self.query_one("#s-outer").border_title = "⚙  Settings"
         self._render_category(self._active_category)
+
+    @on(Button.Pressed, "#s-close-btn")
+    def on_close_pressed(self, event: Button.Pressed) -> None:
+        event.stop()
+        self.dismiss(None)
 
     @on(_CategoryClicked)
     def on_category_clicked(self, event: _CategoryClicked) -> None:

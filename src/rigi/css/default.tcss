@@ -322,6 +322,14 @@ _SettingItem {
 _SettingItem ._s-label { color: #c9d1d9; text-style: bold; height: 1; }
 _SettingItem ._s-desc { color: #6e7681; height: 1; }
 
+_SettingSwitch {
+    height: 1;
+    width: auto;
+    margin-top: 1;
+    background: transparent;
+}
+_SettingSwitch Switch { height: 1; width: auto; }
+
 _SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
 _SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
 
@@ -336,11 +344,30 @@ RigiSettingsScreen { align: center middle; background: transparent; }
 }
 #s-titlebar {
     height: 2;
-    padding: 0 2;
+    padding: 0 1;
     border-bottom: solid #21262d;
     background: transparent;
+    layout: horizontal;
     content-align: left middle;
 }
+#s-title-lbl {
+    width: 1fr;
+    height: 1;
+    color: #c9d1d9;
+    content-align: left middle;
+    padding: 0 1;
+}
+#s-close-btn {
+    width: 3;
+    height: 1;
+    min-width: 3;
+    max-width: 3;
+    border: none;
+    background: transparent;
+    color: #6e7681;
+    padding: 0;
+}
+#s-close-btn:hover { color: #f85149; background: transparent; }
 #s-body { layout: horizontal; height: 1fr; background: transparent; }
 #s-categories {
     width: 22;

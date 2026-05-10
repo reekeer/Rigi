@@ -745,8 +745,29 @@ class RigiApp(App[None]):
         value_fn: Callable[[], str] | None = None,
         action_fn: Callable[[], None] | None = None,
         action_label: str = "Change",
+        write_fn: Callable[[str], None] | None = None,
     ) -> RigiSettingDef:
-        s = RigiSettingDef(category, label, description, value_fn, action_fn, action_label)
+        s = RigiSettingDef(
+            category, label, description, value_fn, action_fn, action_label, write_fn
+        )
+        self._rigi_settings.append(s)
+        return s
+
+    def add_checkbox_setting(
+        self,
+        category: str,
+        label: str,
+        description: str = "",
+        checked_fn: Callable[[], bool] | None = None,
+        toggle_fn: Callable[[], None] | None = None,
+    ) -> RigiSettingDef:
+        s = RigiSettingDef(
+            category=category,
+            label=label,
+            description=description,
+            checkbox_fn=checked_fn,
+            toggle_fn=toggle_fn,
+        )
         self._rigi_settings.append(s)
         return s
 
