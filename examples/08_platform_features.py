@@ -139,7 +139,7 @@ def make_features() -> RigiPane:
 - `app.open_url(url)` — open browser cross-platform
 - `app.open_path(path)` — open file/dir with OS app
 - `app.notify_desktop(title, body)` — OS desktop notification
-- `app.run_worker(coro)` — background async task
+- `app.schedule_task(coro)` — background async task
 
 ### Platform Module
 - `rigi.platform.IS_WINDOWS / IS_MACOS / IS_LINUX / IS_WAYLAND`
@@ -204,11 +204,12 @@ async def cmd_open(app: RigiApp, **kwargs: object) -> None:
         app.notify("Usage: open <url|path>", severity="warning")
         return
     if target.startswith("http://") or target.startswith("https://"):
-        ok = app.open_url(target)
+        app.open_url(target)
+        app.notify(f"Opened: {target}", severity="information")
     else:
         ok = app.open_path(target)
-    app.notify(f"Opened: {target}" if ok else f"Failed to open: {target}",
-               severity="information" if ok else "error")
+        app.notify(f"Opened: {target}" if ok else f"Failed to open: {target}",
+                   severity="information" if ok else "error")
 
 
 @app.command("copy", help="Copy text to clipboard")
