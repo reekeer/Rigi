@@ -15,18 +15,6 @@ _ui_log = logging.getLogger("rigi.ui")
 class _ContentResizeHandle(Widget):
     """Вертикальный handle для изменения ширины content area."""
 
-    DEFAULT_CSS = """
-    _ContentResizeHandle {
-        width: 1;
-        height: 100%;
-        background: transparent;
-        color: #30363d;
-    }
-    _ContentResizeHandle:hover { 
-        color: #58a6ff;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__()
         self._drag_x: int | None = None
@@ -69,33 +57,11 @@ class _ContentResizeHandle(Widget):
 
 
 class _RigiEmptyState(Widget):
-    DEFAULT_CSS = """
-    _RigiEmptyState {
-        height: 100%;
-        width: 100%;
-        content-align: center middle;
-    }
-    _RigiEmptyState Label {
-        color: #3d444d;
-        width: auto;
-    }
-    """
-
     def compose(self) -> ComposeResult:
         yield Label("Select a section from the sidebar")
 
 
 class RigiContentArea(Widget):
-    DEFAULT_CSS = """
-    RigiContentArea {
-        layout: horizontal;
-    }
-    #content-main {
-        width: 1fr;
-        height: 100%;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__()
         self._current: Widget | None = None

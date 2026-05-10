@@ -35,16 +35,6 @@ def extract_help_annotation(fn: Callable[..., object] | None) -> str | None:
 
 
 class RigiShortcutsBar(Widget):
-    DEFAULT_CSS = """
-    RigiShortcutsBar {
-        height: 1;
-        border-top: solid #21262d;
-        layout: horizontal;
-        padding: 0 1;
-    }
-    RigiShortcutsBar Label { color: #6e7681; padding: 0 1; }
-    """
-
     HINTS: list[tuple[str, str]] = [
         ("Ctrl+H", "Help"),
         ("Ctrl+P", "Commands"),

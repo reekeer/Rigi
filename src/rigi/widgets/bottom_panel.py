@@ -30,19 +30,6 @@ _LEVEL_COLORS: dict[str, str] = {
 class _ResizeHandle(Widget):
     ALLOW_SELECT = False
 
-    DEFAULT_CSS = """
-    _ResizeHandle {
-        height: 1;
-        width: 100%;
-        background: #0d1117;
-        color: #30363d;
-        pointer: ns-resize;
-    }
-    _ResizeHandle:hover {
-        color: #58a6ff;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__()
         self._drag_y: int | None = None
@@ -86,48 +73,6 @@ class _TerminalInput(Input):
 
 
 class _LogsView(Widget):
-    DEFAULT_CSS = """
-    _LogsView {
-        layout: horizontal;
-        height: 1fr;
-        background: #0d1117;
-    }
-    _LogsView #logs-output {
-        width: 1fr;
-        height: 1fr;
-        background: #0d1117;
-    }
-    _LogsView #logs-controls {
-        width: 18;
-        height: 1fr;
-        layout: vertical;
-        background: #161b22;
-        border-left: solid #21262d;
-        padding: 0 1;
-    }
-    _LogsView #logs-controls Label {
-        width: 100%;
-        height: 1;
-        color: #8b949e;
-        margin-top: 1;
-        margin-bottom: 0;
-    }
-    _LogsView #logs-controls Select {
-        width: 100%;
-        height: 1;
-        margin-bottom: 0;
-    }
-    _LogsView #logs-controls Button {
-        width: 100%;
-        height: 1;
-        min-height: 1;
-        max-height: 1;
-        margin-top: 1;
-        border: none !important;
-        padding: 0 1;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__()
         self._seen: int = 0
@@ -235,50 +180,6 @@ class _LogsView(Widget):
 
 
 class RigiBottomPanel(Widget):
-    DEFAULT_CSS = """
-    RigiBottomPanel {
-        height: 12;
-        layout: vertical;
-        background: #0d1117;
-    }
-    RigiBottomPanel Tabs {
-        height: 3;
-        background: #161b22;
-        padding: 0;
-        dock: none;
-    }
-    RigiBottomPanel Tab { color: #8b949e; min-width: 12; }
-    RigiBottomPanel Tab:hover { color: #e6edf3; }
-    RigiBottomPanel Tab.-active { color: #58a6ff; }
-    RigiBottomPanel #bp-switcher { height: 1fr; }
-    RigiBottomPanel #bp-terminal { layout: vertical; height: 1fr; }
-    RigiBottomPanel #term-history {
-        height: 1fr;
-        background: transparent;
-    }
-    RigiBottomPanel #input-row {
-        height: 1;
-        layout: horizontal;
-        background: transparent;
-    }
-    RigiBottomPanel #terminal-prompt {
-        height: 1;
-        color: #3fb950;
-        padding: 0 0 0 1;
-        width: auto;
-        content-align: left middle;
-    }
-    RigiBottomPanel #terminal-input {
-        height: 1;
-        width: 1fr;
-        border: none;
-        padding: 0;
-        background: transparent;
-        color: #e6edf3;
-    }
-    RigiBottomPanel #terminal-input:focus { border: none; }
-    """
-
     BINDINGS = [
         Binding("tab", "complete", "Complete", show=False),
     ]

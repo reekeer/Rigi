@@ -47,15 +47,6 @@ _CSS_PATH = Path(__file__).parent.parent / "css" / "default.tcss"
 
 
 class _RigiBody(Widget):
-    DEFAULT_CSS = """
-    _RigiBody {
-        layout: horizontal;
-        height: 1fr;
-        width: 100%;
-        background: transparent;
-    }
-    """
-
     def compose(self) -> ComposeResult:
         yield from []
 

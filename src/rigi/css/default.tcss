@@ -20,6 +20,37 @@ RigiBorderFrame {
     color: #c9d1d9;
 }
 
+_StatusSpacer { width: 1fr; height: 1; background: transparent; }
+
+_IconButton {
+    width: 3;
+    height: 1;
+    content-align: center middle;
+    color: #6e7681;
+    background: transparent;
+}
+_IconButton:hover { color: #c9d1d9; }
+
+_HamburgerButton {
+    width: 5;
+    height: 1;
+    content-align: center middle;
+    color: #6e7681;
+    background: transparent;
+}
+_HamburgerButton:hover { color: #c9d1d9; }
+
+_HomeButton {
+    width: 5;
+    height: 1;
+    padding: 0 0 0 1;
+    content-align: left middle;
+    color: #6e7681;
+    background: transparent;
+}
+_HomeButton:hover { color: #c9d1d9; }
+_HomeButton.--active { color: #58a6ff; }
+
 RigiStatusBar {
     height: 2;
     layout: horizontal;
@@ -81,35 +112,53 @@ _RigiSubNav {
     background: transparent;
 }
 
+_VerticalResizeHandle {
+    width: 1;
+    height: 100%;
+    background: #0d1117;
+    color: #30363d;
+    pointer: ew-resize;
+}
+_VerticalResizeHandle:hover { color: #58a6ff; }
+
+_SubNavNamePart { height: 1; width: 1fr; background: transparent; }
+_SubNavArrowPart { height: 1; width: 3; background: transparent; }
+
 _SubNavItem {
     height: 1;
     width: 100%;
+    layout: horizontal;
     color: #6e7681;
     background: transparent;
 }
 _SubNavItem:hover { color: #c9d1d9; }
 _SubNavItem.--active { color: #79c0ff; text-style: bold; }
 
+_RigiEmptyState {
+    height: 100%;
+    width: 100%;
+    content-align: center middle;
+}
+_RigiEmptyState Label { color: #3d444d; width: auto; }
+
 RigiContentArea {
     height: 1fr;
     width: 1fr;
+    layout: horizontal;
     overflow-y: auto;
     overflow-x: hidden;
     background: transparent;
 }
+#content-main { width: 1fr; height: 100%; }
 
 RigiShortcutsBar {
-    height: 2;
+    height: 1;
     layout: horizontal;
     padding: 0 1;
     border-top: solid #21262d;
     background: transparent;
 }
-RigiShortcutsBar Label {
-    color: #6e7681;
-    padding: 0 1;
-    width: auto;
-}
+RigiShortcutsBar Label { color: #6e7681; padding: 0 1; }
 
 RigiTerminalBar {
     height: 2;
@@ -221,3 +270,92 @@ RigiHelpScreen > #help-container {
     width: 100%;
     height: 1;
 }
+
+_ContentResizeHandle { width: 1; height: 100%; background: transparent; color: #30363d; }
+_ContentResizeHandle:hover { color: #58a6ff; }
+
+RigiMenuItem { height: 1; width: 100%; padding: 0 1; background: transparent; }
+RigiMenuItem:hover { background: #1c2128; }
+
+_MenuSectionLabel {
+    height: 1;
+    width: 100%;
+    padding: 0 1;
+    color: #3d444d;
+    text-style: bold;
+    background: transparent;
+}
+
+RigiMenuPanel {
+    width: 26;
+    height: auto;
+    max-height: 24;
+    border: round #30363d;
+    border-title-color: #c9d1d9;
+    background: #0d1117;
+    padding: 0;
+    overflow-y: auto;
+}
+
+_ResizeHandle {
+    height: 1;
+    width: 100%;
+    background: #0d1117;
+    color: #30363d;
+    pointer: ns-resize;
+}
+_ResizeHandle:hover { color: #58a6ff; }
+
+_LogsView { layout: horizontal; height: 1fr; background: #0d1117; }
+_LogsView #logs-output { width: 1fr; height: 1fr; background: #0d1117; }
+_LogsView #logs-controls {
+    width: 18;
+    height: 1fr;
+    layout: vertical;
+    background: #161b22;
+    border-left: solid #21262d;
+    padding: 0 1;
+}
+_LogsView #logs-controls Label {
+    width: 100%;
+    height: 1;
+    color: #8b949e;
+    margin-top: 1;
+    margin-bottom: 0;
+}
+_LogsView #logs-controls Select { width: 100%; height: 1; margin-bottom: 0; }
+_LogsView #logs-controls Button {
+    width: 100%;
+    height: 1;
+    min-height: 1;
+    max-height: 1;
+    margin-top: 1;
+    border: none !important;
+    padding: 0 1;
+}
+
+RigiBottomPanel { height: 12; layout: vertical; background: #0d1117; }
+RigiBottomPanel Tabs { height: 3; background: #161b22; padding: 0; dock: none; }
+RigiBottomPanel Tab { color: #8b949e; min-width: 12; }
+RigiBottomPanel Tab:hover { color: #e6edf3; }
+RigiBottomPanel Tab.-active { color: #58a6ff; }
+RigiBottomPanel #bp-switcher { height: 1fr; }
+RigiBottomPanel #bp-terminal { layout: vertical; height: 1fr; }
+RigiBottomPanel #term-history { height: 1fr; background: transparent; }
+RigiBottomPanel #input-row { height: 1; layout: horizontal; background: transparent; }
+RigiBottomPanel #terminal-prompt {
+    height: 1;
+    color: #3fb950;
+    padding: 0 0 0 1;
+    width: auto;
+    content-align: left middle;
+}
+RigiBottomPanel #terminal-input {
+    height: 1;
+    width: 1fr;
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: #e6edf3;
+}
+RigiBottomPanel #terminal-input:focus { border: none; }

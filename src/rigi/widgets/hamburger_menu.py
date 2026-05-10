@@ -28,11 +28,6 @@ class _ItemClicked(Message):
 
 
 class RigiMenuItem(Widget):
-    DEFAULT_CSS = """
-    RigiMenuItem { height: 1; width: 100%; padding: 0 1; background: transparent; }
-    RigiMenuItem:hover { background: #1c2128; }
-    """
-
     def __init__(self, item: RigiMenuItemData) -> None:
         super().__init__()
         self._item = item
@@ -51,13 +46,6 @@ class RigiMenuItem(Widget):
 
 
 class _MenuSectionLabel(Widget):
-    DEFAULT_CSS = """
-    _MenuSectionLabel {
-        height: 1; width: 100%; padding: 0 1;
-        color: #3d444d; text-style: bold; background: transparent;
-    }
-    """
-
     def __init__(self, title: str) -> None:
         super().__init__()
         self._title = title
@@ -67,14 +55,6 @@ class _MenuSectionLabel(Widget):
 
 
 class RigiMenuPanel(Widget):
-    DEFAULT_CSS = """
-    RigiMenuPanel {
-        width: 26; height: auto; max-height: 24;
-        border: round #30363d; border-title-color: #c9d1d9;
-        background: #0d1117; padding: 0; overflow-y: auto;
-    }
-    """
-
     def __init__(
         self,
         sections: list[tuple[str, list[RigiMenuItemData]]],
