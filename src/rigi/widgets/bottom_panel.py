@@ -9,6 +9,7 @@ from textual.binding import Binding
 from textual.events import Key, MouseDown, MouseMove, MouseUp
 from textual.message import Message
 from textual.reactive import reactive
+from textual.timer import Timer
 from textual.widget import Widget
 from textual.widgets import Button, ContentSwitcher, Input, Label, RichLog, Select, Tab, Tabs
 
@@ -79,6 +80,8 @@ class _LogsView(Widget):
         self._logger_filter: str = "all"
         self._level_filter: str = "all"
         self._known_loggers: list[str] = []
+        self._active: bool = False
+        self._flush_timer: Timer | None = None
 
     def compose(self) -> ComposeResult:
         yield RichLog(highlight=False, markup=True, id="logs-output", auto_scroll=True)
@@ -107,9 +110,24 @@ class _LogsView(Widget):
             yield Button("Clear", id="btn-logs-clear", variant="default")
 
     def on_mount(self) -> None:
-        self.set_interval(0.5, self._flush)
+        pass
+
+    def activate(self) -> None:
+        self._active = True
+        self._reset_seen()
+        self._flush()
+        if self._flush_timer is None:
+            self._flush_timer = self.set_interval(0.5, self._flush)
+
+    def deactivate(self) -> None:
+        self._active = False
+        if self._flush_timer is not None:
+            self._flush_timer.stop()
+            self._flush_timer = None
 
     def _flush(self) -> None:
+        if not self._active:
+            return
         self._refresh_logger_select()
         try:
             view = self.query_one("#logs-output", RichLog)
@@ -128,9 +146,10 @@ class _LogsView(Widget):
             ms = rec.timestamp.microsecond // 1000
             ts = rec.timestamp.strftime("%H:%M:%S") + f".{ms:03d}"
             safe_message = rec.message.replace("[", "\\[")
+            safe_logger = rec.logger_name.replace("[", "\\[")
             view.write(
                 f"[dim]{ts}[/dim] "
-                f"[bold cyan]{rec.logger_name:<20}[/bold cyan] "
+                f"[bold cyan]{safe_logger:<20}[/bold cyan] "
                 f"[{color}]{rec.level:<8}[/{color}] "
                 f"{safe_message}"
             )
@@ -213,7 +232,7 @@ class RigiBottomPanel(Widget):
         yield Tabs(Tab("Terminal", id="tab-terminal"), Tab("Logs", id="tab-logs"))
         with ContentSwitcher(initial="bp-terminal", id="bp-switcher"):
             with Widget(id="bp-terminal"):
-                yield RichLog(highlight=True, markup=True, id="term-history")
+                yield RichLog(highlight=False, markup=True, id="term-history")
                 with Widget(id="input-row"):
                     yield Label(self._prompt_label(focused=False), id="terminal-prompt")
                     yield _TerminalInput(placeholder="", id="terminal-input")
@@ -229,6 +248,14 @@ class RigiBottomPanel(Widget):
     def watch_active_tab(self, value: str) -> None:
         try:
             self.query_one("#bp-switcher", ContentSwitcher).current = f"bp-{value}"
+        except Exception:
+            pass
+        try:
+            logs_view = self.query_one(_LogsView)
+            if value == "logs":
+                logs_view.activate()
+            else:
+                logs_view.deactivate()
         except Exception:
             pass
 
@@ -321,7 +348,8 @@ class RigiBottomPanel(Widget):
             self.query_one("#terminal-input", _TerminalInput).value = ""
         except Exception:
             pass
-        self.write_output(f"[bold green]{self._prompt_text}[/bold green] [dim]$[/dim] {text}")
+        safe_text = text.replace("[", "\\[")
+        self.write_output(f"[bold green]{self._prompt_text}[/bold green] [dim]$[/dim] {safe_text}")
         self.post_message(RigiBottomPanel.CommandSubmitted(text))
 
     def action_complete(self) -> None:

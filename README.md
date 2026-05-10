@@ -5,7 +5,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative&logoColor=FFFFFF" alt="License"></a>
   <img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python">
-  <img src="https://img.shields.io/badge/Textual-0.80%2B-8A2BE2?style=for-the-badge" alt="Textual">
+  <img src="https://img.shields.io/badge/Textual-8.2.5%2B-8A2BE2?style=for-the-badge" alt="Textual">
   <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=for-the-badge&logo=linux&logoColor=FCC624" alt="Platform">
   <img src="https://img.shields.io/badge/code%20style-black-000000?style=for-the-badge" alt="black">
   <img src="https://img.shields.io/badge/linting-ruff-orange?style=for-the-badge" alt="ruff">

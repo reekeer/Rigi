@@ -11,6 +11,7 @@ from typing import Any, Awaitable, Callable
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
+from textual.notifications import SeverityLevel
 from textual.widget import Widget
 
 from rigi.commands.command import Command
@@ -32,6 +33,7 @@ from rigi.widgets.bottom_panel import RigiBottomPanel
 from rigi.widgets.content_area import RigiContentArea
 from rigi.widgets.hamburger_menu import RigiMenuItemData
 from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
+from rigi.widgets.notifications import RigiNotificationRack
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import (
     RigiStatusBar,
@@ -119,6 +121,7 @@ class RigiApp(App[None]):
         self._rigi_menu_items: list[tuple[str, str, Callable[[], None]]] = []
         self._rigi_settings: list[RigiSettingDef] = []
 
+        self._disable_notifications = True
         self._register_builtin_commands()
 
     def _register_builtin_commands(self) -> None:
@@ -260,6 +263,7 @@ class RigiApp(App[None]):
                 registry=self._cmd_registry,
                 history_file=history_file,
             )
+        yield RigiNotificationRack()
 
     def on_mount(self) -> None:
         self.title = f"{self._prog_name} v{self._version}"
@@ -296,9 +300,27 @@ class RigiApp(App[None]):
         except Exception:
             pass
 
+    def notify(
+        self,
+        message: str,
+        *,
+        title: str = "",
+        severity: SeverityLevel = "information",
+        timeout: float | None = 5.0,
+        markup: bool = True,
+    ) -> None:
+        if not markup:
+            message = message.replace("[", "\\[")
+        effective_timeout = timeout if timeout is not None else 5.0
+        try:
+            self.query_one(RigiNotificationRack).add_notification(
+                title, message, severity, effective_timeout
+            )
+        except Exception:
+            pass
+
     @property
     def terminal(self) -> str:
-        """Name of the running terminal (kitty, iterm2, wezterm, etc.)."""
         return _console.detect_terminal()
 
     @property
@@ -455,8 +477,8 @@ class RigiApp(App[None]):
                 )
                 _terminal_log.error(f"Shell command timed out: {cmd}")
                 return
-            out = (stdout.decode(errors="replace") + stderr.decode(errors="replace")).strip()
-            display = out[:1200] if out else "(no output)"
+            raw = (stdout.decode(errors="replace") + stderr.decode(errors="replace")).strip()
+            display = (raw[:1200] if raw else "(no output)").replace("[", "\\[")
             _terminal_log.info(f"Shell command completed: {cmd}")
             try:
                 self.query_one(RigiBottomPanel).write_output(display)
@@ -465,10 +487,11 @@ class RigiApp(App[None]):
         except Exception as exc:
             msg = str(exc)
             _terminal_log.error(f"Shell command failed: {cmd}", exc_info=True)
+            safe_msg = msg.replace("[", "\\[")
             try:
-                self.query_one(RigiBottomPanel).write_output(f"[red]{msg}[/red]")
+                self.query_one(RigiBottomPanel).write_output(f"[red]{safe_msg}[/red]")
             except Exception:
-                self.notify(msg, severity="error", title=f"$ {cmd[:30]}")
+                self.notify(safe_msg, severity="error", title=f"$ {cmd[:30]}")
 
     @on(_HamburgerButton.Clicked)
     def on_hamburger_clicked(self, event: _HamburgerButton.Clicked) -> None:
@@ -723,8 +746,29 @@ class RigiApp(App[None]):
         value_fn: Callable[[], str] | None = None,
         action_fn: Callable[[], None] | None = None,
         action_label: str = "Change",
+        write_fn: Callable[[str], None] | None = None,
     ) -> RigiSettingDef:
-        s = RigiSettingDef(category, label, description, value_fn, action_fn, action_label)
+        s = RigiSettingDef(
+            category, label, description, value_fn, action_fn, action_label, write_fn
+        )
+        self._rigi_settings.append(s)
+        return s
+
+    def add_checkbox_setting(
+        self,
+        category: str,
+        label: str,
+        description: str = "",
+        checked_fn: Callable[[], bool] | None = None,
+        toggle_fn: Callable[[], None] | None = None,
+    ) -> RigiSettingDef:
+        s = RigiSettingDef(
+            category=category,
+            label=label,
+            description=description,
+            checkbox_fn=checked_fn,
+            toggle_fn=toggle_fn,
+        )
         self._rigi_settings.append(s)
         return s
 
