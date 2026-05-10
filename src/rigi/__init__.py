@@ -74,7 +74,7 @@ from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
 from rigi.widgets.terminal_bar import RigiTerminalBar
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __all__ = [
     # Textual primitives
     "Widget",
