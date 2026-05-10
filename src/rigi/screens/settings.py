@@ -63,14 +63,6 @@ class _CategoryClicked(Message):
 
 
 class _CategoryRow(Widget):
-    DEFAULT_CSS = """
-    _CategoryRow {
-        height: 2; width: 100%; padding: 0 2;
-        color: #6e7681; background: transparent; content-align: left middle;
-    }
-    _CategoryRow:hover { color: #c9d1d9; }
-    _CategoryRow.--active { color: #58a6ff; border-left: thick #58a6ff; text-style: bold; }
-    """
     can_focus = False
 
     def __init__(self, name: str) -> None:
@@ -88,13 +80,6 @@ class _CategoryRow(Widget):
 
 
 class _ActionButton(Widget):
-    DEFAULT_CSS = """
-    _ActionButton {
-        width: 10; height: 1; content-align: center middle;
-        background: #21262d; color: #c9d1d9; padding: 0 1;
-    }
-    _ActionButton:hover { background: #30363d; color: white; }
-    """
     can_focus = False
 
     def __init__(self, label: str, callback: Callable[[], None]) -> None:
@@ -116,11 +101,6 @@ class _ActionButton(Widget):
 
 
 class _ValueRow(Widget):
-    DEFAULT_CSS = """
-    _ValueRow { layout: horizontal; height: 1; width: 100%; background: transparent; }
-    _ValueRow ._val-lbl { width: 1fr; color: #58a6ff; height: 1; }
-    """
-
     def __init__(self, setting: RigiSettingDef) -> None:
         super().__init__()
         self._setting = setting
@@ -132,14 +112,6 @@ class _ValueRow(Widget):
 
 
 class _SettingInput(Input):
-    DEFAULT_CSS = """
-    _SettingInput {
-        width: 28; height: 1; border: solid #30363d;
-        background: #161b22; color: #e6edf3; padding: 0 1; margin-top: 1;
-    }
-    _SettingInput:focus { border: solid #58a6ff; }
-    """
-
     def __init__(self, setting: RigiSettingDef) -> None:
         super().__init__(value=setting.get_value())
         self._setting = setting
@@ -159,15 +131,6 @@ class _SettingInput(Input):
 
 
 class _SettingItem(Widget):
-    DEFAULT_CSS = """
-    _SettingItem {
-        height: auto; width: 100%; padding: 0 0 1 0;
-        border-bottom: solid #21262d; margin-bottom: 1; background: transparent;
-    }
-    _SettingItem ._s-label { color: #c9d1d9; text-style: bold; height: 1; }
-    _SettingItem ._s-desc { color: #6e7681; height: 1; }
-    """
-
     def __init__(self, setting: RigiSettingDef) -> None:
         super().__init__()
         self._setting = setting
@@ -185,34 +148,11 @@ class _SettingItem(Widget):
 
 
 class _SettingsContent(Widget):
-    DEFAULT_CSS = """
-    _SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
-    _SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
-    """
-
     def compose(self) -> ComposeResult:
         yield from []
 
 
 class RigiSettingsScreen(ModalScreen[None]):
-    DEFAULT_CSS = """
-    RigiSettingsScreen { align: center middle; background: transparent; }
-    #s-outer {
-        width: 90%; height: 85%;
-        border: round #30363d; border-title-color: #c9d1d9;
-        background: #0d1117; layout: vertical;
-    }
-    #s-titlebar {
-        height: 2; padding: 0 2;
-        border-bottom: solid #21262d; background: transparent; content-align: left middle;
-    }
-    #s-body { layout: horizontal; height: 1fr; background: transparent; }
-    #s-categories {
-        width: 22; height: 100%; border-right: solid #21262d;
-        padding: 1 0; overflow-y: auto; background: transparent;
-    }
-    """
-
     BINDINGS = [Binding("escape", "dismiss", show=False)]
 
     def __init__(self, settings: list[RigiSettingDef]) -> None:

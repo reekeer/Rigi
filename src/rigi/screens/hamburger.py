@@ -16,10 +16,6 @@ from rigi.widgets.hamburger_menu import (
 
 
 class RigiHamburgerScreen(ModalScreen[None]):
-    DEFAULT_CSS = """
-    RigiHamburgerScreen { background: transparent; }
-    """
-
     BINDINGS = [Binding("escape", "action_close_or_dismiss", show=False)]
 
     def __init__(self, sections: list[tuple[str, list[RigiMenuItemData]]]) -> None:

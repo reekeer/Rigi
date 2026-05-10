@@ -216,6 +216,13 @@ RigiVPane {
     width: 100%;
 }
 
+RigiScrollPane {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 RigiCard {
     border: round #21262d;
     border-title-color: #c9d1d9;
@@ -231,21 +238,21 @@ RigiSplit {
     height: 100%;
     width: 100%;
 }
+RigiSplit > Widget { width: 1fr; height: 100%; }
 
-RigiHelpScreen {
-    align: center middle;
-    layer: overlay;
-}
+RigiHamburgerScreen { background: transparent; }
 
+RigiHelpScreen { align: center middle; }
 RigiHelpScreen > #help-container {
-    width: 62;
+    width: 60;
     height: auto;
-    max-height: 38;
+    max-height: 80%;
+    border: round #30363d;
+    background: #0d1117;
     padding: 1 2;
     overflow-y: auto;
 }
-
-#help-title {
+RigiHelpScreen #help-title {
     text-style: bold;
     color: #58a6ff;
     width: 100%;
@@ -253,22 +260,95 @@ RigiHelpScreen > #help-container {
     margin-bottom: 1;
     height: 1;
 }
-.help-category {
-    color: #30363d;
-    text-style: bold;
-    margin-top: 1;
-    height: 1;
-}
-.help-row { layout: horizontal; height: 1; width: 100%; }
-.help-key { width: 16; color: #e3b341; text-style: bold; }
-.help-desc { width: 1fr; color: #8b949e; }
-
-#help-dismiss {
+RigiHelpScreen .help-category { color: #30363d; text-style: bold; margin-top: 1; height: 1; }
+RigiHelpScreen .help-row { layout: horizontal; height: 1; width: 100%; }
+RigiHelpScreen .help-key { width: 16; color: #e3b341; text-style: bold; }
+RigiHelpScreen .help-desc { width: 1fr; color: #8b949e; }
+RigiHelpScreen #help-dismiss {
     margin-top: 1;
     color: #6e7681;
     content-align: center middle;
     width: 100%;
     height: 1;
+}
+
+RigiGauge { height: 1; width: 100%; }
+RigiSparkline { height: 1; width: 100%; }
+RigiImage { height: auto; width: auto; }
+
+_CategoryRow {
+    height: 2;
+    width: 100%;
+    padding: 0 2;
+    color: #6e7681;
+    background: transparent;
+    content-align: left middle;
+}
+_CategoryRow:hover { color: #c9d1d9; }
+_CategoryRow.--active { color: #58a6ff; border-left: thick #58a6ff; text-style: bold; }
+
+_ActionButton {
+    width: 10;
+    height: 1;
+    content-align: center middle;
+    background: #21262d;
+    color: #c9d1d9;
+    padding: 0 1;
+}
+_ActionButton:hover { background: #30363d; color: white; }
+
+_ValueRow { layout: horizontal; height: 1; width: 100%; background: transparent; }
+_ValueRow ._val-lbl { width: 1fr; color: #58a6ff; height: 1; }
+
+_SettingInput {
+    width: 28;
+    height: 1;
+    border: solid #30363d;
+    background: #161b22;
+    color: #e6edf3;
+    padding: 0 1;
+    margin-top: 1;
+}
+_SettingInput:focus { border: solid #58a6ff; }
+
+_SettingItem {
+    height: auto;
+    width: 100%;
+    padding: 0 0 1 0;
+    border-bottom: solid #21262d;
+    margin-bottom: 1;
+    background: transparent;
+}
+_SettingItem ._s-label { color: #c9d1d9; text-style: bold; height: 1; }
+_SettingItem ._s-desc { color: #6e7681; height: 1; }
+
+_SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
+_SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
+
+RigiSettingsScreen { align: center middle; background: transparent; }
+#s-outer {
+    width: 90%;
+    height: 85%;
+    border: round #30363d;
+    border-title-color: #c9d1d9;
+    background: #0d1117;
+    layout: vertical;
+}
+#s-titlebar {
+    height: 2;
+    padding: 0 2;
+    border-bottom: solid #21262d;
+    background: transparent;
+    content-align: left middle;
+}
+#s-body { layout: horizontal; height: 1fr; background: transparent; }
+#s-categories {
+    width: 22;
+    height: 100%;
+    border-right: solid #21262d;
+    padding: 1 0;
+    overflow-y: auto;
+    background: transparent;
 }
 
 _ContentResizeHandle { width: 1; height: 100%; background: transparent; color: #30363d; }

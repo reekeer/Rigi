@@ -28,16 +28,6 @@ class _TerminalInput(Input):
 
 
 class _TerminalResizeHandle(Widget):
-    DEFAULT_CSS = """
-    _TerminalResizeHandle {
-        height: 1;
-        width: 100%;
-        background: transparent;
-        color: #30363d;
-    }
-    _TerminalResizeHandle:hover { color: #58a6ff; }
-    """
-
     def __init__(self) -> None:
         super().__init__()
         self._drag_y: int | None = None
@@ -69,34 +59,6 @@ class _TerminalResizeHandle(Widget):
 
 
 class RigiTerminalBar(Widget):
-    DEFAULT_CSS = """
-    RigiTerminalBar {
-        height: 2;
-        layout: vertical;
-        background: #0d1117;
-    }
-    RigiTerminalBar #input-row {
-        height: 1;
-        background: transparent;
-    }
-    RigiTerminalBar Label {
-        height: 1;
-        color: #3fb950;
-        padding: 0 0 0 1;
-        width: auto;
-        content-align: left middle;
-    }
-    RigiTerminalBar Input {
-        height: 1;
-        width: 1fr;
-        border: none;
-        padding: 0;
-        background: transparent;
-        color: #e6edf3;
-    }
-    RigiTerminalBar Input:focus { border: none; }
-    """
-
     BINDINGS = [
         Binding("tab", "complete", "Complete", show=False),
     ]
