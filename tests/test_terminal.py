@@ -1,6 +1,7 @@
 """Tests for terminal functionality."""
 import pytest
 from textual.app import App
+from textual.widgets import Tabs
 from rigi.widgets.bottom_panel import RigiBottomPanel, _TerminalInput
 from rigi.commands.registry import CommandRegistry
 from rigi.commands.command import Command
@@ -167,14 +168,16 @@ async def test_terminal_tab_switching():
     app = TestApp()
     async with app.run_test() as pilot:
         panel = app.query_one(RigiBottomPanel)
-        
+
         # Should start on terminal
-        assert panel._active_tab == "terminal"
-        
-        # Switch to logs
-        panel._switch_tab("logs")
-        assert panel._active_tab == "logs"
-        
+        assert panel.active_tab == "terminal"
+
+        # Switch to logs via Tabs reactive
+        panel.query_one(Tabs).active = "tab-logs"
+        await pilot.pause()
+        assert panel.active_tab == "logs"
+
         # Switch back
-        panel._switch_tab("terminal")
-        assert panel._active_tab == "terminal"
+        panel.query_one(Tabs).active = "tab-terminal"
+        await pilot.pause()
+        assert panel.active_tab == "terminal"

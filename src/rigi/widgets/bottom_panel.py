@@ -3,13 +3,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal
 from textual.events import Key, MouseDown, MouseMove, MouseUp
 from textual.message import Message
+from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, ContentSwitcher, Input, Label, RichLog, Select
+from textual.widgets import Button, ContentSwitcher, Input, Label, RichLog, Select, Tab, Tabs
 
 from rigi.core import log_store
 
@@ -240,24 +241,15 @@ class RigiBottomPanel(Widget):
         layout: vertical;
         background: #0d1117;
     }
-    RigiBottomPanel #bp-tab-bar {
-        height: 1;
+    RigiBottomPanel Tabs {
+        height: 3;
         background: #161b22;
         padding: 0;
+        dock: none;
     }
-    RigiBottomPanel #bp-tab-bar Button {
-        min-width: 12;
-        height: 1;
-        background: transparent;
-        border: none;
-        color: #8b949e;
-        padding: 0 2;
-    }
-    RigiBottomPanel #bp-tab-bar Button:hover { color: #e6edf3; }
-    RigiBottomPanel #bp-tab-bar Button.bp-active {
-        color: #58a6ff;
-        text-style: bold underline;
-    }
+    RigiBottomPanel Tab { color: #8b949e; min-width: 12; }
+    RigiBottomPanel Tab:hover { color: #e6edf3; }
+    RigiBottomPanel Tab.-active { color: #58a6ff; }
     RigiBottomPanel #bp-switcher { height: 1fr; }
     RigiBottomPanel #bp-terminal { layout: vertical; height: 1fr; }
     RigiBottomPanel #term-history {
@@ -266,6 +258,7 @@ class RigiBottomPanel(Widget):
     }
     RigiBottomPanel #input-row {
         height: 1;
+        layout: horizontal;
         background: transparent;
     }
     RigiBottomPanel #terminal-prompt {
@@ -290,6 +283,8 @@ class RigiBottomPanel(Widget):
         Binding("tab", "complete", "Complete", show=False),
     ]
 
+    active_tab: reactive[str] = reactive("terminal")
+
     class CommandSubmitted(Message):
         def __init__(self, text: str) -> None:
             super().__init__()
@@ -309,46 +304,35 @@ class RigiBottomPanel(Widget):
         self._completion_idx: int = -1
         self._completions: list[str] = []
         self._history_file = history_file
-        self._active_tab: str = "terminal"
         if history_file:
             self._load_history(history_file)
 
     def compose(self) -> ComposeResult:
         yield _ResizeHandle()
-        with Horizontal(id="bp-tab-bar"):
-            yield Button("Terminal", id="bp-btn-terminal", classes="bp-active")
-            yield Button("Logs", id="bp-btn-logs")
+        yield Tabs(Tab("Terminal", id="tab-terminal"), Tab("Logs", id="tab-logs"))
         with ContentSwitcher(initial="bp-terminal", id="bp-switcher"):
             with Widget(id="bp-terminal"):
                 yield RichLog(highlight=True, markup=True, id="term-history")
-                with Horizontal(id="input-row"):
+                with Widget(id="input-row"):
                     yield Label(self._prompt_label(focused=False), id="terminal-prompt")
                     yield _TerminalInput(placeholder="", id="terminal-input")
             with Widget(id="bp-logs"):
                 yield _LogsView()
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        bid = event.button.id
-        if bid in ("bp-btn-terminal", "bp-btn-logs"):
-            event.stop()
-            tab = "terminal" if bid == "bp-btn-terminal" else "logs"
-            self._switch_tab(tab)
+    @on(Tabs.TabActivated)
+    def on_tab_activated(self, event: Tabs.TabActivated) -> None:
+        event.stop()
+        if event.tab and event.tab.id:
+            self.active_tab = event.tab.id.removeprefix("tab-")
 
-    def _switch_tab(self, tab: str) -> None:
-        self._active_tab = tab
+    def watch_active_tab(self, value: str) -> None:
         try:
-            self.query_one("#bp-switcher", ContentSwitcher).current = f"bp-{tab}"
-        except Exception:
-            pass
-        try:
-            self.query_one("#bp-btn-terminal", Button).remove_class("bp-active")
-            self.query_one("#bp-btn-logs", Button).remove_class("bp-active")
-            self.query_one(f"#bp-btn-{tab}", Button).add_class("bp-active")
+            self.query_one("#bp-switcher", ContentSwitcher).current = f"bp-{value}"
         except Exception:
             pass
 
     def on_click(self) -> None:
-        if self._active_tab == "terminal":
+        if self.active_tab == "terminal":
             try:
                 self.query_one("#terminal-input").focus()
             except Exception:
@@ -378,7 +362,10 @@ class RigiBottomPanel(Widget):
             pass
 
     def focus_input(self) -> None:
-        self._switch_tab("terminal")
+        try:
+            self.query_one(Tabs).active = "tab-terminal"
+        except Exception:
+            pass
         try:
             self.query_one("#terminal-input", _TerminalInput).focus()
         except Exception:
