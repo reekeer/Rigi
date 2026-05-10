@@ -12,19 +12,6 @@ from rigi.core.types import SubtabDef, TabDef
 class _VerticalResizeHandle(Widget):
     ALLOW_SELECT = False
 
-    DEFAULT_CSS = """
-    _VerticalResizeHandle {
-        width: 1;
-        height: 100%;
-        background: #0d1117;
-        color: #30363d;
-        pointer: ew-resize;
-    }
-    _VerticalResizeHandle:hover {
-        color: #58a6ff;
-    }
-    """
-
     def __init__(self, target_id: str) -> None:
         super().__init__()
         self._target_id = target_id
@@ -78,21 +65,6 @@ class _SubItemToggle(Message):
 
 
 class _MainNavItem(Widget):
-    DEFAULT_CSS = """
-    _MainNavItem {
-        height: 3;
-        width: 100%;
-        padding: 0 2;
-        color: #6e7681;
-        background: transparent;
-    }
-    _MainNavItem:hover { color: #c9d1d9; }
-    _MainNavItem.--active {
-        color: #58a6ff;
-        border-left: thick #58a6ff;
-        text-style: bold;
-    }
-    """
     can_focus = False
 
     def __init__(self, tab: TabDef, idx: int) -> None:
@@ -114,16 +86,6 @@ class _MainNavItem(Widget):
 
 
 class _RigiMainNav(Widget):
-    DEFAULT_CSS = """
-    _RigiMainNav {
-        width: 20;
-        height: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        background: transparent;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__(id="main-nav")
         self._tabs: list[TabDef] = []
@@ -147,13 +109,6 @@ class _RigiMainNav(Widget):
 
 
 class _SubNavNamePart(Widget):
-    DEFAULT_CSS = """
-    _SubNavNamePart {
-        height: 1;
-        width: 1fr;
-        background: transparent;
-    }
-    """
     can_focus = False
 
     def __init__(self, sub: SubtabDef, path: list[int], depth: int) -> None:
@@ -176,13 +131,6 @@ class _SubNavNamePart(Widget):
 
 
 class _SubNavArrowPart(Widget):
-    DEFAULT_CSS = """
-    _SubNavArrowPart {
-        height: 1;
-        width: 3;
-        background: transparent;
-    }
-    """
     can_focus = False
 
     def __init__(self, path: list[int], expanded: bool) -> None:
@@ -201,17 +149,6 @@ class _SubNavArrowPart(Widget):
 
 
 class _SubNavItem(Widget):
-    DEFAULT_CSS = """
-    _SubNavItem {
-        height: 1;
-        width: 100%;
-        layout: horizontal;
-        color: #6e7681;
-        background: transparent;
-    }
-    _SubNavItem:hover { color: #c9d1d9; }
-    _SubNavItem.--active { color: #79c0ff; text-style: bold; }
-    """
     can_focus = False
 
     def __init__(self, sub: SubtabDef, path: list[int], depth: int, expanded: bool) -> None:
@@ -231,17 +168,6 @@ class _SubNavItem(Widget):
 
 
 class _RigiSubNav(Widget):
-    DEFAULT_CSS = """
-    _RigiSubNav {
-        width: 18;
-        height: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 1 0;
-        background: transparent;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__(id="sub-nav")
         self._tab: TabDef | None = None
@@ -333,15 +259,6 @@ class _RigiSubNav(Widget):
 
 
 class RigiSidebar(Widget):
-    DEFAULT_CSS = """
-    RigiSidebar {
-        layout: horizontal;
-        height: 100%;
-        width: auto;
-        background: transparent;
-    }
-    """
-
     class NavigationChanged(Message):
         def __init__(self, tab_idx: int, subtab_path: list[int]) -> None:
             super().__init__()

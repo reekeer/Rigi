@@ -42,6 +42,8 @@ from rigi.core.platform import (
 )
 from rigi.core.types import CommandArg, HelpEntry, StatusItem, SubtabDef, TabDef
 from rigi.layout.pane import RigiCard, RigiHPane, RigiPane, RigiScrollPane, RigiSplit, RigiVPane
+from rigi.screens.hamburger import RigiHamburgerScreen
+from rigi.screens.help import RigiHelpScreen
 from rigi.themes import DARK as ThemeDark
 from rigi.themes import LIGHT as ThemeLight
 from rigi.themes import MONOKAI as ThemeMonokai
@@ -53,21 +55,19 @@ from rigi.widgets.content_area import RigiContentArea
 from rigi.widgets.gauge import RigiGauge, RigiSparkline
 from rigi.widgets.hamburger_menu import (
     RigiHamburgerPanel,
-    RigiHamburgerScreen,
     RigiMenuItem,
     RigiMenuItemData,
     RigiMenuPanel,
 )
-from rigi.widgets.help_panel import RigiHelpScreen, RigiShortcutsBar, extract_help_annotation
+from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
 from rigi.widgets.image import RigiImage, TerminalImageProtocol, detect_image_protocol
 from rigi.widgets.mouse import RigiClickable, RigiDraggable, RigiMouseMixin
-from rigi.widgets.palette import RigiPaletteScreen
 from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
 from rigi.widgets.terminal_bar import RigiTerminalBar
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __all__ = [
     # Textual primitives
     "Widget",
@@ -126,7 +126,6 @@ __all__ = [
     "extract_help_annotation",
     "RigiGauge",
     "RigiSparkline",
-    "RigiPaletteScreen",
     # Platform utilities
     "platform",
     "console",

@@ -11,13 +11,6 @@ from textual.widget import Widget
 class RigiGauge(Widget):
     """Horizontal progress bar — set .value to update."""
 
-    DEFAULT_CSS = """
-    RigiGauge {
-        height: 1;
-        width: 100%;
-    }
-    """
-
     def __init__(
         self,
         label: str = "",
@@ -69,12 +62,6 @@ class RigiSparkline(Widget):
     """Inline sparkline chart. Call .push(value) to add data points."""
 
     _BARS = " ▁▂▃▄▅▆▇█"
-    DEFAULT_CSS = """
-    RigiSparkline {
-        height: 1;
-        width: 100%;
-    }
-    """
 
     def __init__(
         self,

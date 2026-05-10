@@ -1,9 +1,10 @@
 """Notes app — markdown viewer with search and multiple sections."""
+
 from __future__ import annotations
 
 from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiPane
-from rigi.widgets import Label, Markdown
+from rigi.layout.pane import RigiPane
+from rigi.widgets import Markdown
 
 app = RigiApp(name="notes", version="1.0.0", description="Markdown notes viewer")
 
@@ -30,7 +31,6 @@ and type commands.
 
 > Tip: press **→** to enter a subsection, **←** to go back.
 """,
-
     "Rigi Overview": """# Rigi Overview
 
 Rigi is a high-level TUI framework built on top of [Textual](https://textual.textualize.io).
@@ -65,7 +65,6 @@ async def greet(app, name="world", **_):
 app.add_setting("General", "Theme", value_fn=lambda: app._theme.name)
 ```
 """,
-
     "Keyboard Shortcuts": """# Keyboard Shortcuts
 
 ## Navigation
@@ -94,7 +93,6 @@ app.add_setting("General", "Theme", value_fn=lambda: app._theme.name)
 | `↑` / `↓`  | Navigate command history    |
 | `Enter`     | Submit command              |
 """,
-
     "API Reference": """# API Reference
 
 ## RigiApp
@@ -143,6 +141,7 @@ def _make_note(name: str):
     def _factory():
         content = _notes.get(name, f"# {name}\n\n*Empty note.*")
         return RigiPane(Markdown(content))
+
     return _factory
 
 

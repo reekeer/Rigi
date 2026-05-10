@@ -1,4 +1,5 @@
 """File browser — navigates local filesystem, shows file details."""
+
 from __future__ import annotations
 
 import os
@@ -6,7 +7,7 @@ import stat
 from pathlib import Path
 
 from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane
+from rigi.layout.pane import RigiCard, RigiPane
 from rigi.widgets import DataTable, Label
 
 app = RigiApp(name="files", version="1.0.0", description="Local filesystem browser")
@@ -56,7 +57,9 @@ def make_browser():
     info = RigiCard(
         Label(f"[bold]Path:[/bold]  {_cwd}"),
         Label(f"[bold]Items:[/bold] {len(entries)}"),
-        Label(f"[bold]Free:[/bold]  {_size_str(os.statvfs(_cwd).f_bavail * os.statvfs(_cwd).f_frsize)}"),
+        Label(
+            f"[bold]Free:[/bold]  {_size_str(os.statvfs(_cwd).f_bavail * os.statvfs(_cwd).f_frsize)}"
+        ),
         title=" Current Directory",
     )
 

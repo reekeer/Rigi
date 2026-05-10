@@ -9,16 +9,6 @@ from rigi.core.types import StatusItem
 
 
 class RigiStatusItem(Widget):
-    DEFAULT_CSS = """
-    RigiStatusItem {
-        height: 1;
-        padding: 0 1;
-        width: auto;
-        content-align: left middle;
-        background: transparent;
-    }
-    """
-
     def __init__(self, item: StatusItem) -> None:
         super().__init__(id=f"status-{item.key}")
         self._item = item
@@ -40,27 +30,12 @@ class RigiStatusItem(Widget):
 
 
 class _StatusSpacer(Widget):
-    DEFAULT_CSS = """
-    _StatusSpacer { width: 1fr; height: 1; background: transparent; }
-    """
-
     def render(self) -> str:
         return ""
 
 
 class _IconButton(Widget):
     """Generic icon button for the status bar."""
-
-    DEFAULT_CSS = """
-    _IconButton {
-        width: 3;
-        height: 1;
-        content-align: center middle;
-        color: #6e7681;
-        background: transparent;
-    }
-    _IconButton:hover { color: #c9d1d9; }
-    """
 
     class Clicked(Message):
         def __init__(self, key: str) -> None:
@@ -80,17 +55,6 @@ class _IconButton(Widget):
 
 
 class _HamburgerButton(Widget):
-    DEFAULT_CSS = """
-    _HamburgerButton {
-        width: 5;
-        height: 1;
-        content-align: center middle;
-        color: #6e7681;
-        background: transparent;
-    }
-    _HamburgerButton:hover { color: #c9d1d9; }
-    """
-
     class Clicked(Message):
         pass
 
@@ -102,19 +66,6 @@ class _HamburgerButton(Widget):
 
 
 class _HomeButton(Widget):
-    DEFAULT_CSS = """
-    _HomeButton {
-        width: 5;
-        height: 1;
-        padding: 0 0 0 1;
-        content-align: left middle;
-        color: #6e7681;
-        background: transparent;
-    }
-    _HomeButton:hover { color: #c9d1d9; }
-    _HomeButton.--active { color: #58a6ff; }
-    """
-
     class Clicked(Message):
         pass
 
@@ -129,15 +80,6 @@ class _HomeButton(Widget):
 
 
 class RigiStatusBar(Widget):
-    DEFAULT_CSS = """
-    RigiStatusBar {
-        height: 2;
-        layout: horizontal;
-        padding: 0 1;
-        background: transparent;
-    }
-    """
-
     def __init__(self) -> None:
         super().__init__()
         self._items: list[StatusItem] = []

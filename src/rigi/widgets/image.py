@@ -190,13 +190,6 @@ def _make_fallback_strips(
 
 
 class RigiImage(Widget):
-    DEFAULT_CSS = """
-    RigiImage {
-        height: auto;
-        width: auto;
-    }
-    """
-
     def __init__(
         self,
         source: str | Path | bytes | None = None,

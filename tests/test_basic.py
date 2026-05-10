@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import pytest
-
 from rigi import (
     Command,
     CommandArg,
@@ -128,7 +126,7 @@ def test_rigi_app_command_decorator() -> None:
     calls: list[str] = []
 
     @app.command("greet", help="Say hi")
-    async def greet(app: RigiApp, **_: object) -> None:
+    async def greet(_app: RigiApp, **_: object) -> None:  # pyright: ignore[reportUnusedFunction]
         calls.append("hi")
 
     assert app._cmd_registry.get("greet") is not None

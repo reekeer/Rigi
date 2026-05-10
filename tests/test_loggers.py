@@ -1,4 +1,5 @@
 """Tests for specialized loggers."""
+
 import logging
 
 
@@ -28,9 +29,11 @@ def test_logger_hierarchy():
     rigi_log = logging.getLogger("rigi")
     ui_log = logging.getLogger("rigi.ui")
     dev_log = logging.getLogger("rigi.dev")
-    
-    assert ui_log.parent == rigi_log or ui_log.parent.name == "rigi"
-    assert dev_log.parent == rigi_log or dev_log.parent.name == "rigi"
+
+    assert ui_log.parent is rigi_log or (ui_log.parent is not None and ui_log.parent.name == "rigi")
+    assert dev_log.parent is rigi_log or (
+        dev_log.parent is not None and dev_log.parent.name == "rigi"
+    )
 
 
 def test_logger_levels():
@@ -38,19 +41,15 @@ def test_logger_levels():
     logger = logging.getLogger("rigi.test")
     logger.setLevel(logging.DEBUG)
     assert logger.level == logging.DEBUG
-    
+
     logger.setLevel(logging.INFO)
     assert logger.level == logging.INFO
 
 
 def test_logger_names():
     """Test logger naming convention."""
-    loggers = [
-        "rigi.ui",
-        "rigi.dev",
-        "rigi.terminal"
-    ]
-    
+    loggers = ["rigi.ui", "rigi.dev", "rigi.terminal"]
+
     for name in loggers:
         logger = logging.getLogger(name)
         assert logger.name == name
