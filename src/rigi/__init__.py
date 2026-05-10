@@ -42,6 +42,8 @@ from rigi.core.platform import (
 )
 from rigi.core.types import CommandArg, HelpEntry, StatusItem, SubtabDef, TabDef
 from rigi.layout.pane import RigiCard, RigiHPane, RigiPane, RigiScrollPane, RigiSplit, RigiVPane
+from rigi.screens.hamburger import RigiHamburgerScreen
+from rigi.screens.help import RigiHelpScreen
 from rigi.themes import DARK as ThemeDark
 from rigi.themes import LIGHT as ThemeLight
 from rigi.themes import MONOKAI as ThemeMonokai
@@ -51,8 +53,6 @@ from rigi.widgets.border_frame import RigiBorderFrame
 from rigi.widgets.bottom_panel import RigiBottomPanel
 from rigi.widgets.content_area import RigiContentArea
 from rigi.widgets.gauge import RigiGauge, RigiSparkline
-from rigi.screens.hamburger import RigiHamburgerScreen
-from rigi.screens.help import RigiHelpScreen
 from rigi.widgets.hamburger_menu import (
     RigiHamburgerPanel,
     RigiMenuItem,

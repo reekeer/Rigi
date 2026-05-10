@@ -6,5 +6,7 @@ RigiSettingDef and RigiSettingsScreen have moved to rigi.screens.settings
 
 from rigi.screens.settings import (  # noqa: F401
     RigiSettingDef as RigiSettingDef,
+)
+from rigi.screens.settings import (
     RigiSettingsScreen as RigiSettingsScreen,
 )

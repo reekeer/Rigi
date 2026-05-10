@@ -402,8 +402,11 @@ async def _cmd_widget_styles(app: RigiApp, **_: Any) -> None:
 async def _cmd_hotkeys(app: RigiApp, **_: Any) -> None:
     lines = ["[bold]Active bindings:[/bold]\n"]
     try:
+        from textual.binding import Binding as _Binding
+
         for binding in app.BINDINGS:
-            lines.append(f"  [cyan]{binding.key}[/cyan] → {binding.action}")
+            if isinstance(binding, _Binding):
+                lines.append(f"  [cyan]{binding.key}[/cyan] → {binding.action}")
     except Exception:
         pass
     app.notify("\n".join(lines), title="sudo hotkeys", timeout=8)
