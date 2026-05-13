@@ -1,4 +1,4 @@
-"""Horizontal tab groups for in-page navigation with optional wrapping."""
+"""Horizontal tab groups for in-page navigation."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from typing import Any, Callable
 from textual.app import ComposeResult
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import ContentSwitcher, Label
+from textual.widgets import ContentSwitcher
 
 
 class _TabItem(Widget):
@@ -18,8 +18,8 @@ class _TabItem(Widget):
         self._label = label
         self._idx = idx
 
-    def compose(self) -> ComposeResult:
-        yield Label(self._label)
+    def render(self) -> str:
+        return self._label
 
     def set_active(self, active: bool) -> None:
         self.set_class(active, "--active")
@@ -39,31 +39,18 @@ class TabGroup(Widget):
     def __init__(
         self,
         tabs: list[tuple[str, Callable[[], Widget]]],
-        wrap: int = 0,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self._tab_defs = tabs
         self._active_idx: int = 0
-        self._wrap = wrap
 
     def compose(self) -> ComposeResult:
         with Widget(id="tabgroup-nav"):
-            if self._wrap > 0:
-                for row_start in range(0, len(self._tab_defs), self._wrap):
-                    with Widget(classes="tab-row"):
-                        for i in range(
-                            row_start, min(row_start + self._wrap, len(self._tab_defs))
-                        ):
-                            name, _ = self._tab_defs[i]
-                            item = _TabItem(name, i)
-                            item.set_active(i == self._active_idx)
-                            yield item
-            else:
-                for i, (name, _) in enumerate(self._tab_defs):
-                    item = _TabItem(name, i)
-                    item.set_active(i == self._active_idx)
-                    yield item
+            for i, (name, _) in enumerate(self._tab_defs):
+                item = _TabItem(name, i)
+                item.set_active(i == self._active_idx)
+                yield item
         with ContentSwitcher(
             initial="tab-content-0", id="tabgroup-switcher"
         ):

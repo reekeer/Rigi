@@ -26,7 +26,7 @@ from rigi.core.dev_commands import register_dev_commands
 from rigi.core.settings_manager import SettingsManager
 from rigi.core.types import HandlerFn, HelpEntry, StatusItem, SubtabDef, TabDef
 from rigi.screens.action_menu import ActionMenuScreen
-from rigi.widgets.hamburger_overlay import HamburgerOverlay
+from rigi.widgets.hamburger_menu import MenuPanel
 from rigi.screens.help import HelpScreen
 from rigi.screens.settings import SettingDef, SettingsScreen
 from rigi.themes import DARK as _DEFAULT_THEME
@@ -572,12 +572,17 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
 
     def _open_hamburger(self) -> None:
         try:
-            existing = self.query_one(HamburgerOverlay)
-            existing._close()
+            existing = self.query_one("#rigi-main-menu", MenuPanel)
+            existing.remove()
             return
         except Exception:
             pass
-        self.mount(HamburgerOverlay(self._build_hamburger_sections()))
+        panel = MenuPanel(self._build_hamburger_sections(), id="rigi-main-menu")
+        panel.styles.layer = "overlay"
+        panel_w = 26
+        x = max(0, self.size.width - panel_w - 1)
+        panel.styles.offset = (x, 3)
+        self.mount(panel)
 
     def _build_hamburger_sections(self) -> list[tuple[str, list[MenuItemData]]]:
         from rigi.themes import DARK, LIGHT, MONOKAI, NORD
@@ -823,6 +828,13 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
             items = self._context_menu_items()
             if items:
                 self.show_action_menu(items, x=event.x, y=event.y)
+                return
+        try:
+            panel = self.query_one("#rigi-main-menu", MenuPanel)
+            if panel not in event.chain:
+                panel.remove()
+        except Exception:
+            pass
 
     def _context_menu_items(self) -> list[ActionMenuItemData]:
         return []

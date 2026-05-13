@@ -105,9 +105,18 @@ CompletionList {{
     border: solid {self.border};
     background: {self.completion_bg};
 }}
+HelpScreen {{
+    background: transparent;
+}}
 HelpScreen > #help-container {{
     border: round {self.border};
     background: {self.popup_bg};
+}}
+ActionMenuScreen {{
+    background: transparent;
+}}
+SettingsScreen {{
+    background: transparent;
 }}
 HamburgerPanel {{
     border: round {self.border};
