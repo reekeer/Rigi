@@ -31,8 +31,8 @@ class RigiCheckbox(Widget):
         yield Label(self._render_text(), id="rigi-checkbox-label")
 
     def _render_text(self) -> str:
-        box = "[green]✓[/green]" if self._value else " "
-        return f"[{box}] {self._label}"
+        box = "[green]☑[/green]" if self._value else "☐"
+        return f"{box} {self._label}"
 
     def on_click(self, event: Click) -> None:
         event.stop()
