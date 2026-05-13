@@ -51,8 +51,10 @@ from rigi.themes import NORD as ThemeNord
 from rigi.themes import RigiTheme
 from rigi.widgets.border_frame import RigiBorderFrame
 from rigi.widgets.bottom_panel import RigiBottomPanel
+from rigi.widgets.action_menu import RigiActionMenuItemData
 from rigi.widgets.checkbox import RigiCheckbox
 from rigi.widgets.content_area import RigiContentArea
+from rigi.widgets.vertical_tabs import RigiVerticalTabs
 from rigi.widgets.gauge import RigiGauge, RigiSparkline
 from rigi.widgets.hamburger_menu import (
     RigiHamburgerPanel,
@@ -140,6 +142,8 @@ __all__ = [
     "RigiSparkline",
     "RigiNotificationRack",
     "RigiNotificationWidget",
+    "RigiVerticalTabs",
+    "RigiActionMenuItemData",
     # Platform utilities
     "platform",
     "console",
