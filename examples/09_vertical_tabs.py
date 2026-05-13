@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from rigi import RigiApp, TabDef
+from rigi import RigiApp, RigiVerticalTabs, TabDef
 from rigi.layout.pane import RigiCard, RigiPane
 from rigi.widgets import Label
-from rigi.widgets.vertical_tabs import RigiVerticalTabs
 
 app = RigiApp(
     name="vertical-tabs",

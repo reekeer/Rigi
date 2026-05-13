@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from rigi import RigiApp, TabDef
+from rigi import RigiActionMenuItemData, RigiApp, TabDef
 from rigi.layout.pane import RigiCard, RigiPane
 from rigi.widgets import Label
-from rigi.widgets.action_menu import RigiActionMenuItemData
 
 app = RigiApp(
     name="action-menu",
