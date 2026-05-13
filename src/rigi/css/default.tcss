@@ -242,8 +242,13 @@ Split {
 }
 Split > Widget { width: 1fr; height: 100%; }
 
-HelpScreen { align: center middle; background: transparent; }
-HelpScreen > #help-container {
+HelpOverlay {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    align: center middle;
+}
+HelpOverlay > #help-container {
     width: 60;
     height: auto;
     max-height: 80%;
@@ -252,7 +257,7 @@ HelpScreen > #help-container {
     padding: 1 2;
     overflow-y: auto;
 }
-HelpScreen #help-title {
+HelpOverlay #help-title {
     text-style: bold;
     color: #58a6ff;
     width: 100%;
@@ -260,11 +265,11 @@ HelpScreen #help-title {
     margin-bottom: 1;
     height: 1;
 }
-HelpScreen .help-category { color: #30363d; text-style: bold; margin-top: 1; height: 1; }
-HelpScreen .help-row { layout: horizontal; height: 1; width: 100%; }
-HelpScreen .help-key { width: 16; color: #e3b341; text-style: bold; }
-HelpScreen .help-desc { width: 1fr; color: #8b949e; }
-HelpScreen #help-dismiss {
+HelpOverlay .help-category { color: #30363d; text-style: bold; margin-top: 1; height: 1; }
+HelpOverlay .help-row { layout: horizontal; height: 1; width: 100%; }
+HelpOverlay .help-key { width: 16; color: #e3b341; text-style: bold; }
+HelpOverlay .help-desc { width: 1fr; color: #8b949e; }
+HelpOverlay #help-dismiss {
     margin-top: 1;
     color: #6e7681;
     content-align: center middle;
@@ -333,8 +338,13 @@ _SettingSwitch Switch { height: 1; width: auto; }
 _SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
 _SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
 
-SettingsScreen { align: center middle; background: transparent; }
-#s-outer {
+SettingsOverlay {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    align: center middle;
+}
+SettingsOverlay > #s-outer {
     width: 90%;
     height: 85%;
     border: round #30363d;
@@ -394,14 +404,14 @@ _MenuSectionLabel {
 }
 
 MenuPanel {
-    width: 26;
+    width: 16;
     height: auto;
-    max-height: 24;
+    max-height: 14;
     border: round #30363d;
     border-title-color: #c9d1d9;
     background: #0d1117;
     padding: 0;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 ActionMenuPanel {
@@ -432,15 +442,15 @@ TabGroup #tabgroup-nav {
     overflow-x: auto;
     overflow-y: hidden;
     background: transparent;
-    padding: 0 1;
+    border-bottom: solid #21262d;
 }
 _TabItem {
     height: 1;
+    box-sizing: content-box;
     width: auto;
     padding: 0 2;
     color: #6e7681;
     background: transparent;
-    border-bottom: solid #21262d;
 }
 _TabItem:hover { color: #c9d1d9; background: #161b22; }
 _TabItem.--active {

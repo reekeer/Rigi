@@ -12,6 +12,7 @@ from textual import on
 from textual.app import App as _TextualApp, ComposeResult
 from textual.binding import Binding
 from textual.notifications import SeverityLevel
+from textual.events import Key
 from textual.widget import Widget
 
 from rigi.commands.command import Command
@@ -27,8 +28,9 @@ from rigi.core.settings_manager import SettingsManager
 from rigi.core.types import HandlerFn, HelpEntry, StatusItem, SubtabDef, TabDef
 from rigi.screens.action_menu import ActionMenuScreen
 from rigi.widgets.hamburger_menu import MenuPanel
-from rigi.screens.help import HelpScreen
-from rigi.screens.settings import SettingDef, SettingsScreen
+from rigi.widgets.help_overlay import HelpOverlay
+from rigi.screens.settings import SettingDef
+from rigi.widgets.settings_overlay import SettingsOverlay
 from rigi.themes import DARK as _DEFAULT_THEME
 from rigi.themes import Theme
 from rigi.widgets.border_frame import BorderFrame
@@ -579,7 +581,7 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
             pass
         panel = MenuPanel(self._build_hamburger_sections(), id="rigi-main-menu")
         panel.styles.layer = "overlay"
-        panel_w = 26
+        panel_w = 16
         x = max(0, self.size.width - panel_w - 1)
         panel.styles.offset = (x, 3)
         self.mount(panel)
@@ -675,7 +677,15 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
                 write_fn=self._set_transparency_percent,
             ),
         ]
-        self.push_screen(SettingsScreen(builtin + self._settings_manager.all_defs()))
+        try:
+            existing = self.query_one("#rigi-settings-overlay", SettingsOverlay)
+            existing.remove()
+            return
+        except Exception:
+            pass
+        overlay = SettingsOverlay(builtin + self._settings_manager.all_defs())
+        overlay.styles.layer = "overlay"
+        self.mount(overlay)
 
     # ------------------------------------------------------------------ #
     # Keyboard actions                                                     #
@@ -707,7 +717,15 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         self.query_one(BottomPanel).focus_input()
 
     async def action_show_help(self) -> None:
-        await self.push_screen(HelpScreen(self._rigi_help_entries))
+        try:
+            existing = self.query_one("#rigi-help-overlay", HelpOverlay)
+            existing.remove()
+            return
+        except Exception:
+            pass
+        overlay = HelpOverlay(self._rigi_help_entries)
+        overlay.styles.layer = "overlay"
+        self.mount(overlay)
 
     def action_copy_focused(self) -> None:
         text = self._extract_focused_text()
@@ -835,6 +853,33 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
                 panel.remove()
         except Exception:
             pass
+        try:
+            overlay = self.query_one("#rigi-help-overlay", HelpOverlay)
+            if overlay not in event.chain:
+                overlay.remove()
+        except Exception:
+            pass
+        try:
+            overlay = self.query_one("#rigi-settings-overlay", SettingsOverlay)
+            if overlay not in event.chain:
+                overlay.remove()
+        except Exception:
+            pass
+
+    def on_key(self, event: Key) -> None:
+        if event.key == "escape":
+            for selector, cls in (
+                ("#rigi-main-menu", MenuPanel),
+                ("#rigi-settings-overlay", SettingsOverlay),
+                ("#rigi-help-overlay", HelpOverlay),
+            ):
+                try:
+                    widget = self.query_one(selector, cls)
+                    widget.remove()
+                    event.stop()
+                    return
+                except Exception:
+                    pass
 
     def _context_menu_items(self) -> list[ActionMenuItemData]:
         return []

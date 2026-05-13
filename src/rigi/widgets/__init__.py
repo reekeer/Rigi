@@ -53,6 +53,8 @@ from rigi.widgets.hamburger_menu import (
 from rigi.widgets.help_panel import ShortcutsBar, extract_help_annotation
 from rigi.widgets.image import Image, TerminalImageProtocol, detect_image_protocol
 from rigi.widgets.mouse import Clickable, Draggable, MouseMixin
+from rigi.widgets.help_overlay import HelpOverlay
+from rigi.widgets.settings_overlay import SettingsOverlay
 from rigi.widgets.settings_screen import SettingDef, SettingsScreen
 from rigi.widgets.sidebar import Sidebar
 from rigi.widgets.statusbar import StatusBar, StatusItem
@@ -83,7 +85,9 @@ __all__ = [
     "ActionMenuItemData",
     "TabGroup",
     "SettingsScreen",
+    "SettingsOverlay",
     "SettingDef",
+    "HelpOverlay",
     "Image",
     "TerminalImageProtocol",
     "detect_image_protocol",

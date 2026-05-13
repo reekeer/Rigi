@@ -44,6 +44,7 @@ from rigi.core.types import CommandArg, HelpEntry, StatusItem, SubtabDef, TabDef
 from rigi.layout.pane import Card, HPane, Pane, ScrollPane, Split, VPane
 from rigi.screens.hamburger import HamburgerScreen
 from rigi.screens.help import HelpScreen
+from rigi.widgets.help_overlay import HelpOverlay
 from rigi.themes import DARK as ThemeDark
 from rigi.themes import LIGHT as ThemeLight
 from rigi.themes import MONOKAI as ThemeMonokai
@@ -72,6 +73,7 @@ from rigi.widgets.notifications import (
     NotificationWidget as NotificationWidget,
 )
 from rigi.core.settings_manager import Setting, SettingsManager, SettingsPage
+from rigi.widgets.settings_overlay import SettingsOverlay
 from rigi.widgets.settings_screen import SettingDef, SettingsScreen
 from rigi.widgets.sidebar import Sidebar
 from rigi.widgets.statusbar import StatusBar, StatusBarItem
@@ -125,6 +127,7 @@ __all__ = [
     "HamburgerPanel",
     "MenuItemData",
     "SettingsScreen",
+    "SettingsOverlay",
     "SettingDef",
     "Setting",
     "SettingsPage",
@@ -136,6 +139,7 @@ __all__ = [
     "Clickable",
     "Draggable",
     "HelpScreen",
+    "HelpOverlay",
     "ShortcutsBar",
     "extract_help_annotation",
     "Gauge",

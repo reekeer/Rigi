@@ -105,17 +105,17 @@ CompletionList {{
     border: solid {self.border};
     background: {self.completion_bg};
 }}
-HelpScreen {{
+HelpOverlay {{
     background: transparent;
 }}
-HelpScreen > #help-container {{
+HelpOverlay > #help-container {{
     border: round {self.border};
     background: {self.popup_bg};
 }}
 ActionMenuScreen {{
     background: transparent;
 }}
-SettingsScreen {{
+SettingsOverlay {{
     background: transparent;
 }}
 HamburgerPanel {{
