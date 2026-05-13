@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
+from textual.events import Click, Key
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Label
@@ -13,6 +14,8 @@ class RigiCheckbox(Widget):
 
     Posts ``RigiCheckbox.Changed`` when toggled.
     """
+
+    can_focus = True
 
     class Changed(Message):
         def __init__(self, value: bool) -> None:
@@ -31,8 +34,14 @@ class RigiCheckbox(Widget):
         box = "[green]✓[/green]" if self._value else " "
         return f"[{box}] {self._label}"
 
-    def on_click(self) -> None:
+    def on_click(self, event: Click) -> None:
+        event.stop()
         self.toggle()
+
+    def on_key(self, event: Key) -> None:
+        if event.key in ("enter", "space"):
+            event.stop()
+            self.toggle()
 
     def toggle(self) -> None:
         self._value = not self._value
