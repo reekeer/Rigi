@@ -25,6 +25,7 @@ from rigi.core._cmd_handlers import cmd_clear, cmd_help, cmd_quit, cmd_terminal
 from rigi.core.dev_commands import register_dev_commands
 from rigi.core.settings_manager import SettingsManager
 from rigi.core.types import HandlerFn, HelpEntry, StatusItem, SubtabDef, TabDef
+from rigi.screens.action_menu import RigiActionMenuScreen
 from rigi.screens.hamburger import RigiHamburgerScreen
 from rigi.screens.help import RigiHelpScreen
 from rigi.screens.settings import RigiSettingDef, RigiSettingsScreen
@@ -33,6 +34,7 @@ from rigi.themes import RigiTheme
 from rigi.widgets.border_frame import RigiBorderFrame
 from rigi.widgets.bottom_panel import RigiBottomPanel
 from rigi.widgets.content_area import RigiContentArea
+from rigi.widgets.action_menu import RigiActionMenuItemData
 from rigi.widgets.hamburger_menu import RigiMenuItemData
 from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
 from rigi.widgets.notifications import RigiNotificationRack
@@ -725,6 +727,15 @@ class RigiApp(App[None]):
 
     def open_path(self, path: str | Path) -> bool:
         return _platform_utils.open_path(path)
+
+    def show_action_menu(
+        self,
+        items: list[RigiActionMenuItemData],
+        title: str = "",
+        x: int | None = None,
+        y: int | None = None,
+    ) -> None:
+        self.push_screen(RigiActionMenuScreen(items, title=title, anchor_x=x, anchor_y=y))
 
     def notify_desktop(self, title: str, body: str = "", urgency: str = "normal") -> bool:
         return _platform_utils.notify_desktop(title, body, urgency)
