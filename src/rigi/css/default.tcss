@@ -1,5 +1,7 @@
 App {
     background: transparent;
+    scrollbar-size-vertical: 1;
+    scrollbar-size-horizontal: 1;
 }
 
 Screen {
@@ -430,22 +432,21 @@ TabGroup #tabgroup-nav {
     overflow-x: auto;
     overflow-y: hidden;
     background: transparent;
-    border-bottom: solid #21262d;
     padding: 0 1;
 }
 _TabItem {
-    height: 3;
+    height: 1;
     width: auto;
     padding: 0 2;
     color: #6e7681;
     background: transparent;
-    content-align: center middle;
+    border-bottom: solid #21262d;
 }
 _TabItem:hover { color: #c9d1d9; background: #161b22; }
 _TabItem.--active {
     color: #58a6ff;
     text-style: bold;
-    border-bottom: thick #58a6ff;
+    border-bottom: solid #58a6ff;
 }
 TabGroup #tabgroup-switcher {
     width: 100%;
