@@ -7,7 +7,8 @@ from typing import Any
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.events import Key
+from textual.events import Click
+from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import DataTable, Input, Label
 
@@ -32,6 +33,85 @@ app = App(
 )
 
 
+class _EditRowScreen(ModalScreen[list[str] | None]):
+    DEFAULT_CSS = """
+    _EditRowScreen {
+        align: center middle;
+    }
+    _EditRowScreen > #er-box {
+        width: 48;
+        height: auto;
+        border: round #30363d;
+        background: #0d1117;
+        padding: 1 2;
+    }
+    _EditRowScreen #er-title {
+        color: #58a6ff;
+        text-style: bold;
+        height: 1;
+        margin-bottom: 1;
+    }
+    _EditRowScreen .er-label {
+        color: #6e7681;
+        height: 1;
+        margin-top: 1;
+    }
+    _EditRowScreen .er-input {
+        height: 1;
+        border: solid #30363d;
+        background: #161b22;
+        color: #e6edf3;
+        padding: 0 1;
+    }
+    _EditRowScreen .er-input:focus {
+        border: solid #58a6ff;
+    }
+    _EditRowScreen #er-hint {
+        color: #3d444d;
+        height: 1;
+        margin-top: 1;
+        content-align: center middle;
+        width: 100%;
+    }
+    """
+
+    BINDINGS = [Binding("escape", "dismiss_none", show=False)]
+
+    def __init__(self, columns: tuple[str, ...], values: list[str]) -> None:
+        super().__init__()
+        self._columns = columns
+        self._values = values
+
+    def compose(self) -> ComposeResult:
+        with Widget(id="er-box"):
+            yield Label("Edit Row", id="er-title")
+            for col, val in zip(self._columns, self._values):
+                yield Label(col, classes="er-label")
+                yield Input(value=val, classes="er-input")
+            yield Label("Enter — save  ·  Esc — cancel", id="er-hint")
+
+    def on_mount(self) -> None:
+        inputs = list(self.query(Input))
+        if inputs:
+            inputs[0].focus()
+
+    def action_dismiss_none(self) -> None:
+        self.dismiss(None)
+
+    @on(Input.Submitted)
+    def _on_submitted(self, event: Input.Submitted) -> None:
+        event.stop()
+        inputs = list(self.query(Input))
+        try:
+            idx = inputs.index(event.input)
+        except ValueError:
+            idx = -1
+        if idx == len(inputs) - 1:
+            self.dismiss([inp.value for inp in inputs])
+        elif idx >= 0:
+            inputs[idx + 1].focus()
+
+
 class EditableTable(Widget):
     DEFAULT_CSS = """
     EditableTable {
@@ -39,76 +119,72 @@ class EditableTable(Widget):
         height: 1fr;
         width: 100%;
     }
-    EditableTable #cell-input {
-        margin-bottom: 1;
-    }
     EditableTable DataTable {
         height: 1fr;
         width: 100%;
     }
     """
 
-    BINDINGS = [
-        Binding("e", "edit_cell", "Edit"),
-        Binding("enter", "edit_cell", "Edit"),
-    ]
+    BINDINGS = [Binding("e", "row_menu", "Actions")]
 
     def __init__(self) -> None:
         super().__init__()
         self._data: list[list[str]] = [list(r) for r in _ROWS]
         self._col_keys: list[Any] = []
         self._row_keys: list[Any] = []
-        self._editing: tuple[int, int] | None = None
 
     def compose(self) -> ComposeResult:
-        yield Input(placeholder="Edit — Enter to save, Esc to cancel", id="cell-input")
         yield DataTable()
 
     def on_mount(self) -> None:
-        self.query_one(Input).display = False
         table = self.query_one(DataTable)
-        table.cursor_type = "cell"
+        table.cursor_type = "row"
         self._col_keys = list(table.add_columns(*_COLUMNS))
         for row in self._data:
             self._row_keys.append(table.add_row(*row))
 
-    def action_edit_cell(self) -> None:
-        inp = self.query_one(Input)
-        if inp.display:
-            return
+    def action_row_menu(self) -> None:
         table = self.query_one(DataTable)
-        coord = table.cursor_coordinate
-        row_idx, col_idx = coord.row, coord.column
-        inp.value = self._data[row_idx][col_idx]
-        inp.display = True
-        inp.focus()
-        self._editing = (row_idx, col_idx)
+        row_idx = table.cursor_coordinate.row
+        x = table.region.x + 2
+        y = table.region.y + row_idx + 2
+        self._show_row_menu(row_idx, x, y)
 
-    @on(Input.Submitted, "#cell-input")
-    def _on_submitted(self, event: Input.Submitted) -> None:
-        event.stop()
-        self._save(event.value)
-
-    def on_key(self, event: Key) -> None:
-        if event.key == "escape" and self.query_one(Input).display:
+    def on_click(self, event: Click) -> None:
+        if event.button == 3:
             event.stop()
-            self._cancel()
+            table = self.query_one(DataTable)
+            row_idx = table.cursor_coordinate.row
+            self._show_row_menu(row_idx, event.screen_x, event.screen_y)
 
-    def _save(self, value: str) -> None:
-        if self._editing is None:
+    def _show_row_menu(self, row_idx: int, x: int, y: int) -> None:
+        if row_idx < 0 or row_idx >= len(self._data):
             return
-        row_idx, col_idx = self._editing
-        self._data[row_idx][col_idx] = value
-        table = self.query_one(DataTable)
-        table.update_cell(self._row_keys[row_idx], self._col_keys[col_idx], value)
-        self._editing = None
-        self.query_one(Input).display = False
-        table.focus()
+        items = [
+            ActionMenuItemData("Edit", callback=lambda: self._edit_row(row_idx)),
+            ActionMenuItemData("Delete", color="red", callback=lambda: self._delete_row(row_idx)),
+        ]
+        self.app.show_action_menu(items, x=x, y=y)
 
-    def _cancel(self) -> None:
-        self._editing = None
-        self.query_one(Input).display = False
-        self.query_one(DataTable).focus()
+    def _edit_row(self, row_idx: int) -> None:
+        def _apply(values: list[str] | None) -> None:
+            if values is None:
+                return
+            self._data[row_idx] = values
+            table = self.query_one(DataTable)
+            for col_idx, val in enumerate(values):
+                table.update_cell(self._row_keys[row_idx], self._col_keys[col_idx], val)
+
+        self.app.push_screen(
+            _EditRowScreen(_COLUMNS, list(self._data[row_idx])),
+            _apply,
+        )
+
+    def _delete_row(self, row_idx: int) -> None:
+        table = self.query_one(DataTable)
+        table.remove_row(self._row_keys[row_idx])
+        self._data.pop(row_idx)
+        self._row_keys.pop(row_idx)
 
 
 def make_demo() -> Widget:
@@ -126,8 +202,8 @@ def make_demo() -> Widget:
 def make_table() -> Widget:
     return Pane(
         Label(
-            "[bold]Editable Table[/bold] — arrow keys to navigate, "
-            "[cyan]E[/cyan] or [cyan]Enter[/cyan] to edit a cell, [cyan]Esc[/cyan] to cancel."
+            "[bold]Editable Table[/bold] — arrows to navigate, "
+            "[cyan]E[/cyan] or [cyan]RMB[/cyan] for actions."
         ),
         Label(""),
         EditableTable(),
