@@ -1,4 +1,4 @@
-"""RigiHelpScreen — full-screen keyboard-shortcut reference."""
+"""HelpScreen — full-screen keyboard-shortcut reference."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ BUILTIN_SHORTCUTS: list[HelpEntry] = [
 ]
 
 
-class RigiHelpScreen(ModalScreen[None]):
+class HelpScreen(ModalScreen[None]):
     BINDINGS = [
         Binding("escape", "dismiss", "Close", show=False),
         Binding("ctrl+h", "dismiss", "Close", show=False),

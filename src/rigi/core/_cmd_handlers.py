@@ -1,18 +1,18 @@
-"""Built-in terminal command handlers for RigiApp."""
+"""Built-in terminal command handlers for App."""
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
 import rigi.core.console as _console
-from rigi.widgets.bottom_panel import RigiBottomPanel
+from rigi.widgets.bottom_panel import BottomPanel
 
 if TYPE_CHECKING:
-    from rigi.core.app import RigiApp
+    from rigi.core.app import App
 
 
-async def cmd_terminal(app: RigiApp, **_: Any) -> None:
-    from rigi.widgets.bottom_panel import RigiBottomPanel
+async def cmd_terminal(app: App, **_: Any) -> None:
+    from rigi.widgets.bottom_panel import BottomPanel
 
     nfo = _console.info()
     lines = [
@@ -29,20 +29,20 @@ async def cmd_terminal(app: RigiApp, **_: Any) -> None:
         f"  Size:        {nfo['columns']}×{nfo['lines']}",
     ]
     try:
-        app.query_one(RigiBottomPanel).write_output("\n".join(lines))
+        app.query_one(BottomPanel).write_output("\n".join(lines))
     except Exception:
         app.notify("\n".join(lines), title="Terminal Info", timeout=8)
 
 
-async def cmd_help(app: RigiApp, **kwargs: Any) -> None:
-    from rigi.widgets.bottom_panel import RigiBottomPanel
+async def cmd_help(app: App, **kwargs: Any) -> None:
+    from rigi.widgets.bottom_panel import BottomPanel
 
     cmd_name = kwargs.get("command")
     registry = app.cmd_registry
 
     def _output(text: str) -> None:
         try:
-            app.query_one(RigiBottomPanel).write_output(text)
+            app.query_one(BottomPanel).write_output(text)
         except Exception:
             app.notify(text, title="Help", timeout=12)
 
@@ -86,12 +86,12 @@ async def cmd_help(app: RigiApp, **kwargs: Any) -> None:
         _output("\n".join(lines))
 
 
-async def cmd_quit(app: RigiApp, **_: Any) -> None:
+async def cmd_quit(app: App, **_: Any) -> None:
     app.exit()
 
 
-async def cmd_clear(app: RigiApp, **_: Any) -> None:
+async def cmd_clear(app: App, **_: Any) -> None:
     try:
-        app.query_one(RigiBottomPanel).clear_history_view()
+        app.query_one(BottomPanel).clear_history_view()
     except Exception:
         pass

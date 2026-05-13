@@ -13,7 +13,7 @@ from textual.widgets import Label
 
 
 @dataclass
-class RigiActionMenuItemData:
+class ActionMenuItemData:
     label: str
     callback: Callable[[], Any] | None = None
     color: str | None = None
@@ -21,15 +21,15 @@ class RigiActionMenuItemData:
 
 
 class _ActionItemClicked(Message):
-    def __init__(self, item: RigiActionMenuItemData) -> None:
+    def __init__(self, item: ActionMenuItemData) -> None:
         super().__init__()
         self.item = item
 
 
-class RigiActionMenuItem(Widget):
+class ActionMenuItem(Widget):
     can_focus = False
 
-    def __init__(self, item: RigiActionMenuItemData, number: int) -> None:
+    def __init__(self, item: ActionMenuItemData, number: int) -> None:
         super().__init__()
         self._item = item
         self._number = number
@@ -49,10 +49,10 @@ class RigiActionMenuItem(Widget):
             self.post_message(_ActionItemClicked(self._item))
 
 
-class RigiActionMenuPanel(Widget):
+class ActionMenuPanel(Widget):
     def __init__(
         self,
-        items: list[RigiActionMenuItemData],
+        items: list[ActionMenuItemData],
         title: str = "",
         **kwargs: Any,
     ) -> None:
@@ -63,10 +63,10 @@ class RigiActionMenuPanel(Widget):
 
     def compose(self) -> ComposeResult:
         for i, item in enumerate(self._items, start=1):
-            yield RigiActionMenuItem(item, number=i)
+            yield ActionMenuItem(item, number=i)
 
-    def replace_items(self, items: list[RigiActionMenuItemData]) -> None:
+    def replace_items(self, items: list[ActionMenuItemData]) -> None:
         self._items = items
         self.remove_children()
         for i, item in enumerate(items, start=1):
-            self.mount(RigiActionMenuItem(item, number=i))
+            self.mount(ActionMenuItem(item, number=i))

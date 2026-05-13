@@ -9,7 +9,7 @@ from textual.command import Hit, Hits, Provider
 from rigi.commands.command import Command
 
 if TYPE_CHECKING:
-    from rigi.core.app import RigiApp
+    from rigi.core.app import App
 
 
 def _fuzzy_score(query: str, candidate: str) -> float | None:
@@ -32,18 +32,18 @@ def _fuzzy_score(query: str, candidate: str) -> float | None:
     return raw / max(len(candidate), 1)
 
 
-class RigiCommandProvider(Provider):
+class CommandProvider(Provider):
     """Bridges Rigi's CommandRegistry into Textual's built-in command palette."""
 
     _commands: list[Command]
 
     async def startup(self) -> None:
-        app: RigiApp = self.app  # type: ignore[assignment]
+        app: App = self.app  # type: ignore[assignment]
         self._commands = list(app._cmd_registry.visible())
 
     async def search(self, query: str) -> Hits:
         def _run(name: str) -> None:
-            app: RigiApp = self.app  # type: ignore[assignment]
+            app: App = self.app  # type: ignore[assignment]
             self.app.call_later(app._handle_command, name)
 
         scored: list[tuple[float, Command]] = []

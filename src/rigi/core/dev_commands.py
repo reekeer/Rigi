@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING, Any
 from rigi.commands.command import Command
 
 if TYPE_CHECKING:
-    from rigi.core.app import RigiApp
+    from rigi.core.app import App
 
 # Создаем специализированные логгеры
 _log = logging.getLogger("rigi.dev")
@@ -70,7 +70,7 @@ def _tree_lines(widget: Any, depth: int = 0, max_depth: int = 4) -> list[str]:
 # ── Command handlers ───────────────────────────────────────────────────────────
 
 
-async def _cmd_help(app: RigiApp, **_: Any) -> None:
+async def _cmd_help(app: App, **_: Any) -> None:
     lines = ["[bold]sudo commands[/bold] (hidden from normal autocomplete):\n"]
     for sub in _SUBCOMMANDS:
         aliases = f"  [dim]({', '.join(sub.aliases)})[/dim]" if sub.aliases else ""
@@ -80,19 +80,19 @@ async def _cmd_help(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines), title="Dev Commands", timeout=15)
 
 
-async def _cmd_clear_cache(app: RigiApp, **_: Any) -> None:
+async def _cmd_clear_cache(app: App, **_: Any) -> None:
     n = len(app._rigi_widget_cache)
     app.invalidate_tab_cache()
     app.notify(f"Cleared {n} cached widget(s)", title="sudo cc", timeout=3)
 
 
-async def _cmd_reload(app: RigiApp, **_: Any) -> None:
+async def _cmd_reload(app: App, **_: Any) -> None:
     app.invalidate_tab_cache()
     app.refresh(layout=True)
     app.notify("All caches cleared + layout refreshed", title="sudo reload", timeout=3)
 
 
-async def _cmd_reload_css(app: RigiApp, **_: Any) -> None:
+async def _cmd_reload_css(app: App, **_: Any) -> None:
     try:
         app.refresh_css(animate=False)
         app.notify("CSS reloaded", title="sudo rcss", timeout=3)
@@ -100,11 +100,11 @@ async def _cmd_reload_css(app: RigiApp, **_: Any) -> None:
         app.notify(str(e), severity="error", title="sudo rcss")
 
 
-async def _cmd_css(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_css(app: App, **kwargs: Any) -> None:
     rule = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not rule:
         app.notify(
-            "Usage: sudo css <rule>  (e.g. sudo css 'RigiCard { opacity: 0.8; }')",
+            "Usage: sudo css <rule>  (e.g. sudo css 'Card { opacity: 0.8; }')",
             severity="warning",
         )
         return
@@ -121,14 +121,14 @@ async def _cmd_css(app: RigiApp, **kwargs: Any) -> None:
         app.notify(str(e), severity="error", title="sudo css")
 
 
-async def _cmd_dump_theme(app: RigiApp, **_: Any) -> None:
+async def _cmd_dump_theme(app: App, **_: Any) -> None:
     css = app._theme.to_css()
     path = Path(f"/tmp/rigi_theme_{app._prog_name}.css")
     path.write_text(css, encoding="utf-8")
     app.notify(f"Written to {path}\n\n{css[:400]}…", title="sudo dump_theme", timeout=10)
 
 
-async def _cmd_inspect(app: RigiApp, **_: Any) -> None:
+async def _cmd_inspect(app: App, **_: Any) -> None:
     focused = app.focused
     if focused is None:
         app.notify("No focused widget", severity="warning", title="sudo inspect")
@@ -148,7 +148,7 @@ async def _cmd_inspect(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines), title="sudo inspect", timeout=10)
 
 
-async def _cmd_tree(app: RigiApp, **_: Any) -> None:
+async def _cmd_tree(app: App, **_: Any) -> None:
     try:
         screen = app.screen
         lines = _tree_lines(screen, max_depth=4)
@@ -160,7 +160,7 @@ async def _cmd_tree(app: RigiApp, **_: Any) -> None:
         app.notify(str(e), severity="error", title="sudo tree")
 
 
-async def _cmd_focus(app: RigiApp, **_: Any) -> None:
+async def _cmd_focus(app: App, **_: Any) -> None:
     focused = app.focused
     if focused is None:
         app.notify("No widget focused", title="sudo focus", timeout=4)
@@ -168,7 +168,7 @@ async def _cmd_focus(app: RigiApp, **_: Any) -> None:
         app.notify(_widget_path(focused), title="sudo focus", timeout=6)
 
 
-async def _cmd_mem(app: RigiApp, **_: Any) -> None:
+async def _cmd_mem(app: App, **_: Any) -> None:
     lines: list[str] = []
     try:
         import resource
@@ -197,14 +197,14 @@ async def _cmd_mem(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines) or "Memory info unavailable", title="sudo mem", timeout=8)
 
 
-async def _cmd_gc(app: RigiApp, **_: Any) -> None:
+async def _cmd_gc(app: App, **_: Any) -> None:
     before = sum(_gc.get_count())
     n = _gc.collect()
     after = sum(_gc.get_count())
     app.notify(f"Collected {n} objects  (count {before}→{after})", title="sudo gc", timeout=4)
 
 
-async def _cmd_tracemalloc(app: RigiApp, **_: Any) -> None:
+async def _cmd_tracemalloc(app: App, **_: Any) -> None:
     import tracemalloc
 
     if tracemalloc.is_tracing():
@@ -219,7 +219,7 @@ async def _cmd_tracemalloc(app: RigiApp, **_: Any) -> None:
         )
 
 
-async def _cmd_screenshot(app: RigiApp, **_: Any) -> None:
+async def _cmd_screenshot(app: App, **_: Any) -> None:
     try:
         svg = app.export_screenshot()
         path = Path(f"/tmp/rigi_{app._prog_name}_{os.getpid()}.svg")
@@ -229,7 +229,7 @@ async def _cmd_screenshot(app: RigiApp, **_: Any) -> None:
         app.notify(str(e), severity="error", title="sudo screenshot")
 
 
-async def _cmd_env(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_env(app: App, **kwargs: Any) -> None:
     query = " ".join(str(v) for v in kwargs.values() if v).strip().lower()
     items = sorted(os.environ.items())
     if query:
@@ -243,7 +243,7 @@ async def _cmd_env(app: RigiApp, **kwargs: Any) -> None:
     app.notify("\n".join(lines), title=f"sudo env{' [' + query + ']' if query else ''}", timeout=12)
 
 
-async def _cmd_tabs(app: RigiApp, **_: Any) -> None:
+async def _cmd_tabs(app: App, **_: Any) -> None:
     lines: list[str] = []
     for i, tab in enumerate(app._rigi_tabs):
         cached_keys = [k for k in app._rigi_widget_cache if k[0] == i]
@@ -258,7 +258,7 @@ async def _cmd_tabs(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines) or "(no tabs)", title="sudo tabs", timeout=10)
 
 
-async def _cmd_cmds(app: RigiApp, **_: Any) -> None:
+async def _cmd_cmds(app: App, **_: Any) -> None:
     all_cmds = app._cmd_registry.all()
     lines = ["[bold]All registered commands (including hidden):[/bold]\n"]
     for cmd in sorted(all_cmds, key=lambda c: c.name):
@@ -269,14 +269,14 @@ async def _cmd_cmds(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines), title="sudo cmds", timeout=12)
 
 
-async def _cmd_bell(app: RigiApp, **_: Any) -> None:
+async def _cmd_bell(app: App, **_: Any) -> None:
     from rigi.core import console
 
     console.write_escape(console.bell())
     app.notify("🔔", title="sudo bell", timeout=2)
 
 
-async def _cmd_dn_test(app: RigiApp, **_: Any) -> None:
+async def _cmd_dn_test(app: App, **_: Any) -> None:
     from rigi.core import platform
 
     ok = platform.notify_desktop("Rigi Dev", f"Test from {app._prog_name}")
@@ -287,12 +287,12 @@ async def _cmd_dn_test(app: RigiApp, **_: Any) -> None:
     )
 
 
-async def _cmd_crash(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_crash(app: App, **kwargs: Any) -> None:
     msg = " ".join(str(v) for v in kwargs.values() if v).strip() or "Test crash from sudo crash"
     raise RuntimeError(msg)
 
 
-async def _cmd_python(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_python(app: App, **kwargs: Any) -> None:
     expr = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not expr:
         app.notify("Usage: sudo python <expression>", severity="warning")
@@ -305,7 +305,7 @@ async def _cmd_python(app: RigiApp, **kwargs: Any) -> None:
         app.notify(tb[:800], severity="error", title="sudo python")
 
 
-async def _cmd_log(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_log(app: App, **kwargs: Any) -> None:
     msg = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not msg:
         app.notify("Usage: sudo log <message>", severity="warning")
@@ -314,7 +314,7 @@ async def _cmd_log(app: RigiApp, **kwargs: Any) -> None:
     app.notify(f"Logged: {msg}", title="sudo log", timeout=3)
 
 
-async def _cmd_log_level(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_log_level(app: App, **kwargs: Any) -> None:
     level_str = " ".join(str(v) for v in kwargs.values() if v).strip().upper()
     level = getattr(logging, level_str, None)
     if not isinstance(level, int):
@@ -328,7 +328,7 @@ async def _cmd_log_level(app: RigiApp, **kwargs: Any) -> None:
     app.notify(f"rigi logger → {level_str}", title="sudo log_level", timeout=3)
 
 
-async def _cmd_perf(app: RigiApp, **_: Any) -> None:
+async def _cmd_perf(app: App, **_: Any) -> None:
     try:
         import time
 
@@ -347,7 +347,7 @@ async def _cmd_perf(app: RigiApp, **_: Any) -> None:
         app.notify(str(e), severity="error", title="sudo perf")
 
 
-async def _cmd_set_theme(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_set_theme(app: App, **kwargs: Any) -> None:
     from rigi.themes import DARK, LIGHT, MONOKAI, NORD
 
     name = " ".join(str(v) for v in kwargs.values() if v).strip().lower()
@@ -360,7 +360,7 @@ async def _cmd_set_theme(app: RigiApp, **kwargs: Any) -> None:
     app.notify(f"Theme → {name}", title="sudo set_theme", timeout=2)
 
 
-async def _cmd_console_info(app: RigiApp, **_: Any) -> None:
+async def _cmd_console_info(app: App, **_: Any) -> None:
     from rigi.core import console
 
     nfo = console.info()
@@ -379,7 +379,7 @@ async def _cmd_console_info(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines), title="sudo console", timeout=10)
 
 
-async def _cmd_widget_styles(app: RigiApp, **_: Any) -> None:
+async def _cmd_widget_styles(app: App, **_: Any) -> None:
     focused = app.focused
     if focused is None:
         app.notify("No focused widget", severity="warning", title="sudo styles")
@@ -399,7 +399,7 @@ async def _cmd_widget_styles(app: RigiApp, **_: Any) -> None:
         app.notify(str(e), severity="error", title="sudo styles")
 
 
-async def _cmd_hotkeys(app: RigiApp, **_: Any) -> None:
+async def _cmd_hotkeys(app: App, **_: Any) -> None:
     lines = ["[bold]Active bindings:[/bold]\n"]
     try:
         from textual.binding import Binding as _Binding
@@ -412,7 +412,7 @@ async def _cmd_hotkeys(app: RigiApp, **_: Any) -> None:
     app.notify("\n".join(lines), title="sudo hotkeys", timeout=8)
 
 
-async def _cmd_reload_module(app: RigiApp, **kwargs: Any) -> None:
+async def _cmd_reload_module(app: App, **kwargs: Any) -> None:
     mod_name = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not mod_name:
         app.notify("Usage: sudo reload_module <module>", severity="warning")

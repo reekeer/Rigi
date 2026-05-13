@@ -85,7 +85,7 @@ class _MainNavItem(Widget):
         self.app.set_focus(None)
 
 
-class _RigiMainNav(Widget):
+class _MainNav(Widget):
     def __init__(self) -> None:
         super().__init__(id="main-nav")
         self._tabs: list[TabDef] = []
@@ -167,7 +167,7 @@ class _SubNavItem(Widget):
         self.set_class(active, "--active")
 
 
-class _RigiSubNav(Widget):
+class _SubNav(Widget):
     def __init__(self) -> None:
         super().__init__(id="sub-nav")
         self._tab: TabDef | None = None
@@ -258,7 +258,7 @@ class _RigiSubNav(Widget):
         self._rebuild()
 
 
-class RigiSidebar(Widget):
+class Sidebar(Widget):
     class NavigationChanged(Message):
         def __init__(self, tab_idx: int, subtab_path: list[int]) -> None:
             super().__init__()
@@ -273,25 +273,24 @@ class RigiSidebar(Widget):
         self._nav_level: str = "tab"
 
     def compose(self) -> ComposeResult:
-        yield _RigiMainNav()
+        yield _MainNav()
         yield _VerticalResizeHandle("main-nav")
-        yield _RigiSubNav()
-        yield _VerticalResizeHandle("sub-nav")
+        yield _SubNav()
 
     def on_mount(self) -> None:
-        main = self.query_one(_RigiMainNav)
+        main = self.query_one(_MainNav)
         main.set_tabs(self._tabs)
         if self._tabs:
-            self.query_one(_RigiSubNav).set_tab(self._tabs[0], 0)
+            self.query_one(_SubNav).set_tab(self._tabs[0], 0)
 
     def set_tabs(self, tabs: list[TabDef]) -> None:
         self._tabs = tabs
         if not self.is_mounted:
             return
-        main = self.query_one(_RigiMainNav)
+        main = self.query_one(_MainNav)
         main.set_tabs(tabs)
         tab = tabs[0] if tabs else None
-        self.query_one(_RigiSubNav).set_tab(tab, 0)
+        self.query_one(_SubNav).set_tab(tab, 0)
 
     def on__main_tab_clicked(self, event: _MainTabClicked) -> None:
         event.stop()
@@ -299,24 +298,24 @@ class RigiSidebar(Widget):
         self._active_tab = idx
         self._active_path = []
         self._nav_level = "tab"
-        self.query_one(_RigiMainNav).set_active(idx)
+        self.query_one(_MainNav).set_active(idx)
         tab = self._tabs[idx] if idx < len(self._tabs) else None
-        self.query_one(_RigiSubNav).set_tab(tab, idx, [])
-        self.post_message(RigiSidebar.NavigationChanged(idx, []))
+        self.query_one(_SubNav).set_tab(tab, idx, [])
+        self.post_message(Sidebar.NavigationChanged(idx, []))
 
     def on__sub_item_clicked(self, event: _SubItemClicked) -> None:
         event.stop()
         path = event.path
-        sub_nav = self.query_one(_RigiSubNav)
+        sub_nav = self.query_one(_SubNav)
         sub_nav.set_active_path(path)
         self._active_path = list(path)
         self._nav_level = "subtab"
-        self.post_message(RigiSidebar.NavigationChanged(self._active_tab, path))
+        self.post_message(Sidebar.NavigationChanged(self._active_tab, path))
 
     def navigate(self, direction: int) -> None:
         if not self._tabs:
             return
-        sub_nav = self.query_one(_RigiSubNav)
+        sub_nav = self.query_one(_SubNav)
 
         if self._nav_level == "tab":
             new_tab = max(0, min(len(self._tabs) - 1, self._active_tab + direction))
@@ -324,10 +323,10 @@ class RigiSidebar(Widget):
                 return
             self._active_tab = new_tab
             self._active_path = []
-            self.query_one(_RigiMainNav).set_active(new_tab)
+            self.query_one(_MainNav).set_active(new_tab)
             tab_or_none: TabDef | None = self._tabs[new_tab] if new_tab < len(self._tabs) else None
             sub_nav.set_tab(tab_or_none, new_tab, [])
-            self.post_message(RigiSidebar.NavigationChanged(new_tab, []))
+            self.post_message(Sidebar.NavigationChanged(new_tab, []))
         else:
             if not self._active_path:
                 return
@@ -347,12 +346,12 @@ class RigiSidebar(Widget):
                 return
             self._active_path = self._active_path[:-1] + [new_idx]
             sub_nav.set_active_path(self._active_path)
-            self.post_message(RigiSidebar.NavigationChanged(self._active_tab, self._active_path))
+            self.post_message(Sidebar.NavigationChanged(self._active_tab, self._active_path))
 
     def navigate_right(self) -> None:
         if not self._tabs:
             return
-        sub_nav = self.query_one(_RigiSubNav)
+        sub_nav = self.query_one(_SubNav)
 
         if self._nav_level == "tab":
             tab = self._tabs[self._active_tab] if self._active_tab < len(self._tabs) else None
@@ -360,7 +359,7 @@ class RigiSidebar(Widget):
                 self._nav_level = "subtab"
                 self._active_path = [0]
                 sub_nav.set_tab(tab, self._active_tab, [0])
-                self.post_message(RigiSidebar.NavigationChanged(self._active_tab, [0]))
+                self.post_message(Sidebar.NavigationChanged(self._active_tab, [0]))
         else:
             current = sub_nav.resolve(self._active_path)
             if current and current.children:
@@ -369,23 +368,23 @@ class RigiSidebar(Widget):
                 sub_nav._active_path = list(child_path)
                 sub_nav._rebuild()
                 self._active_path = child_path
-                self.post_message(RigiSidebar.NavigationChanged(self._active_tab, child_path))
+                self.post_message(Sidebar.NavigationChanged(self._active_tab, child_path))
 
     def navigate_left(self) -> None:
         if self._nav_level != "subtab":
             return
-        sub_nav = self.query_one(_RigiSubNav)
+        sub_nav = self.query_one(_SubNav)
 
         if len(self._active_path) > 1:
             parent = self._active_path[:-1]
             self._active_path = parent
             sub_nav.set_active_path(parent)
-            self.post_message(RigiSidebar.NavigationChanged(self._active_tab, parent))
+            self.post_message(Sidebar.NavigationChanged(self._active_tab, parent))
         else:
             self._nav_level = "tab"
             self._active_path = []
             sub_nav.set_active_path([])
-            self.post_message(RigiSidebar.NavigationChanged(self._active_tab, []))
+            self.post_message(Sidebar.NavigationChanged(self._active_tab, []))
 
     def jump_to_tab_by_key(self, key: str) -> bool:
         for t_idx, tab in enumerate(self._tabs):
@@ -393,8 +392,8 @@ class RigiSidebar(Widget):
                 self._active_tab = t_idx
                 self._active_path = []
                 self._nav_level = "tab"
-                self.query_one(_RigiMainNav).set_active(t_idx)
-                self.query_one(_RigiSubNav).set_tab(tab, t_idx, [])
-                self.post_message(RigiSidebar.NavigationChanged(t_idx, []))
+                self.query_one(_MainNav).set_active(t_idx)
+                self.query_one(_SubNav).set_tab(tab, t_idx, [])
+                self.post_message(Sidebar.NavigationChanged(t_idx, []))
                 return True
         return False

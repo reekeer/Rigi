@@ -23,7 +23,7 @@ class _DismissNotification(Message):
         self.notification_id = notification_id
 
 
-class RigiNotificationWidget(Widget):
+class NotificationWidget(Widget):
     def __init__(
         self,
         notification_id: str,
@@ -62,7 +62,7 @@ class RigiNotificationWidget(Widget):
         self._expire()
 
 
-class RigiNotificationRack(Widget):
+class NotificationRack(Widget):
     def compose(self) -> ComposeResult:
         yield from []
 
@@ -74,14 +74,14 @@ class RigiNotificationRack(Widget):
         timeout: float = 5.0,
     ) -> str:
         notification_id = str(uuid4())
-        notif = RigiNotificationWidget(notification_id, title, message, severity, timeout)
+        notif = NotificationWidget(notification_id, title, message, severity, timeout)
         self.mount(notif)
         return notification_id
 
     @on(_DismissNotification)
     def on_dismiss(self, event: _DismissNotification) -> None:
         event.stop()
-        for widget in self.query(RigiNotificationWidget):
+        for widget in self.query(NotificationWidget):
             if widget._notification_id == event.notification_id:
                 widget.remove()
                 return

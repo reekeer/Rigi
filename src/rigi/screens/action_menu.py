@@ -1,4 +1,4 @@
-"""RigiActionMenuScreen — modal popup action menu."""
+"""ActionMenuScreen — modal popup action menu."""
 
 from __future__ import annotations
 
@@ -9,18 +9,18 @@ from textual.events import Click
 from textual.screen import ModalScreen
 
 from rigi.widgets.action_menu import (
-    RigiActionMenuItemData,
-    RigiActionMenuPanel,
+    ActionMenuItemData,
+    ActionMenuPanel,
     _ActionItemClicked,
 )
 
 
-class RigiActionMenuScreen(ModalScreen[None]):
+class ActionMenuScreen(ModalScreen[None]):
     BINDINGS = [Binding("escape", "dismiss", show=False)]
 
     def __init__(
         self,
-        items: list[RigiActionMenuItemData],
+        items: list[ActionMenuItemData],
         title: str = "",
         anchor_x: int | None = None,
         anchor_y: int | None = None,
@@ -32,10 +32,10 @@ class RigiActionMenuScreen(ModalScreen[None]):
         self._anchor_y = anchor_y
 
     def compose(self) -> ComposeResult:
-        yield RigiActionMenuPanel(self._items, title=self._title, id="rigi-action-menu")
+        yield ActionMenuPanel(self._items, title=self._title, id="rigi-action-menu")
 
     def on_mount(self) -> None:
-        panel = self.query_one("#rigi-action-menu", RigiActionMenuPanel)
+        panel = self.query_one("#rigi-action-menu", ActionMenuPanel)
         panel_w = 30
         panel_h = min(2 + len(self._items), 20)
         app_w = self.app.size.width
@@ -62,7 +62,7 @@ class RigiActionMenuScreen(ModalScreen[None]):
             self.app.call_after_refresh(callback)
 
     def on_click(self, event: Click) -> None:
-        panel = self.query_one("#rigi-action-menu", RigiActionMenuPanel)
+        panel = self.query_one("#rigi-action-menu", ActionMenuPanel)
         if not panel.region.contains(event.x, event.y):
             self.dismiss(None)
 

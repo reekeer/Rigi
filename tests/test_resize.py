@@ -5,8 +5,8 @@ from textual.app import App
 from textual.events import MouseDown, MouseMove, MouseUp
 
 from rigi.commands.registry import CommandRegistry
-from rigi.widgets.bottom_panel import RigiBottomPanel, _ResizeHandle
-from rigi.widgets.content_area import RigiContentArea
+from rigi.widgets.bottom_panel import BottomPanel, _ResizeHandle
+from rigi.widgets.content_area import ContentArea
 from rigi.widgets.sidebar import _VerticalResizeHandle
 
 
@@ -31,7 +31,7 @@ async def test_horizontal_resize_handle_render():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiBottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
+            yield BottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
 
     app = TestApp()
     async with app.run_test() as _:
@@ -69,12 +69,12 @@ async def test_resize_minimum_size():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiBottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
+            yield BottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
 
     app = TestApp()
     async with app.run_test() as _:
         handle = app.query_one(_ResizeHandle)
-        panel = app.query_one(RigiBottomPanel)
+        panel = app.query_one(BottomPanel)
 
         # Simulate drag to very small size
         handle._drag_y = 100

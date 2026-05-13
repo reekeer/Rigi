@@ -42,7 +42,7 @@ class _ResizeHandle(Widget):
     def on_mouse_down(self, event: MouseDown) -> None:
         self.capture_mouse()
         self._drag_y = event.screen_y
-        panel = next((w for w in self.ancestors if isinstance(w, RigiBottomPanel)), None)
+        panel = next((w for w in self.ancestors if isinstance(w, BottomPanel)), None)
         if panel is not None:
             self._drag_h = panel.size.height
 
@@ -51,7 +51,7 @@ class _ResizeHandle(Widget):
             return
         delta = self._drag_y - event.screen_y
         new_h = max(4, self._drag_h + delta)
-        panel = next((w for w in self.ancestors if isinstance(w, RigiBottomPanel)), None)
+        panel = next((w for w in self.ancestors if isinstance(w, BottomPanel)), None)
         if panel is not None:
             panel.styles.height = new_h
 
@@ -63,12 +63,12 @@ class _ResizeHandle(Widget):
 
 class _TerminalInput(Input):
     def on_focus(self) -> None:
-        panel = next((w for w in self.ancestors if isinstance(w, RigiBottomPanel)), None)
+        panel = next((w for w in self.ancestors if isinstance(w, BottomPanel)), None)
         if panel is not None:
             panel._on_focus_changed(True)
 
     def on_blur(self) -> None:
-        panel = next((w for w in self.ancestors if isinstance(w, RigiBottomPanel)), None)
+        panel = next((w for w in self.ancestors if isinstance(w, BottomPanel)), None)
         if panel is not None:
             panel._on_focus_changed(False)
 
@@ -198,7 +198,7 @@ class _LogsView(Widget):
             pass
 
 
-class RigiBottomPanel(Widget):
+class BottomPanel(Widget):
     BINDINGS = [
         Binding("tab", "complete", "Complete", show=False),
     ]
@@ -350,7 +350,7 @@ class RigiBottomPanel(Widget):
             pass
         safe_text = text.replace("[", "\\[")
         self.write_output(f"[bold green]{self._prompt_text}[/bold green] [dim]$[/dim] {safe_text}")
-        self.post_message(RigiBottomPanel.CommandSubmitted(text))
+        self.post_message(BottomPanel.CommandSubmitted(text))
 
     def action_complete(self) -> None:
         if not self._completions:

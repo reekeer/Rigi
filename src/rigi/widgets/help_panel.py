@@ -1,4 +1,4 @@
-"""RigiShortcutsBar and help annotation utilities."""
+"""ShortcutsBar and help annotation utilities."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def extract_help_annotation(fn: Callable[..., object] | None) -> str | None:
     return m.group(1).strip() if m else None
 
 
-class RigiShortcutsBar(Widget):
+class ShortcutsBar(Widget):
     HINTS: list[tuple[str, str]] = [
         ("Ctrl+H", "Help"),
         ("Ctrl+P", "Commands"),

@@ -8,7 +8,7 @@ from textual.widgets import Label
 from rigi.core.types import StatusItem
 
 
-class RigiStatusItem(Widget):
+class StatusBarItem(Widget):
     def __init__(self, item: StatusItem) -> None:
         super().__init__(id=f"status-{item.key}")
         self._item = item
@@ -79,7 +79,7 @@ class _HomeButton(Widget):
         self.set_class(active, "--active")
 
 
-class RigiStatusBar(Widget):
+class StatusBar(Widget):
     def __init__(self) -> None:
         super().__init__()
         self._items: list[StatusItem] = []
@@ -88,7 +88,7 @@ class RigiStatusBar(Widget):
         self._items.append(item)
         if self.is_mounted:
             spacer = self.query_one(_StatusSpacer)
-            self.mount(RigiStatusItem(item), before=spacer)
+            self.mount(StatusItem(item), before=spacer)
 
     def set_home_active(self, active: bool) -> None:
         try:
@@ -99,6 +99,6 @@ class RigiStatusBar(Widget):
     def compose(self) -> ComposeResult:
         yield _HomeButton()
         for item in self._items:
-            yield RigiStatusItem(item)
+            yield StatusItem(item)
         yield _StatusSpacer()
         yield _HamburgerButton()

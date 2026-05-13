@@ -6,7 +6,7 @@ from textual.widgets import Tabs
 
 from rigi.commands.command import Command
 from rigi.commands.registry import CommandRegistry
-from rigi.widgets.bottom_panel import RigiBottomPanel, _TerminalInput
+from rigi.widgets.bottom_panel import BottomPanel, _TerminalInput
 
 
 @pytest.mark.asyncio
@@ -15,7 +15,7 @@ async def test_terminal_input_focus():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiBottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
+            yield BottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
 
     app = TestApp()
     async with app.run_test() as pilot:
@@ -36,11 +36,11 @@ async def test_terminal_command_submission():
             registry = CommandRegistry()
             cmd = Command(name="test", help="Test command")
             registry.register(cmd)
-            yield RigiBottomPanel(prompt_text="test", registry=registry, history_file=None)
+            yield BottomPanel(prompt_text="test", registry=registry, history_file=None)
 
     app = TestApp()
     async with app.run_test() as pilot:
-        panel = app.query_one(RigiBottomPanel)
+        panel = app.query_one(BottomPanel)
         terminal_input = app.query_one("#terminal-input", _TerminalInput)
 
         # Type command
@@ -61,11 +61,11 @@ async def test_terminal_history_navigation():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiBottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
+            yield BottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
 
     app = TestApp()
     async with app.run_test() as pilot:
-        panel = app.query_one(RigiBottomPanel)
+        panel = app.query_one(BottomPanel)
         terminal_input = app.query_one("#terminal-input", _TerminalInput)
 
         # Add some history
@@ -98,12 +98,12 @@ async def test_terminal_tab_completion():
             cmd2 = Command(name="terminal", help="Terminal")
             registry.register(cmd1)
             registry.register(cmd2)
-            yield RigiBottomPanel(prompt_text="test", registry=registry, history_file=None)
+            yield BottomPanel(prompt_text="test", registry=registry, history_file=None)
 
     app = TestApp()
     async with app.run_test() as _:
         terminal_input = app.query_one("#terminal-input", _TerminalInput)
-        panel = app.query_one(RigiBottomPanel)
+        panel = app.query_one(BottomPanel)
 
         terminal_input.focus()
         terminal_input.value = "te"
@@ -120,11 +120,11 @@ async def test_terminal_clear():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiBottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
+            yield BottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
 
     app = TestApp()
     async with app.run_test() as pilot:
-        panel = app.query_one(RigiBottomPanel)
+        panel = app.query_one(BottomPanel)
 
         # Write some output
         panel.write_output("Test line 1")
@@ -147,11 +147,11 @@ async def test_terminal_tab_switching():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiBottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
+            yield BottomPanel(prompt_text="test", registry=CommandRegistry(), history_file=None)
 
     app = TestApp()
     async with app.run_test() as pilot:
-        panel = app.query_one(RigiBottomPanel)
+        panel = app.query_one(BottomPanel)
 
         # Should start on terminal
         assert panel.active_tab == "terminal"

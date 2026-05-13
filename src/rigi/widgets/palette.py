@@ -35,16 +35,16 @@ def _fuzzy_score(query: str, candidate: str) -> int | None:
     return score if i == len(q) else None
 
 
-class RigiPaletteScreen(ModalScreen[str | None]):
+class PaletteScreen(ModalScreen[str | None]):
     """Ctrl+P command palette with fuzzy search."""
 
     DEFAULT_CSS = """
-    RigiPaletteScreen {
+    PaletteScreen {
         align: center top;
         layer: overlay;
         background: rgba(0,0,0,0.5);
     }
-    RigiPaletteScreen > #palette-container {
+    PaletteScreen > #palette-container {
         width: 64;
         height: auto;
         max-height: 30;
@@ -53,7 +53,7 @@ class RigiPaletteScreen(ModalScreen[str | None]):
         border: round #30363d;
         background: #0d1117;
     }
-    RigiPaletteScreen Input {
+    PaletteScreen Input {
         border: none;
         background: transparent;
         width: 100%;
@@ -61,20 +61,20 @@ class RigiPaletteScreen(ModalScreen[str | None]):
         padding: 0;
         color: #e6edf3;
     }
-    RigiPaletteScreen Input:focus { border: none; }
-    RigiPaletteScreen #palette-divider {
+    PaletteScreen Input:focus { border: none; }
+    PaletteScreen #palette-divider {
         height: 1;
         width: 100%;
         color: #30363d;
     }
-    RigiPaletteScreen OptionList {
+    PaletteScreen OptionList {
         border: none;
         padding: 0;
         background: transparent;
         height: auto;
         max-height: 22;
     }
-    RigiPaletteScreen #palette-hint {
+    PaletteScreen #palette-hint {
         height: 1;
         color: #6e7681;
         width: 100%;

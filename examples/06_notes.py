@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiPane
+from rigi import App, TabDef
+from rigi.layout.pane import Pane
 from rigi.widgets import Markdown
 
-app = RigiApp(name="notes", version="1.0.0", description="Markdown notes viewer")
+app = App(name="notes", version="1.0.0", description="Markdown notes viewer")
 
 _notes: dict[str, str] = {
     "Getting Started": """# Getting Started
@@ -98,16 +98,16 @@ general.settings = [
 """,
     "API Reference": """# API Reference
 
-## RigiApp
+## App
 
 ```python
-RigiApp(
+App(
     name: str,
     version: str = "0.1.0",
     description: str = "",
     username: str | None = None,
     home_tab: str | None = None,
-    theme: RigiTheme | None = None,
+    theme: Theme | None = None,
 )
 ```
 
@@ -119,7 +119,7 @@ RigiApp(
 - `add_menu_item(label, callback, section)`
 - `navigate_to_tab(name: str) → bool`
 - `invalidate_tab_cache(tab_name=None)`
-- `set_theme(theme: RigiTheme)`
+- `set_theme(theme: Theme)`
 - `register_css(path)`
 
 ## TabDef
@@ -131,11 +131,11 @@ tab.add_subtab(name, widget_factory=None, icon="", key=None)
 
 ## Layout helpers
 
-- `RigiPane(*children)` — vertical stack
-- `RigiHPane(*children)` — horizontal row
-- `RigiVPane(*children)` — vertical column
-- `RigiCard(*children, title="")` — bordered card
-- `RigiSplit(*children, sizes=None)` — horizontal split
+- `Pane(*children)` — vertical stack
+- `HPane(*children)` — horizontal row
+- `VPane(*children)` — vertical column
+- `Card(*children, title="")` — bordered card
+- `Split(*children, sizes=None)` — horizontal split
 """,
 }
 
@@ -143,7 +143,7 @@ tab.add_subtab(name, widget_factory=None, icon="", key=None)
 def _make_note(name: str):
     def _factory():
         content = _notes.get(name, f"# {name}\n\n*Empty note.*")
-        return RigiPane(Markdown(content))
+        return Pane(Markdown(content))
 
     return _factory
 
@@ -157,13 +157,13 @@ app.add_status("count", "Notes", lambda: str(len(_notes)), refresh_interval=5.0)
 
 
 @app.command("list", help="List all notes", aliases=["ls"])
-async def cmd_list(app: RigiApp, **_: object) -> None:
+async def cmd_list(app: App, **_: object) -> None:
     names = "\n".join(f"  • {n}" for n in _notes)
     app.notify(f"Notes:\n{names}", title="All notes")
 
 
 @app.command("new", help="Create a blank note")
-async def cmd_new(app: RigiApp, **kwargs: object) -> None:
+async def cmd_new(app: App, **kwargs: object) -> None:
     name = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not name:
         app.notify("Usage: new <note name>", severity="warning")
@@ -173,7 +173,7 @@ async def cmd_new(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("search", help="Search note contents")
-async def cmd_search(app: RigiApp, **kwargs: object) -> None:
+async def cmd_search(app: App, **kwargs: object) -> None:
     query = " ".join(str(v) for v in kwargs.values() if v).lower()
     if not query:
         app.notify("Usage: search <text>", severity="warning")
@@ -186,4 +186,4 @@ async def cmd_search(app: RigiApp, **kwargs: object) -> None:
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

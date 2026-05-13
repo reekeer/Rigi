@@ -8,7 +8,7 @@ import rigi.core.platform as platform
 from rigi.commands.command import Command
 from rigi.commands.parser import build_cli_parser, parse_inline
 from rigi.commands.registry import CommandRegistry
-from rigi.core.app import RigiApp
+from rigi.core.app import App
 from rigi.core.platform import (
     CAPS,
     IS_ISH,
@@ -41,41 +41,41 @@ from rigi.core.platform import (
     tmux_passthrough,
 )
 from rigi.core.types import CommandArg, HelpEntry, StatusItem, SubtabDef, TabDef
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane, RigiScrollPane, RigiSplit, RigiVPane
-from rigi.screens.hamburger import RigiHamburgerScreen
-from rigi.screens.help import RigiHelpScreen
+from rigi.layout.pane import Card, HPane, Pane, ScrollPane, Split, VPane
+from rigi.screens.hamburger import HamburgerScreen
+from rigi.screens.help import HelpScreen
 from rigi.themes import DARK as ThemeDark
 from rigi.themes import LIGHT as ThemeLight
 from rigi.themes import MONOKAI as ThemeMonokai
 from rigi.themes import NORD as ThemeNord
-from rigi.themes import RigiTheme
-from rigi.widgets.border_frame import RigiBorderFrame
-from rigi.widgets.bottom_panel import RigiBottomPanel
-from rigi.widgets.action_menu import RigiActionMenuItemData
-from rigi.widgets.checkbox import RigiCheckbox
-from rigi.widgets.content_area import RigiContentArea
-from rigi.widgets.vertical_tabs import RigiVerticalTabs
-from rigi.widgets.gauge import RigiGauge, RigiSparkline
+from rigi.themes import Theme
+from rigi.widgets.border_frame import BorderFrame
+from rigi.widgets.bottom_panel import BottomPanel
+from rigi.widgets.action_menu import ActionMenuItemData
+from rigi.widgets.checkbox import Checkbox
+from rigi.widgets.content_area import ContentArea
+from rigi.widgets.tab_group import TabGroup
+from rigi.widgets.gauge import Gauge, Sparkline
 from rigi.widgets.hamburger_menu import (
-    RigiHamburgerPanel,
-    RigiMenuItem,
-    RigiMenuItemData,
-    RigiMenuPanel,
+    HamburgerPanel,
+    MenuItem,
+    MenuItemData,
+    MenuPanel,
 )
-from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
-from rigi.widgets.image import RigiImage, TerminalImageProtocol, detect_image_protocol
-from rigi.widgets.mouse import RigiClickable, RigiDraggable, RigiMouseMixin
+from rigi.widgets.help_panel import ShortcutsBar, extract_help_annotation
+from rigi.widgets.image import Image, TerminalImageProtocol, detect_image_protocol
+from rigi.widgets.mouse import Clickable, Draggable, MouseMixin
 from rigi.widgets.notifications import (
-    RigiNotificationRack as RigiNotificationRack,
+    NotificationRack as NotificationRack,
 )
 from rigi.widgets.notifications import (
-    RigiNotificationWidget as RigiNotificationWidget,
+    NotificationWidget as NotificationWidget,
 )
 from rigi.core.settings_manager import Setting, SettingsManager, SettingsPage
-from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
-from rigi.widgets.sidebar import RigiSidebar
-from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
-from rigi.widgets.terminal_bar import RigiTerminalBar
+from rigi.widgets.settings_screen import SettingDef, SettingsScreen
+from rigi.widgets.sidebar import Sidebar
+from rigi.widgets.statusbar import StatusBar, StatusBarItem
+from rigi.widgets.terminal_bar import TerminalBar
 
 __version__ = "1.2.0"
 __all__ = [
@@ -86,8 +86,8 @@ __all__ = [
     "ModalScreen",
     "reactive",
     # Core app
-    "RigiApp",
-    "RigiTheme",
+    "App",
+    "Theme",
     "ThemeDark",
     "ThemeLight",
     "ThemeMonokai",
@@ -104,46 +104,46 @@ __all__ = [
     "SubtabDef",
     "HelpEntry",
     # Layout
-    "RigiPane",
-    "RigiHPane",
-    "RigiVPane",
-    "RigiScrollPane",
-    "RigiCard",
-    "RigiSplit",
+    "Pane",
+    "HPane",
+    "VPane",
+    "ScrollPane",
+    "Card",
+    "Split",
     # Widgets
-    "RigiStatusBar",
-    "RigiStatusItem",
-    "RigiSidebar",
-    "RigiTerminalBar",
-    "RigiBottomPanel",
-    "RigiCheckbox",
-    "RigiContentArea",
-    "RigiBorderFrame",
-    "RigiHamburgerScreen",
-    "RigiMenuItem",
-    "RigiMenuPanel",
-    "RigiHamburgerPanel",
-    "RigiMenuItemData",
-    "RigiSettingsScreen",
-    "RigiSettingDef",
+    "StatusBar",
+    "StatusItem",
+    "Sidebar",
+    "TerminalBar",
+    "BottomPanel",
+    "Checkbox",
+    "ContentArea",
+    "BorderFrame",
+    "HamburgerScreen",
+    "MenuItem",
+    "MenuPanel",
+    "HamburgerPanel",
+    "MenuItemData",
+    "SettingsScreen",
+    "SettingDef",
     "Setting",
     "SettingsPage",
     "SettingsManager",
-    "RigiImage",
+    "Image",
     "TerminalImageProtocol",
     "detect_image_protocol",
-    "RigiMouseMixin",
-    "RigiClickable",
-    "RigiDraggable",
-    "RigiHelpScreen",
-    "RigiShortcutsBar",
+    "MouseMixin",
+    "Clickable",
+    "Draggable",
+    "HelpScreen",
+    "ShortcutsBar",
     "extract_help_annotation",
-    "RigiGauge",
-    "RigiSparkline",
-    "RigiNotificationRack",
-    "RigiNotificationWidget",
-    "RigiVerticalTabs",
-    "RigiActionMenuItemData",
+    "Gauge",
+    "Sparkline",
+    "NotificationRack",
+    "NotificationWidget",
+    "TabGroup",
+    "ActionMenuItemData",
     # Platform utilities
     "platform",
     "console",

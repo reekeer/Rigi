@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from rigi import RigiActionMenuItemData, RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiPane
+from rigi import ActionMenuItemData, App, TabDef
+from rigi.layout.pane import Card, Pane
 from rigi.widgets import Label
 
-app = RigiApp(
+app = App(
     name="action-menu",
     version="1.0.0",
     description="Demo of RigiActionMenu",
@@ -15,10 +15,10 @@ app = RigiApp(
 
 
 def make_demo():
-    return RigiPane(
+    return Pane(
         Label("[bold]RigiActionMenu[/bold] — press [cyan]Ctrl+M[/cyan] or use the button below."),
         Label(""),
-        RigiCard(
+        Card(
             Label("Action menus show numbered items with color support."),
             Label("Click an item or press its number key to activate."),
             title=" Info",
@@ -31,16 +31,16 @@ app.add_tab(demo_tab)
 
 
 @app.command("menu", help="Show the action menu")
-async def cmd_menu(app: RigiApp, **_: object) -> None:
+async def cmd_menu(app: App, **_: object) -> None:
     items = [
-        RigiActionMenuItemData("Copy", color="cyan", callback=lambda: app.notify("Copied!", timeout=2)),
-        RigiActionMenuItemData("Paste", color="green", callback=lambda: app.notify("Pasted!", timeout=2)),
-        RigiActionMenuItemData("Delete", color="red", callback=lambda: app.notify("Deleted!", timeout=2)),
-        RigiActionMenuItemData("Rename", callback=lambda: app.notify("Renamed!", timeout=2)),
-        RigiActionMenuItemData("Cancel", disabled=True),
+        ActionMenuItemData("Copy", color="cyan", callback=lambda: app.notify("Copied!", timeout=2)),
+        ActionMenuItemData("Paste", color="green", callback=lambda: app.notify("Pasted!", timeout=2)),
+        ActionMenuItemData("Delete", color="red", callback=lambda: app.notify("Deleted!", timeout=2)),
+        ActionMenuItemData("Rename", callback=lambda: app.notify("Renamed!", timeout=2)),
+        ActionMenuItemData("Cancel", disabled=True),
     ]
     app.show_action_menu(items, title="Actions")
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

@@ -1,6 +1,6 @@
-from rigi.themes.base import RigiTheme
+from rigi.themes.base import Theme
 
-DARK = RigiTheme(
+DARK = Theme(
     name="dark",
     bg_color="#000000",
     fg_color="#ffffff",

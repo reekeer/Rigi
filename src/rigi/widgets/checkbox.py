@@ -9,10 +9,10 @@ from textual.widget import Widget
 from textual.widgets import Label
 
 
-class RigiCheckbox(Widget):
+class Checkbox(Widget):
     """A simple checkbox with a clickable label.
 
-    Posts ``RigiCheckbox.Changed`` when toggled.
+    Posts ``Checkbox.Changed`` when toggled.
     """
 
     can_focus = True

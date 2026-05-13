@@ -14,7 +14,7 @@ from textual.widgets import Button, Input, Label, Switch
 _ui_log = logging.getLogger("rigi.ui")
 
 
-class RigiSettingDef:
+class SettingDef:
     def __init__(
         self,
         category: str,
@@ -105,14 +105,14 @@ class _ActionButton(Widget):
         self._callback()
         try:
             screen = self.app.screen
-            if isinstance(screen, RigiSettingsScreen):
+            if isinstance(screen, SettingsScreen):
                 screen._refresh_content()
         except Exception as e:
             _ui_log.error(f"Error in action button click: {e}", exc_info=True)
 
 
 class _ValueRow(Widget):
-    def __init__(self, setting: RigiSettingDef) -> None:
+    def __init__(self, setting: SettingDef) -> None:
         super().__init__()
         self._setting = setting
 
@@ -123,7 +123,7 @@ class _ValueRow(Widget):
 
 
 class _SettingInput(Input):
-    def __init__(self, setting: RigiSettingDef) -> None:
+    def __init__(self, setting: SettingDef) -> None:
         super().__init__(value=setting.get_value())
         self._setting = setting
         self.restrict = None
@@ -142,7 +142,7 @@ class _SettingInput(Input):
 
 
 class _SettingSwitch(Widget):
-    def __init__(self, setting: RigiSettingDef) -> None:
+    def __init__(self, setting: SettingDef) -> None:
         super().__init__()
         self._setting = setting
 
@@ -166,7 +166,7 @@ class _SettingSwitch(Widget):
 
 
 class _SettingItem(Widget):
-    def __init__(self, setting: RigiSettingDef) -> None:
+    def __init__(self, setting: SettingDef) -> None:
         super().__init__()
         self._setting = setting
 
@@ -191,10 +191,10 @@ class _SettingsContent(Widget):
         yield from []
 
 
-class RigiSettingsScreen(ModalScreen[None]):
+class SettingsScreen(ModalScreen[None]):
     BINDINGS = [Binding("escape", "dismiss", show=False)]
 
-    def __init__(self, settings: list[RigiSettingDef]) -> None:
+    def __init__(self, settings: list[SettingDef]) -> None:
         super().__init__()
         self._settings = settings
         self._active_category = ""

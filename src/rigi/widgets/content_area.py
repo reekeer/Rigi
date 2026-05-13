@@ -1,4 +1,4 @@
-"""RigiContentArea with resizable support."""
+"""ContentArea with resizable support."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ class _ContentResizeHandle(Widget):
         try:
             self.capture_mouse()
             self._drag_x = event.screen_x
-            content = next((w for w in self.ancestors if isinstance(w, RigiContentArea)), None)
+            content = next((w for w in self.ancestors if isinstance(w, ContentArea)), None)
             if content is not None:
                 self._drag_w = content.size.width
                 _ui_log.debug("Started resizing content area")
@@ -40,7 +40,7 @@ class _ContentResizeHandle(Widget):
         try:
             delta = event.screen_x - self._drag_x
             new_w = max(20, self._drag_w + delta)
-            content = next((w for w in self.ancestors if isinstance(w, RigiContentArea)), None)
+            content = next((w for w in self.ancestors if isinstance(w, ContentArea)), None)
             if content is not None:
                 content.styles.width = new_w
         except Exception as e:
@@ -56,19 +56,19 @@ class _ContentResizeHandle(Widget):
             _ui_log.error(f"Error in content resize mouse_up: {e}", exc_info=True)
 
 
-class _RigiEmptyState(Widget):
+class _EmptyState(Widget):
     def compose(self) -> ComposeResult:
         yield Label("Select a section from the sidebar")
 
 
-class RigiContentArea(Widget):
+class ContentArea(Widget):
     def __init__(self) -> None:
         super().__init__()
         self._current: Widget | None = None
 
     def compose(self) -> ComposeResult:
         with Widget(id="content-main"):
-            yield _RigiEmptyState(id="rigi-empty-state")
+            yield _EmptyState(id="rigi-empty-state")
 
     def show_widget(self, widget: Widget) -> None:
         try:
@@ -100,7 +100,7 @@ class RigiContentArea(Widget):
         except Exception:
             try:
                 content_main = self.query_one("#content-main")
-                content_main.mount(_RigiEmptyState(id="rigi-empty-state"))
+                content_main.mount(_EmptyState(id="rigi-empty-state"))
             except Exception as e:
                 _ui_log.error(f"Error showing empty state: {e}", exc_info=True)
 

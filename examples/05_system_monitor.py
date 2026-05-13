@@ -7,11 +7,11 @@ import platform
 import subprocess
 import time
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane
+from rigi import App, TabDef
+from rigi.layout.pane import Card, HPane, Pane
 from rigi.widgets import DataTable, Label
 
-app = RigiApp(
+app = App(
     name="sysmon", version="1.0.0", description="System resource monitor", home_tab="System"
 )
 
@@ -81,9 +81,9 @@ def make_system():
     for row in procs_data:
         procs_table.add_row(*row)
 
-    return RigiPane(
-        RigiHPane(
-            RigiCard(
+    return Pane(
+        HPane(
+            Card(
                 Label(f"[bold]OS:[/bold]      {platform.system()} {platform.release()}"),
                 Label(f"[bold]Arch:[/bold]    {platform.machine()}"),
                 Label(f"[bold]Python:[/bold]  {platform.python_version()}"),
@@ -91,7 +91,7 @@ def make_system():
                 Label(f"[bold]Uptime:[/bold]  {uptime}"),
                 title=" Host",
             ),
-            RigiCard(
+            Card(
                 Label(
                     f"[bold]CPU:[/bold]     [{'green' if int(cpu.rstrip('%') or 0) < 70 else 'red'}]{cpu}[/{'green' if int(cpu.rstrip('%') or 0) < 70 else 'red'}]"
                 ),
@@ -102,7 +102,7 @@ def make_system():
                 title=" Resources",
             ),
         ),
-        RigiCard(procs_table, title=" Top Processes (by CPU)"),
+        Card(procs_table, title=" Top Processes (by CPU)"),
     )
 
 
@@ -126,7 +126,7 @@ def make_env():
         if len(val) > 60:
             val = val[:57] + "..."
         table.add_row(f"[bold]{key}[/bold]", val)
-    return RigiPane(table)
+    return Pane(table)
 
 
 system_tab = TabDef(name="System", key="1", icon="", widget_factory=make_system)
@@ -140,10 +140,10 @@ app.add_status("time", "Up", _uptime, refresh_interval=1.0)
 
 
 @app.command("refresh", help="Refresh all tabs", aliases=["r"])
-async def cmd_refresh(app: RigiApp, **_: object) -> None:
+async def cmd_refresh(app: App, **_: object) -> None:
     app.invalidate_tab_cache()
     app.notify("Refreshed", timeout=2)
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

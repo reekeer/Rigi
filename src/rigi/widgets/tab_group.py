@@ -1,4 +1,4 @@
-"""Vertical tab groups for in-page navigation."""
+"""Horizontal tab groups for in-page navigation with optional wrapping."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from textual.widget import Widget
 from textual.widgets import ContentSwitcher, Label
 
 
-class _VerticalTabItem(Widget):
+class _TabItem(Widget):
     can_focus = False
 
     def __init__(self, label: str, idx: int) -> None:
@@ -25,40 +25,55 @@ class _VerticalTabItem(Widget):
         self.set_class(active, "--active")
 
     def on_click(self) -> None:
-        self.post_message(_VerticalTabClicked(self._idx))
+        self.post_message(_TabClicked(self._idx))
         self.app.set_focus(None)
 
 
-class _VerticalTabClicked(Message):
+class _TabClicked(Message):
     def __init__(self, idx: int) -> None:
         super().__init__()
         self.idx = idx
 
 
-class RigiVerticalTabs(Widget):
+class TabGroup(Widget):
     def __init__(
         self,
         tabs: list[tuple[str, Callable[[], Widget]]],
+        wrap: int = 0,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self._tab_defs = tabs
         self._active_idx: int = 0
+        self._wrap = wrap
 
     def compose(self) -> ComposeResult:
-        with Widget(id="vt-nav"):
-            for i, (name, _) in enumerate(self._tab_defs):
-                item = _VerticalTabItem(name, i)
-                item.set_active(i == self._active_idx)
-                yield item
-        with ContentSwitcher(initial="vt-content-0", id="vt-switcher"):
+        with Widget(id="tabgroup-nav"):
+            if self._wrap > 0:
+                for row_start in range(0, len(self._tab_defs), self._wrap):
+                    with Widget(classes="tab-row"):
+                        for i in range(
+                            row_start, min(row_start + self._wrap, len(self._tab_defs))
+                        ):
+                            name, _ = self._tab_defs[i]
+                            item = _TabItem(name, i)
+                            item.set_active(i == self._active_idx)
+                            yield item
+            else:
+                for i, (name, _) in enumerate(self._tab_defs):
+                    item = _TabItem(name, i)
+                    item.set_active(i == self._active_idx)
+                    yield item
+        with ContentSwitcher(
+            initial="tab-content-0", id="tabgroup-switcher"
+        ):
             for i, _ in enumerate(self._tab_defs):
-                yield Widget(id=f"vt-content-{i}")
+                yield Widget(id=f"tab-content-{i}")
 
     def on_mount(self) -> None:
         for i, (_, factory) in enumerate(self._tab_defs):
             try:
-                container = self.query_one(f"#vt-content-{i}", Widget)
+                container = self.query_one(f"#tab-content-{i}", Widget)
                 container.mount(factory())
             except Exception:
                 pass
@@ -67,14 +82,14 @@ class RigiVerticalTabs(Widget):
         if idx < 0 or idx >= len(self._tab_defs):
             return
         self._active_idx = idx
-        for item in self.query(_VerticalTabItem):
+        for item in self.query(_TabItem):
             item.set_active(item._idx == idx)
         try:
-            switcher = self.query_one("#vt-switcher", ContentSwitcher)
-            switcher.current = f"vt-content-{idx}"
+            switcher = self.query_one("#tabgroup-switcher", ContentSwitcher)
+            switcher.current = f"tab-content-{idx}"
         except Exception:
             pass
 
-    def on__vertical_tab_clicked(self, event: _VerticalTabClicked) -> None:
+    def on__tab_clicked(self, event: _TabClicked) -> None:
         event.stop()
         self.set_active(event.idx)

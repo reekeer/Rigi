@@ -3,8 +3,8 @@ from __future__ import annotations
 from rigi import (
     Command,
     CommandArg,
-    RigiApp,
-    RigiTheme,
+    App,
+    Theme,
     StatusItem,
     SubtabDef,
     TabDef,
@@ -14,17 +14,17 @@ from rigi import (
     ThemeNord,
 )
 from rigi.commands.registry import CommandRegistry
-from rigi.widgets.hamburger_menu import RigiMenuItemData
-from rigi.widgets.settings_screen import RigiSettingDef
+from rigi.widgets.hamburger_menu import MenuItemData
+from rigi.widgets.settings_screen import SettingDef
 
 
 def test_import() -> None:
-    assert RigiApp is not None
+    assert App is not None
 
 
 def test_theme_to_css() -> None:
     css = ThemeDark.to_css()
-    assert "RigiBorderFrame" in css
+    assert "BorderFrame" in css
     assert ThemeDark.name == "dark"
 
 
@@ -80,7 +80,7 @@ def test_command_completions() -> None:
 
 
 def test_setting_def_get_set() -> None:
-    s = RigiSettingDef(
+    s = SettingDef(
         category="Test",
         label="Key",
         value_fn=lambda: "default",
@@ -92,7 +92,7 @@ def test_setting_def_get_set() -> None:
 
 def test_setting_def_write_fn() -> None:
     written: list[str] = []
-    s = RigiSettingDef(
+    s = SettingDef(
         category="Test",
         label="Key",
         write_fn=written.append,
@@ -102,7 +102,7 @@ def test_setting_def_write_fn() -> None:
 
 
 def test_menu_item_data() -> None:
-    item = RigiMenuItemData(label="Option", checked=True)
+    item = MenuItemData(label="Option", checked=True)
     assert item.label == "Option"
     assert item.checked is True
     assert item.submenu is None
@@ -110,23 +110,23 @@ def test_menu_item_data() -> None:
 
 
 def test_rigi_app_init() -> None:
-    app = RigiApp(name="testapp", version="0.0.1", description="test")
+    app = App(name="testapp", version="0.0.1", description="test")
     assert app._prog_name == "testapp"
     assert app._version == "0.0.1"
 
 
 def test_rigi_app_add_tab() -> None:
-    app = RigiApp(name="testapp")
+    app = App(name="testapp")
     tab = app.add_tab(TabDef(name="Dashboard", key="1"))
     assert tab in app._rigi_tabs
 
 
 def test_rigi_app_command_decorator() -> None:
-    app = RigiApp(name="testapp")
+    app = App(name="testapp")
     calls: list[str] = []
 
     @app.command("greet", help="Say hi")
-    async def greet(_app: RigiApp, **_: object) -> None:  # pyright: ignore[reportUnusedFunction]
+    async def greet(_app: App, **_: object) -> None:  # pyright: ignore[reportUnusedFunction]
         calls.append("hi")
 
     assert app._cmd_registry.get("greet") is not None
@@ -143,7 +143,7 @@ def test_status_item() -> None:
 
 
 def test_custom_theme() -> None:
-    theme = RigiTheme(
+    theme = Theme(
         name="custom",
         border="#ff0000",
         text="#ffffff",

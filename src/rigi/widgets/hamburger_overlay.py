@@ -1,22 +1,17 @@
-"""HamburgerScreen — slide-in hamburger menu modal."""
+"""Hamburger menu overlay widget — mounts directly on app, non-blocking."""
 
 from __future__ import annotations
 
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding
 from textual.events import Click
-from textual.screen import ModalScreen
+from textual.widget import Widget
 
-from rigi.widgets.hamburger_menu import (
-    MenuItemData,
-    MenuPanel,
-    _ItemClicked,
-)
+from rigi.widgets.hamburger_menu import MenuItemData, MenuPanel, _ItemClicked
 
 
-class HamburgerScreen(ModalScreen[None]):
-    BINDINGS = [Binding("escape", "action_close_or_dismiss", show=False)]
+class HamburgerOverlay(Widget):
+    """Non-blocking overlay that hosts the hamburger menu panel."""
 
     def __init__(self, sections: list[tuple[str, list[MenuItemData]]]) -> None:
         super().__init__()
@@ -42,7 +37,7 @@ class HamburgerScreen(ModalScreen[None]):
             self._enter_submenu(item)
         elif item.callback is not None:
             callback = item.callback
-            self.dismiss(None)
+            self._close()
             self.app.call_after_refresh(callback)
 
     def _enter_submenu(self, item: MenuItemData) -> None:
@@ -60,15 +55,21 @@ class HamburgerScreen(ModalScreen[None]):
             panel.border_title = ""
             panel.replace_sections(self._current_sections)
         else:
-            self.dismiss(None)
+            self._close()
 
     def on_click(self, event: Click) -> None:
         main = self.query_one("#rigi-main-menu", MenuPanel)
         if not main.region.contains(event.x, event.y):
-            self.dismiss(None)
+            self._close()
 
     def action_close_or_dismiss(self) -> None:
         if self._sections_stack:
             self._go_back()
         else:
-            self.dismiss(None)
+            self._close()
+
+    def _close(self) -> None:
+        try:
+            self.remove()
+        except Exception:
+            pass

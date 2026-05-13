@@ -8,7 +8,7 @@ from rich.text import Text
 from textual.widget import Widget
 
 
-class RigiGauge(Widget):
+class Gauge(Widget):
     """Horizontal progress bar — set .value to update."""
 
     def __init__(
@@ -58,7 +58,7 @@ class RigiGauge(Widget):
         return t
 
 
-class RigiSparkline(Widget):
+class Sparkline(Widget):
     """Inline sparkline chart. Call .push(value) to add data points."""
 
     _BARS = " ▁▂▃▄▅▆▇█"

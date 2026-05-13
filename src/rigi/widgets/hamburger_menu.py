@@ -13,22 +13,22 @@ from textual.widgets import Label
 
 
 @dataclass
-class RigiMenuItemData:
+class MenuItemData:
     label: str
     callback: Callable[[], Any] | None = None
     checked: bool = False
-    submenu: list[RigiMenuItemData] | None = None
+    submenu: list[MenuItemData] | None = None
     is_back: bool = False
 
 
 class _ItemClicked(Message):
-    def __init__(self, item: RigiMenuItemData) -> None:
+    def __init__(self, item: MenuItemData) -> None:
         super().__init__()
         self.item = item
 
 
-class RigiMenuItem(Widget):
-    def __init__(self, item: RigiMenuItemData) -> None:
+class MenuItem(Widget):
+    def __init__(self, item: MenuItemData) -> None:
         super().__init__()
         self._item = item
 
@@ -54,10 +54,10 @@ class _MenuSectionLabel(Widget):
         yield Label(f"── {self._title}")
 
 
-class RigiMenuPanel(Widget):
+class MenuPanel(Widget):
     def __init__(
         self,
-        sections: list[tuple[str, list[RigiMenuItemData]]],
+        sections: list[tuple[str, list[MenuItemData]]],
         title: str = "",
         **kwargs: Any,
     ) -> None:
@@ -71,16 +71,16 @@ class RigiMenuPanel(Widget):
             if title:
                 yield _MenuSectionLabel(title)
             for item in items:
-                yield RigiMenuItem(item)
+                yield MenuItem(item)
 
-    def replace_sections(self, sections: list[tuple[str, list[RigiMenuItemData]]]) -> None:
+    def replace_sections(self, sections: list[tuple[str, list[MenuItemData]]]) -> None:
         self._sections = sections
         self.remove_children()
         for title, items in sections:
             if title:
                 self.mount(_MenuSectionLabel(title))
             for item in items:
-                self.mount(RigiMenuItem(item))
+                self.mount(MenuItem(item))
 
 
-RigiHamburgerPanel = RigiMenuPanel
+HamburgerPanel = MenuPanel

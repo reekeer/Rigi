@@ -5,11 +5,11 @@ from __future__ import annotations
 import asyncio
 import random
 
-from rigi import RigiApp, TabDef, platform
-from rigi.layout.pane import RigiCard, RigiPane
-from rigi.widgets import Label, Markdown, RigiGauge, RigiSparkline
+from rigi import App, TabDef, platform
+from rigi.layout.pane import Card, Pane
+from rigi.widgets import Label, Markdown, Gauge, Sparkline
 
-app = RigiApp(
+app = App(
     name="platform-demo",
     version="1.0.0",
     description="Platform features & new widgets showcase",
@@ -21,11 +21,11 @@ _cpu_history: list[float] = []
 _mem_history: list[float] = []
 _net_history: list[float] = []
 
-_gauge_cpu: RigiGauge | None = None
-_gauge_mem: RigiGauge | None = None
-_spark_cpu: RigiSparkline | None = None
-_spark_mem: RigiSparkline | None = None
-_spark_net: RigiSparkline | None = None
+_gauge_cpu: Gauge | None = None
+_gauge_mem: Gauge | None = None
+_spark_cpu: Sparkline | None = None
+_spark_mem: Sparkline | None = None
+_spark_net: Sparkline | None = None
 
 
 def _read_cpu_pct() -> float:
@@ -53,26 +53,26 @@ def _read_mem_pct() -> float:
         return random.uniform(30, 70)
 
 
-def make_overview() -> RigiPane:
+def make_overview() -> Pane:
     global _gauge_cpu, _gauge_mem, _spark_cpu, _spark_mem, _spark_net
 
-    _gauge_cpu = RigiGauge(label="CPU", value=_read_cpu_pct(), color="green")
-    _gauge_mem = RigiGauge(label="MEM", value=_read_mem_pct(), color="cyan")
-    _spark_cpu = RigiSparkline(color="green")
-    _spark_mem = RigiSparkline(color="cyan")
-    _spark_net = RigiSparkline(color="yellow")
+    _gauge_cpu = Gauge(label="CPU", value=_read_cpu_pct(), color="green")
+    _gauge_mem = Gauge(label="MEM", value=_read_mem_pct(), color="cyan")
+    _spark_cpu = Sparkline(color="green")
+    _spark_mem = Sparkline(color="cyan")
+    _spark_net = Sparkline(color="yellow")
 
     cols, lines = platform.terminal_size()
 
-    return RigiPane(
-        RigiCard(
+    return Pane(
+        Card(
             Label(f"[bold]Platform:[/bold]  {platform.PLATFORM_NAME}"),
             Label(f"[bold]Arch:[/bold]      {platform.ARCH}"),
             Label(f"[bold]Wayland:[/bold]   {'yes' if platform.IS_WAYLAND else 'no'}"),
             Label(f"[bold]Terminal:[/bold]  {cols}×{lines}"),
             title=" System",
         ),
-        RigiCard(
+        Card(
             Label("CPU usage"),
             _gauge_cpu,
             _spark_cpu,
@@ -88,11 +88,11 @@ def make_overview() -> RigiPane:
     )
 
 
-def make_platform() -> RigiPane:
+def make_platform() -> Pane:
     import sys
 
-    return RigiPane(
-        RigiCard(
+    return Pane(
+        Card(
             Markdown(f"""
 ## Platform Details
 
@@ -108,7 +108,7 @@ def make_platform() -> RigiPane:
 """),
             title=" Platform",
         ),
-        RigiCard(
+        Card(
             Markdown(f"""
 ## Config Directories
 
@@ -125,15 +125,15 @@ def make_platform() -> RigiPane:
     )
 
 
-def make_features() -> RigiPane:
-    return RigiPane(
-        RigiCard(
+def make_features() -> Pane:
+    return Pane(
+        Card(
             Markdown("""
 ## New Features in this Build
 
 ### Widgets
-- **RigiGauge** — horizontal progress bar with label and %
-- **RigiSparkline** — rolling mini-chart, push values with `.push(v)`
+- **Gauge** — horizontal progress bar with label and %
+- **Sparkline** — rolling mini-chart, push values with `.push(v)`
 
 ### App Methods
 - `app.open_url(url)` — open browser cross-platform
@@ -174,7 +174,7 @@ app.add_status("os", "OS", lambda: platform.PLATFORM_NAME, refresh_interval=60.0
 
 
 @app.on_startup
-async def _start_metrics(a: RigiApp) -> None:  # pyright: ignore[reportUnusedFunction]
+async def _start_metrics(a: App) -> None:  # pyright: ignore[reportUnusedFunction]
     async def _loop() -> None:
         while True:
             cpu = _read_cpu_pct()
@@ -198,7 +198,7 @@ async def _start_metrics(a: RigiApp) -> None:  # pyright: ignore[reportUnusedFun
 
 
 @app.command("open", help="Open a URL or path  (e.g. open https://example.com)")
-async def cmd_open(app: RigiApp, **kwargs: object) -> None:
+async def cmd_open(app: App, **kwargs: object) -> None:
     target = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not target:
         app.notify("Usage: open <url|path>", severity="warning")
@@ -215,7 +215,7 @@ async def cmd_open(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("copy", help="Copy text to clipboard")
-async def cmd_copy(app: RigiApp, **kwargs: object) -> None:
+async def cmd_copy(app: App, **kwargs: object) -> None:
     text = " ".join(str(v) for v in kwargs.values() if v).strip()
     if not text:
         app.notify("Usage: copy <text>", severity="warning")
@@ -229,7 +229,7 @@ async def cmd_copy(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("desktop-notify", help="Send OS desktop notification", aliases=["dn"])
-async def cmd_dn(app: RigiApp, **kwargs: object) -> None:
+async def cmd_dn(app: App, **kwargs: object) -> None:
     text = " ".join(str(v) for v in kwargs.values() if v).strip() or "Hello from Rigi!"
     ok = app.notify_desktop("Rigi", text)
     app.notify(
@@ -239,7 +239,7 @@ async def cmd_dn(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("gauge", help="Demo: set CPU gauge value  (e.g. gauge 75)")
-async def cmd_gauge(app: RigiApp, **kwargs: object) -> None:
+async def cmd_gauge(app: App, **kwargs: object) -> None:
     try:
         val = float(str(next(iter(kwargs.values()))))
         if _gauge_cpu is not None:
@@ -250,4 +250,4 @@ async def cmd_gauge(app: RigiApp, **kwargs: object) -> None:
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

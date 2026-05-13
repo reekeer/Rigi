@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiPane
+from rigi import App, TabDef
+from rigi.layout.pane import Card, Pane
 from rigi.widgets import Label
 
-app = RigiApp(name="minimal", version="1.0.0", description="Simplest possible Rigi app")
+app = App(name="minimal", version="1.0.0", description="Simplest possible Rigi app")
 
 
 def home():
-    return RigiPane(
-        RigiCard(
+    return Pane(
+        Card(
             Label("Welcome to [bold cyan]Rigi[/bold cyan]!"),
             Label(""),
             Label("  [dim]Ctrl+H[/dim]   Help"),
@@ -25,4 +25,4 @@ def home():
 app.add_tab(TabDef(name="Home", key="1", icon="⌂", widget_factory=home))
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

@@ -36,28 +36,28 @@ from textual.widgets import (
 )
 
 from rigi.widgets.action_menu import (
-    RigiActionMenuItem,
-    RigiActionMenuItemData,
-    RigiActionMenuPanel,
+    ActionMenuItem,
+    ActionMenuItemData,
+    ActionMenuPanel,
 )
-from rigi.widgets.border_frame import RigiBorderFrame
-from rigi.widgets.bottom_panel import RigiBottomPanel
-from rigi.widgets.content_area import RigiContentArea
-from rigi.widgets.gauge import RigiGauge, RigiSparkline
+from rigi.widgets.border_frame import BorderFrame
+from rigi.widgets.bottom_panel import BottomPanel
+from rigi.widgets.content_area import ContentArea
+from rigi.widgets.gauge import Gauge, Sparkline
 from rigi.widgets.hamburger_menu import (
-    RigiHamburgerPanel,
-    RigiMenuItem,
-    RigiMenuItemData,
-    RigiMenuPanel,
+    HamburgerPanel,
+    MenuItem,
+    MenuItemData,
+    MenuPanel,
 )
-from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
-from rigi.widgets.image import RigiImage, TerminalImageProtocol, detect_image_protocol
-from rigi.widgets.mouse import RigiClickable, RigiDraggable, RigiMouseMixin
-from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
-from rigi.widgets.sidebar import RigiSidebar
-from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
-from rigi.widgets.terminal_bar import RigiTerminalBar
-from rigi.widgets.vertical_tabs import RigiVerticalTabs
+from rigi.widgets.help_panel import ShortcutsBar, extract_help_annotation
+from rigi.widgets.image import Image, TerminalImageProtocol, detect_image_protocol
+from rigi.widgets.mouse import Clickable, Draggable, MouseMixin
+from rigi.widgets.settings_screen import SettingDef, SettingsScreen
+from rigi.widgets.sidebar import Sidebar
+from rigi.widgets.statusbar import StatusBar, StatusItem
+from rigi.widgets.terminal_bar import TerminalBar
+from rigi.widgets.tab_group import TabGroup
 
 __all__ = [
     # Textual primitives
@@ -67,33 +67,33 @@ __all__ = [
     "ModalScreen",
     "reactive",
     # Rigi widgets
-    "RigiStatusBar",
-    "RigiStatusItem",
-    "RigiSidebar",
-    "RigiTerminalBar",
-    "RigiBottomPanel",
-    "RigiBorderFrame",
-    "RigiContentArea",
-    "RigiMenuItem",
-    "RigiMenuPanel",
-    "RigiHamburgerPanel",
-    "RigiMenuItemData",
-    "RigiActionMenuItem",
-    "RigiActionMenuPanel",
-    "RigiActionMenuItemData",
-    "RigiVerticalTabs",
-    "RigiSettingsScreen",
-    "RigiSettingDef",
-    "RigiImage",
+    "StatusBar",
+    "StatusItem",
+    "Sidebar",
+    "TerminalBar",
+    "BottomPanel",
+    "BorderFrame",
+    "ContentArea",
+    "MenuItem",
+    "MenuPanel",
+    "HamburgerPanel",
+    "MenuItemData",
+    "ActionMenuItem",
+    "ActionMenuPanel",
+    "ActionMenuItemData",
+    "TabGroup",
+    "SettingsScreen",
+    "SettingDef",
+    "Image",
     "TerminalImageProtocol",
     "detect_image_protocol",
-    "RigiMouseMixin",
-    "RigiClickable",
-    "RigiDraggable",
-    "RigiShortcutsBar",
+    "MouseMixin",
+    "Clickable",
+    "Draggable",
+    "ShortcutsBar",
     "extract_help_annotation",
-    "RigiGauge",
-    "RigiSparkline",
+    "Gauge",
+    "Sparkline",
     # Textual widgets
     "Label",
     "Static",
