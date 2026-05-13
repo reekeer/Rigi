@@ -413,8 +413,8 @@ _ResizeHandle {
 }
 _ResizeHandle:hover { color: #58a6ff; }
 
-_LogsView { layout: horizontal; height: 1fr; background: #0d1117; }
-_LogsView #logs-output { width: 1fr; height: 1fr; background: #0d1117; }
+_LogsView { layout: horizontal; height: 1fr; background: #0d1117; overflow: hidden; }
+_LogsView #logs-output { width: 1fr; height: 1fr; background: #0d1117; overflow-y: auto; overflow-x: hidden; }
 _LogsView #logs-controls {
     width: 18;
     height: 1fr;
@@ -441,7 +441,9 @@ _LogsView #logs-controls Button {
     padding: 0 1;
 }
 
-RigiBottomPanel { height: 12; layout: vertical; background: #0d1117; }
+RigiBottomPanel { height: 12; layout: vertical; background: #0d1117; overflow: hidden; }
+#bp-logs { height: 1fr; layout: vertical; overflow: hidden; }
+#bp-terminal { height: 1fr; layout: vertical; overflow: hidden; }
 RigiBottomPanel Tabs { height: 3; background: #161b22; padding: 0; dock: none; }
 RigiBottomPanel Tab { color: #8b949e; min-width: 12; }
 RigiBottomPanel Tab:hover { color: #e6edf3; }
