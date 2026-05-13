@@ -118,6 +118,8 @@ class RigiApp(App[None]):
         self._rigi_help_entries: list[HelpEntry] = []
         self._rigi_menu_items: list[tuple[str, str, Callable[[], None]]] = []
         self._settings_manager = SettingsManager()
+        self._transparent_enabled: bool = False
+        self._transparent_percent: int = 50
 
         self._disable_notifications = True
         self._register_builtin_commands()
@@ -305,10 +307,71 @@ class RigiApp(App[None]):
                 tie_breaker=self._theme_tie_breaker,
             )
             self.refresh_css(animate=False)
+            self._apply_transparency()
             _ui_log.info(f"Theme changed to: {theme.name}")
         except Exception as exc:
             _ui_log.error(f"Theme error: {exc}", exc_info=True)
             self.notify(f"Theme error: {exc}", severity="error")
+
+    def _toggle_transparency(self) -> None:
+        self._transparent_enabled = not self._transparent_enabled
+        self._apply_transparency()
+
+    def _set_transparency_percent(self, value: str) -> None:
+        try:
+            self._transparent_percent = max(0, min(100, int(value)))
+        except ValueError:
+            pass
+        self._apply_transparency()
+
+    def _apply_transparency(self) -> None:
+        if not self.is_running:
+            return
+        try:
+            if self._transparent_enabled:
+                alpha = max(0.0, min(1.0, 1.0 - (self._transparent_percent / 100.0)))
+                bg = self._theme.bg_color
+                if bg.startswith("#") and len(bg) == 7:
+                    r = int(bg[1:3], 16)
+                    g = int(bg[3:5], 16)
+                    b = int(bg[5:7], 16)
+                    rgba = f"rgb({r} {g} {b} / {alpha})"
+                else:
+                    rgba = bg
+                css = f"""
+App, Screen {{
+    background: transparent;
+}}
+RigiBorderFrame, _RigiBody, RigiSidebar, RigiContentArea, #content-main,
+_RigiMainNav, _RigiSubNav, RigiBottomPanel, RigiTerminalBar,
+RigiStatusBar, RigiShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
+    background: {rgba};
+}}
+"""
+            else:
+                css = f"""
+App, Screen {{
+    background: {self._theme.bg_color};
+}}
+RigiBorderFrame, _RigiBody, RigiSidebar, RigiContentArea, #content-main,
+_RigiMainNav, _RigiSubNav, RigiBottomPanel, RigiTerminalBar,
+RigiStatusBar, RigiShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
+    background: {self._theme.bg_color};
+}}
+"""
+            self._theme_tie_breaker += 1
+            self.stylesheet.add_source(
+                css,
+                read_from=(
+                    f"__rigi_transparency_{self._theme_tie_breaker}__",
+                    f"__rigi_transparency_{self._theme_tie_breaker}__",
+                ),
+                is_default_css=False,
+                tie_breaker=self._theme_tie_breaker,
+            )
+            self.refresh_css(animate=False)
+        except Exception as exc:
+            _ui_log.error(f"Transparency error: {exc}", exc_info=True)
 
     def _cycle_theme(self) -> None:
         from rigi.themes import DARK, LIGHT, MONOKAI, NORD
@@ -587,6 +650,14 @@ class RigiApp(App[None]):
                 label="Unicode",
                 description="UTF-8 output encoding",
                 value_fn=lambda: "yes" if _console.supports_unicode() else "no",
+            ),
+            RigiSettingDef(
+                category="Appearance",
+                label="Transparent",
+                description="Enable transparent background with adjustable opacity",
+                checkbox_fn=lambda: self._transparent_enabled,
+                toggle_fn=self._toggle_transparency,
+                write_fn=self._set_transparency_percent,
             ),
         ]
         self.push_screen(RigiSettingsScreen(builtin + self._settings_manager.all_defs()))

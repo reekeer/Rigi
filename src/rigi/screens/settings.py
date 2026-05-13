@@ -157,6 +157,12 @@ class _SettingSwitch(Widget):
                 self._setting.toggle_fn()
             except Exception as e:
                 _ui_log.error(f"Error toggling setting {self._setting.label}: {e}", exc_info=True)
+        # Show/hide sibling input when present
+        for sibling in self.siblings:
+            if isinstance(sibling, _SettingInput):
+                sibling.display = event.value
+                if event.value:
+                    sibling.focus()
 
 
 class _SettingItem(Widget):
@@ -170,10 +176,14 @@ class _SettingItem(Widget):
             yield Label(self._setting.description, classes="_s-desc")
         if self._setting.checkbox_fn is not None:
             yield _SettingSwitch(self._setting)
-        elif self._setting.write_fn is not None:
-            yield _SettingInput(self._setting)
+        if self._setting.write_fn is not None:
+            inp = _SettingInput(self._setting)
+            if self._setting.checkbox_fn is not None:
+                inp.display = self._setting.get_checked()
+            yield inp
         elif self._setting.value_fn is not None or self._setting.action_fn is not None:
-            yield _ValueRow(self._setting)
+            if self._setting.checkbox_fn is None:
+                yield _ValueRow(self._setting)
 
 
 class _SettingsContent(Widget):
