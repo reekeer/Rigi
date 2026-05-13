@@ -2,19 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.events import Click
+from textual.events import MouseDown
 from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import DataTable, Input, Label
 
 from rigi import ActionMenuItemData, App, TabDef
 from rigi.layout.pane import Card, Pane
-
 
 _COLUMNS = ("Name", "Age", "City", "Role")
 _ROWS = [
@@ -85,7 +84,7 @@ class _EditRowScreen(ModalScreen[list[str] | None]):
     def compose(self) -> ComposeResult:
         with Widget(id="er-box"):
             yield Label("Edit Row", id="er-title")
-            for col, val in zip(self._columns, self._values):
+            for col, val in zip(self._columns, self._values, strict=True):
                 yield Label(col, classes="er-label")
                 yield Input(value=val, classes="er-input")
             yield Label("Enter — save  ·  Esc — cancel", id="er-hint")
@@ -150,12 +149,16 @@ class EditableTable(Widget):
         y = table.region.y + row_idx + 2
         self._show_row_menu(row_idx, x, y)
 
-    def on_click(self, event: Click) -> None:
+    def on_mouse_down(self, event: MouseDown) -> None:
         if event.button == 3:
             event.stop()
             table = self.query_one(DataTable)
-            row_idx = table.cursor_coordinate.row
-            self._show_row_menu(row_idx, event.screen_x, event.screen_y)
+            table_region = table.region
+            row_in_view = event.screen_y - table_region.y - 1
+            scroll_y = int(table.scroll_offset.y)
+            row_idx = max(0, min(row_in_view + scroll_y, len(self._data) - 1))
+            if row_in_view >= 0:
+                self._show_row_menu(row_idx, event.screen_x, event.screen_y)
 
     def _show_row_menu(self, row_idx: int, x: int, y: int) -> None:
         if row_idx < 0 or row_idx >= len(self._data):
@@ -164,7 +167,7 @@ class EditableTable(Widget):
             ActionMenuItemData("Edit", callback=lambda: self._edit_row(row_idx)),
             ActionMenuItemData("Delete", color="red", callback=lambda: self._delete_row(row_idx)),
         ]
-        self.app.show_action_menu(items, x=x, y=y)
+        cast(App, self.app).show_action_menu(items, x=x, y=y)
 
     def _edit_row(self, row_idx: int) -> None:
         def _apply(values: list[str] | None) -> None:
@@ -175,7 +178,7 @@ class EditableTable(Widget):
             for col_idx, val in enumerate(values):
                 table.update_cell(self._row_keys[row_idx], self._col_keys[col_idx], val)
 
-        self.app.push_screen(
+        cast(App, self.app).push_screen(
             _EditRowScreen(_COLUMNS, list(self._data[row_idx])),
             _apply,
         )
@@ -218,8 +221,12 @@ app.add_tab(TabDef(name="Table", key="2", icon="", widget_factory=make_table))
 async def cmd_menu(app: App, **_: object) -> None:
     items = [
         ActionMenuItemData("Copy", color="cyan", callback=lambda: app.notify("Copied!", timeout=2)),
-        ActionMenuItemData("Paste", color="green", callback=lambda: app.notify("Pasted!", timeout=2)),
-        ActionMenuItemData("Delete", color="red", callback=lambda: app.notify("Deleted!", timeout=2)),
+        ActionMenuItemData(
+            "Paste", color="green", callback=lambda: app.notify("Pasted!", timeout=2)
+        ),
+        ActionMenuItemData(
+            "Delete", color="red", callback=lambda: app.notify("Deleted!", timeout=2)
+        ),
         ActionMenuItemData("Rename", callback=lambda: app.notify("Renamed!", timeout=2)),
         ActionMenuItemData("Cancel", disabled=True),
     ]

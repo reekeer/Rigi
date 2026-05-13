@@ -7,7 +7,7 @@ import random
 
 from rigi import App, TabDef, platform
 from rigi.layout.pane import Card, Pane
-from rigi.widgets import Label, Markdown, Gauge, Sparkline
+from rigi.widgets import Gauge, Label, Markdown, Sparkline
 
 app = App(
     name="platform-demo",

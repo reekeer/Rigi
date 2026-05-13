@@ -18,14 +18,12 @@ async def cmd_terminal(app: App, **_: Any) -> None:
     lines = [
         "[bold]Terminal Info[/bold]",
         f"  Terminal:    {nfo['terminal']}",
-        f"  True color:  {'yes' if nfo['true_color'] else 'no'}"
-        f"  (depth {nfo['color_depth']})",
+        f"  True color:  {'yes' if nfo['true_color'] else 'no'}" f"  (depth {nfo['color_depth']})",
         f"  Hyperlinks:  {'yes' if nfo['hyperlinks'] else 'no'}",
         f"  Unicode:     {'yes' if nfo['unicode'] else 'no'}",
         f"  Mouse:       {'yes' if nfo['mouse'] else 'no'}",
         f"  Kitty gfx:   {'yes' if nfo['kitty_graphics'] else 'no'}",
-        f"  Multiplexer: "
-        f"{'tmux' if nfo['tmux'] else 'screen' if nfo['screen'] else 'none'}",
+        f"  Multiplexer: " f"{'tmux' if nfo['tmux'] else 'screen' if nfo['screen'] else 'none'}",
         f"  Size:        {nfo['columns']}×{nfo['lines']}",
     ]
     try:

@@ -46,7 +46,8 @@ class _ContentResizeHandle(Widget):
         except Exception as e:
             _ui_log.error(f"Error in content resize mouse_move: {e}", exc_info=True)
 
-    def on_mouse_up(self, _event: MouseUp) -> None:
+    def on_mouse_up(self, event: MouseUp) -> None:
+        event.stop()
         try:
             self.release_mouse()
             self._drag_x = None
@@ -67,6 +68,7 @@ class ContentArea(Widget):
         self._current: Widget | None = None
 
     def compose(self) -> ComposeResult:
+        yield _ContentResizeHandle()
         with Widget(id="content-main"):
             yield _EmptyState(id="rigi-empty-state")
 

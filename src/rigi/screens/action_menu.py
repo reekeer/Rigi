@@ -1,11 +1,11 @@
-"""ActionMenuScreen — modal popup action menu."""
+"""ActionMenuScreen — modal popup action menu (kept for API compatibility)."""
 
 from __future__ import annotations
 
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.events import Click
+from textual.events import Click, Key
 from textual.screen import ModalScreen
 
 from rigi.widgets.action_menu import (
@@ -16,7 +16,7 @@ from rigi.widgets.action_menu import (
 
 
 class ActionMenuScreen(ModalScreen[None]):
-    BINDINGS = [Binding("escape", "dismiss", show=False)]
+    BINDINGS = [Binding("escape", "close_menu", show=False)]
 
     def __init__(
         self,
@@ -66,11 +66,11 @@ class ActionMenuScreen(ModalScreen[None]):
         if not panel.region.contains(event.x, event.y):
             self.dismiss(None)
 
-    def action_dismiss(self) -> None:
+    def action_close_menu(self) -> None:
         self.dismiss(None)
 
-    def on_key(self, event) -> None:
-        if hasattr(event, "key") and event.key.isdigit():
+    def on_key(self, event: Key) -> None:
+        if event.key.isdigit():
             idx = int(event.key) - 1
             if 0 <= idx < len(self._items):
                 item = self._items[idx]

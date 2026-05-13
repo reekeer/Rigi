@@ -9,10 +9,11 @@ from pathlib import Path
 from typing import Any, Awaitable, Callable
 
 from textual import on
-from textual.app import App as _TextualApp, ComposeResult
+from textual.app import App as _TextualApp
+from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.notifications import SeverityLevel
 from textual.events import Key
+from textual.notifications import SeverityLevel
 from textual.widget import Widget
 
 from rigi.commands.command import Command
@@ -26,20 +27,18 @@ from rigi.core._cmd_handlers import cmd_clear, cmd_help, cmd_quit, cmd_terminal
 from rigi.core.dev_commands import register_dev_commands
 from rigi.core.settings_manager import SettingsManager
 from rigi.core.types import HandlerFn, HelpEntry, StatusItem, SubtabDef, TabDef
-from rigi.screens.action_menu import ActionMenuScreen
-from rigi.widgets.hamburger_menu import MenuPanel
-from rigi.widgets.help_overlay import HelpOverlay
 from rigi.screens.settings import SettingDef
-from rigi.widgets.settings_overlay import SettingsOverlay
 from rigi.themes import DARK as _DEFAULT_THEME
 from rigi.themes import Theme
+from rigi.widgets.action_menu import ActionMenuItemData, ActionMenuPanel
 from rigi.widgets.border_frame import BorderFrame
 from rigi.widgets.bottom_panel import BottomPanel
 from rigi.widgets.content_area import ContentArea
-from rigi.widgets.action_menu import ActionMenuItemData
-from rigi.widgets.hamburger_menu import MenuItemData
+from rigi.widgets.hamburger_menu import MenuItemData, MenuPanel
+from rigi.widgets.help_overlay import HelpOverlay
 from rigi.widgets.help_panel import ShortcutsBar, extract_help_annotation
 from rigi.widgets.notifications import NotificationRack
+from rigi.widgets.settings_overlay import SettingsOverlay
 from rigi.widgets.sidebar import Sidebar
 from rigi.widgets.statusbar import (
     StatusBar,
@@ -104,9 +103,12 @@ class App(_TextualApp[None]):
             if env_theme:
                 from rigi.themes import DARK, LIGHT, MONOKAI, NORD
 
-                resolved_theme = {"dark": DARK, "light": LIGHT, "monokai": MONOKAI, "nord": NORD}.get(
-                    env_theme
-                )
+                resolved_theme = {
+                    "dark": DARK,
+                    "light": LIGHT,
+                    "monokai": MONOKAI,
+                    "nord": NORD,
+                }.get(env_theme)
         self._theme: Theme = resolved_theme if resolved_theme is not None else _DEFAULT_THEME
         self._theme_tie_breaker: int = 200
         self._home_tab_name: str | None = home_tab
@@ -125,10 +127,6 @@ class App(_TextualApp[None]):
 
         self._disable_notifications = True
         self._register_builtin_commands()
-
-    # ------------------------------------------------------------------ #
-    # Built-in commands                                                    #
-    # ------------------------------------------------------------------ #
 
     def _register_builtin_commands(self) -> None:
         help_cmd = Command(
@@ -170,10 +168,6 @@ class App(_TextualApp[None]):
         self._cmd_registry.register(term_cmd)
 
         register_dev_commands(self._cmd_registry)
-
-    # ------------------------------------------------------------------ #
-    # Composition & mount                                                  #
-    # ------------------------------------------------------------------ #
 
     def compose(self) -> ComposeResult:
         status_bar = StatusBar()
@@ -236,10 +230,6 @@ class App(_TextualApp[None]):
         except Exception:
             pass
 
-    # ------------------------------------------------------------------ #
-    # Notifications & terminal info                                        #
-    # ------------------------------------------------------------------ #
-
     def notify(
         self,
         message: str,
@@ -269,10 +259,6 @@ class App(_TextualApp[None]):
 
     def hyperlink(self, url: str, text: str) -> str:
         return _console.hyperlink(url, text)
-
-    # ------------------------------------------------------------------ #
-    # CSS & theme                                                          #
-    # ------------------------------------------------------------------ #
 
     def _apply_css_file(self, path: Path) -> None:
         try:
@@ -386,10 +372,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
             idx = 0
         self.set_theme(_themes[idx])
 
-    # ------------------------------------------------------------------ #
-    # Navigation                                                           #
-    # ------------------------------------------------------------------ #
-
     @on(Sidebar.NavigationChanged)
     def on_sidebar_nav(self, event: Sidebar.NavigationChanged) -> None:
         self._navigate_to(event.tab_idx, event.subtab_path)
@@ -479,10 +461,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
                     if key[0] == idx:
                         _evict(self._rigi_widget_cache.pop(key))
 
-    # ------------------------------------------------------------------ #
-    # Terminal command processing                                          #
-    # ------------------------------------------------------------------ #
-
     @on(BottomPanel.CommandSubmitted)
     def on_command_submitted(self, event: BottomPanel.CommandSubmitted) -> None:
         self.run_worker(self._handle_command(event.text), name="rigi-cmd", exclusive=False)
@@ -514,9 +492,7 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         if cmd is None:
             return
 
-        nav_tab = next(
-            (t for t in self._rigi_tabs if t.name.lower() == cmd.name.lower()), None
-        )
+        nav_tab = next((t for t in self._rigi_tabs if t.name.lower() == cmd.name.lower()), None)
         if nav_tab is not None and cmd.handler is None:
             self.navigate_to_tab(nav_tab.name)
             _terminal_log.info(f"Navigated to tab: {nav_tab.name}")
@@ -562,10 +538,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
                 self.query_one(BottomPanel).write_output(f"[red]{msg}[/red]")
             except Exception:
                 self.notify(msg, severity="error", title=f"$ {cmd[:30]}")
-
-    # ------------------------------------------------------------------ #
-    # Hamburger menu                                                       #
-    # ------------------------------------------------------------------ #
 
     @on(_HamburgerButton.Clicked)
     def on_hamburger_clicked(self, event: _HamburgerButton.Clicked) -> None:
@@ -616,10 +588,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         for sec_name, items in by_section.items():
             sections.append((sec_name, items))
         return sections
-
-    # ------------------------------------------------------------------ #
-    # Settings screen                                                      #
-    # ------------------------------------------------------------------ #
 
     @property
     def settings(self) -> SettingsManager:
@@ -686,10 +654,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         overlay = SettingsOverlay(builtin + self._settings_manager.all_defs())
         overlay.styles.layer = "overlay"
         self.mount(overlay)
-
-    # ------------------------------------------------------------------ #
-    # Keyboard actions                                                     #
-    # ------------------------------------------------------------------ #
 
     def _terminal_input_focused(self) -> bool:
         try:
@@ -786,10 +750,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
             pass
         self.exit()
 
-    # ------------------------------------------------------------------ #
-    # Public API                                                           #
-    # ------------------------------------------------------------------ #
-
     def add_tab(self, tab: TabDef) -> TabDef:
         self._rigi_tabs.append(tab)
         return tab
@@ -839,7 +799,25 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         x: int | None = None,
         y: int | None = None,
     ) -> None:
-        self.push_screen(ActionMenuScreen(items, title=title, anchor_x=x, anchor_y=y))
+        try:
+            self.query_one("#rigi-action-panel", ActionMenuPanel).remove()
+        except Exception:
+            pass
+        panel = ActionMenuPanel(items, title=title, id="rigi-action-panel")
+        panel.styles.layer = "overlay"
+        panel_w = max((len(item.label) + 6 for item in items), default=22)
+        panel_h = min(2 + len(items), 20)
+        app_w, app_h = self.size.width, self.size.height
+        if x is not None and y is not None:
+            px = min(x, max(0, app_w - panel_w - 1))
+            py = min(y, max(0, app_h - panel_h - 1))
+        else:
+            px = max(0, (app_w - panel_w) // 2)
+            py = max(0, (app_h - panel_h) // 2)
+        panel.styles.offset = (px, py)
+        panel.styles.width = panel_w
+        panel.styles.height = panel_h
+        self.mount(panel)
 
     def on_click(self, event: Any) -> None:
         if hasattr(event, "button") and event.button == 3:
@@ -865,10 +843,17 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
                 overlay.remove()
         except Exception:
             pass
+        try:
+            panel = self.query_one("#rigi-action-panel", ActionMenuPanel)
+            if panel not in event.chain:
+                panel.remove()
+        except Exception:
+            pass
 
     def on_key(self, event: Key) -> None:
         if event.key == "escape":
             for selector, cls in (
+                ("#rigi-action-panel", ActionMenuPanel),
                 ("#rigi-main-menu", MenuPanel),
                 ("#rigi-settings-overlay", SettingsOverlay),
                 ("#rigi-help-overlay", HelpOverlay),
@@ -905,10 +890,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
 
         return asyncio.create_task(_wrapped(), name=name)
 
-    # ------------------------------------------------------------------ #
-    # Commands & hooks                                                     #
-    # ------------------------------------------------------------------ #
-
     def command(
         self,
         name: str,
@@ -944,10 +925,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
     def cmd_registry(self) -> CommandRegistry:
         return self._cmd_registry
 
-    # ------------------------------------------------------------------ #
-    # CLI entry point                                                      #
-    # ------------------------------------------------------------------ #
-
     @classmethod
     def run_cli(cls, app_instance: App) -> None:
         parser = build_cli_parser(
@@ -975,9 +952,7 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
             parser.print_help()
             sys.exit(1)
 
-        tab = next(
-            (t for t in app_instance._rigi_tabs if t.name.lower() == cmd_name.lower()), None
-        )
+        tab = next((t for t in app_instance._rigi_tabs if t.name.lower() == cmd_name.lower()), None)
         if tab and cmd.handler is None:
 
             async def _nav() -> None:

@@ -88,7 +88,7 @@ class StatusBar(Widget):
         self._items.append(item)
         if self.is_mounted:
             spacer = self.query_one(_StatusSpacer)
-            self.mount(StatusItem(item), before=spacer)
+            self.mount(StatusBarItem(item), before=spacer)
 
     def set_home_active(self, active: bool) -> None:
         try:
@@ -99,6 +99,6 @@ class StatusBar(Widget):
     def compose(self) -> ComposeResult:
         yield _HomeButton()
         for item in self._items:
-            yield StatusItem(item)
+            yield StatusBarItem(item)
         yield _StatusSpacer()
         yield _HamburgerButton()

@@ -6,7 +6,6 @@ from textual.events import MouseDown, MouseMove, MouseUp
 
 from rigi.commands.registry import CommandRegistry
 from rigi.widgets.bottom_panel import BottomPanel, _ResizeHandle
-from rigi.widgets.content_area import ContentArea
 from rigi.widgets.sidebar import _VerticalResizeHandle
 
 

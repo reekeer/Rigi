@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from rigi import (
+    App,
     Command,
     CommandArg,
-    App,
-    Theme,
     StatusItem,
     SubtabDef,
     TabDef,
+    Theme,
     ThemeDark,
     ThemeLight,
     ThemeMonokai,

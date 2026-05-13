@@ -11,9 +11,7 @@ from rigi import App, TabDef
 from rigi.layout.pane import Card, HPane, Pane
 from rigi.widgets import DataTable, Label
 
-app = App(
-    name="sysmon", version="1.0.0", description="System resource monitor", home_tab="System"
-)
+app = App(name="sysmon", version="1.0.0", description="System resource monitor", home_tab="System")
 
 _start = time.time()
 

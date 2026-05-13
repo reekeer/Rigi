@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rigi"
-version = "1.2.0"
+version = "1.3.0"
 description = "Rigi isn't a graphics interface, it's terminal. A high-level TUI framework built on Textual."
 readme = "README.md"
 requires-python = ">=3.10"

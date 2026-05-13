@@ -40,22 +40,21 @@ from rigi.core.platform import (
     terminal_size,
     tmux_passthrough,
 )
+from rigi.core.settings_manager import Setting, SettingsManager, SettingsPage
 from rigi.core.types import CommandArg, HelpEntry, StatusItem, SubtabDef, TabDef
 from rigi.layout.pane import Card, HPane, Pane, ScrollPane, Split, VPane
 from rigi.screens.hamburger import HamburgerScreen
 from rigi.screens.help import HelpScreen
-from rigi.widgets.help_overlay import HelpOverlay
 from rigi.themes import DARK as ThemeDark
 from rigi.themes import LIGHT as ThemeLight
 from rigi.themes import MONOKAI as ThemeMonokai
 from rigi.themes import NORD as ThemeNord
 from rigi.themes import Theme
+from rigi.widgets.action_menu import ActionMenuItemData
 from rigi.widgets.border_frame import BorderFrame
 from rigi.widgets.bottom_panel import BottomPanel
-from rigi.widgets.action_menu import ActionMenuItemData
 from rigi.widgets.checkbox import Checkbox
 from rigi.widgets.content_area import ContentArea
-from rigi.widgets.tab_group import TabGroup
 from rigi.widgets.gauge import Gauge, Sparkline
 from rigi.widgets.hamburger_menu import (
     HamburgerPanel,
@@ -63,6 +62,7 @@ from rigi.widgets.hamburger_menu import (
     MenuItemData,
     MenuPanel,
 )
+from rigi.widgets.help_overlay import HelpOverlay
 from rigi.widgets.help_panel import ShortcutsBar, extract_help_annotation
 from rigi.widgets.image import Image, TerminalImageProtocol, detect_image_protocol
 from rigi.widgets.mouse import Clickable, Draggable, MouseMixin
@@ -72,14 +72,14 @@ from rigi.widgets.notifications import (
 from rigi.widgets.notifications import (
     NotificationWidget as NotificationWidget,
 )
-from rigi.core.settings_manager import Setting, SettingsManager, SettingsPage
 from rigi.widgets.settings_overlay import SettingsOverlay
 from rigi.widgets.settings_screen import SettingDef, SettingsScreen
 from rigi.widgets.sidebar import Sidebar
 from rigi.widgets.statusbar import StatusBar, StatusBarItem
+from rigi.widgets.tab_group import TabGroup
 from rigi.widgets.terminal_bar import TerminalBar
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __all__ = [
     # Textual primitives
     "Widget",

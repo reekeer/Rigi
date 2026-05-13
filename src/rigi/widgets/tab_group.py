@@ -51,9 +51,7 @@ class TabGroup(Widget):
                 item = _TabItem(name, i)
                 item.set_active(i == self._active_idx)
                 yield item
-        with ContentSwitcher(
-            initial="tab-content-0", id="tabgroup-switcher"
-        ):
+        with ContentSwitcher(initial="tab-content-0", id="tabgroup-switcher"):
             for i, _ in enumerate(self._tab_defs):
                 yield Widget(id=f"tab-content-{i}")
 

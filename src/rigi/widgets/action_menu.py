@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from textual.app import ComposeResult
-from textual.events import Click
+from textual.events import Click, Key
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import Label
@@ -50,6 +50,8 @@ class ActionMenuItem(Widget):
 
 
 class ActionMenuPanel(Widget):
+    can_focus = True
+
     def __init__(
         self,
         items: list[ActionMenuItemData],
@@ -65,8 +67,33 @@ class ActionMenuPanel(Widget):
         for i, item in enumerate(self._items, start=1):
             yield ActionMenuItem(item, number=i)
 
+    def on_mount(self) -> None:
+        self.focus()
+
     def replace_items(self, items: list[ActionMenuItemData]) -> None:
         self._items = items
         self.remove_children()
         for i, item in enumerate(items, start=1):
             self.mount(ActionMenuItem(item, number=i))
+
+    def on__action_item_clicked(self, event: _ActionItemClicked) -> None:
+        event.stop()
+        item = event.item
+        if item.callback is not None:
+            callback = item.callback
+            self.remove()
+            self.app.call_after_refresh(callback)
+
+    def on_key(self, event: Key) -> None:
+        if event.key == "escape":
+            self.remove()
+            event.stop()
+        elif event.key.isdigit():
+            idx = int(event.key) - 1
+            if 0 <= idx < len(self._items):
+                item = self._items[idx]
+                if not item.disabled and item.callback is not None:
+                    callback = item.callback
+                    self.remove()
+                    self.app.call_after_refresh(callback)
+            event.stop()
