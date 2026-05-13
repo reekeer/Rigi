@@ -57,6 +57,7 @@ from rigi.widgets.settings_screen import RigiSettingDef, RigiSettingsScreen
 from rigi.widgets.sidebar import RigiSidebar
 from rigi.widgets.statusbar import RigiStatusBar, RigiStatusItem
 from rigi.widgets.terminal_bar import RigiTerminalBar
+from rigi.widgets.vertical_tabs import RigiVerticalTabs
 
 __all__ = [
     # Textual primitives
@@ -80,6 +81,7 @@ __all__ = [
     "RigiActionMenuItem",
     "RigiActionMenuPanel",
     "RigiActionMenuItemData",
+    "RigiVerticalTabs",
     "RigiSettingsScreen",
     "RigiSettingDef",
     "RigiImage",
