@@ -655,6 +655,7 @@ RigiStatusBar, RigiShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
                 category="Appearance",
                 label="Transparent",
                 description="Enable transparent background with adjustable opacity",
+                value_fn=lambda: str(self._transparent_percent),
                 checkbox_fn=lambda: self._transparent_enabled,
                 toggle_fn=self._toggle_transparency,
                 write_fn=self._set_transparency_percent,
