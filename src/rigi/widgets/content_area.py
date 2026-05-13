@@ -67,7 +67,6 @@ class RigiContentArea(Widget):
         self._current: Widget | None = None
 
     def compose(self) -> ComposeResult:
-        yield _ContentResizeHandle()
         with Widget(id="content-main"):
             yield _RigiEmptyState(id="rigi-empty-state")
 

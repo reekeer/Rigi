@@ -15,6 +15,10 @@ class RigiTheme:
 
     name: str
 
+    # ── backgrounds ────────────────────────────────────────────────────────
+    bg_color: str = "#000000"
+    fg_color: str = "#ffffff"
+
     # ── borders / separators ───────────────────────────────────────────────
     border: str = "#30363d"
     border_dim: str = "#21262d"
@@ -36,17 +40,25 @@ class RigiTheme:
 
     def to_css(self) -> str:
         return f"""/* rigi-theme: {self.name} */
+App, Screen {{
+    background: {self.bg_color};
+    color: {self.fg_color};
+}}
 RigiBorderFrame {{
     border: round {self.border};
+    background: {self.bg_color};
+    color: {self.fg_color};
 }}
 RigiStatusBar {{
     border-bottom: solid {self.border_dim};
+    background: {self.bg_color};
 }}
 _RigiMainNav {{
-    border-right: solid {self.border_dim};
+    background: {self.bg_color};
 }}
 _MainNavItem {{
     color: {self.text_dim};
+    background: {self.bg_color};
 }}
 _MainNavItem:hover {{
     color: {self.text};
@@ -56,10 +68,11 @@ _MainNavItem.--active {{
     border-left: thick {self.text_highlight};
 }}
 _RigiSubNav {{
-    border-right: solid {self.border_dim};
+    background: {self.bg_color};
 }}
 _SubNavItem {{
     color: {self.text_dim};
+    background: {self.bg_color};
 }}
 _SubNavItem:hover {{
     color: {self.text};
@@ -69,9 +82,13 @@ _SubNavItem.--active {{
 }}
 RigiShortcutsBar {{
     border-top: solid {self.border_dim};
+    background: {self.bg_color};
 }}
 RigiShortcutsBar Label {{
     color: {self.text_dim};
+}}
+RigiTerminalBar {{
+    background: {self.bg_color};
 }}
 RigiTerminalBar Label {{
     color: {self.terminal_color};
@@ -81,6 +98,7 @@ RigiTerminalBar Input {{
 }}
 RigiCard {{
     border: round {self.border_dim};
+    background: {self.bg_color};
 }}
 RigiCompletionList {{
     border: solid {self.border};
@@ -112,5 +130,26 @@ RigiPaletteScreen > #palette-container {{
 }}
 #help-dismiss {{
     color: {self.text_dim};
+}}
+_RigiBody {{
+    background: {self.bg_color};
+}}
+RigiSidebar {{
+    background: {self.bg_color};
+}}
+RigiContentArea {{
+    background: {self.bg_color};
+}}
+RigiBottomPanel {{
+    background: {self.bg_color};
+}}
+#content-main {{
+    background: {self.bg_color};
+}}
+_VerticalResizeHandle {{
+    background: {self.bg_color};
+}}
+_ContentResizeHandle {{
+    background: {self.bg_color};
 }}
 """

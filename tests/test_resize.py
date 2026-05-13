@@ -6,7 +6,7 @@ from textual.events import MouseDown, MouseMove, MouseUp
 
 from rigi.commands.registry import CommandRegistry
 from rigi.widgets.bottom_panel import RigiBottomPanel, _ResizeHandle
-from rigi.widgets.content_area import RigiContentArea, _ContentResizeHandle
+from rigi.widgets.content_area import RigiContentArea
 from rigi.widgets.sidebar import _VerticalResizeHandle
 
 
@@ -21,21 +21,6 @@ async def test_vertical_resize_handle_render():
     app = TestApp()
     async with app.run_test() as _:
         handle = app.query_one(_VerticalResizeHandle)
-        rendered = handle.render()
-        assert "│" in rendered
-
-
-@pytest.mark.asyncio
-async def test_content_resize_handle_render():
-    """Test content resize handle rendering."""
-
-    class TestApp(App[None]):
-        def compose(self):
-            yield RigiContentArea()
-
-    app = TestApp()
-    async with app.run_test() as _:
-        handle = app.query_one(_ContentResizeHandle)
         rendered = handle.render()
         assert "│" in rendered
 
