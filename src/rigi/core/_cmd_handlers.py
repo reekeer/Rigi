@@ -12,30 +12,44 @@ if TYPE_CHECKING:
 
 
 async def cmd_terminal(app: RigiApp, **_: Any) -> None:
+    from rigi.widgets.bottom_panel import RigiBottomPanel
+
     nfo = _console.info()
     lines = [
-        f"[bold]Terminal:[/bold]    {nfo['terminal']}",
-        f"[bold]True color:[/bold]  {'yes' if nfo['true_color'] else 'no'}"
-        f"  [dim](depth {nfo['color_depth']})[/dim]",
-        f"[bold]Hyperlinks:[/bold]  {'yes' if nfo['hyperlinks'] else 'no'}",
-        f"[bold]Unicode:[/bold]     {'yes' if nfo['unicode'] else 'no'}",
-        f"[bold]Mouse:[/bold]       {'yes' if nfo['mouse'] else 'no'}",
-        f"[bold]Kitty gfx:[/bold]   {'yes' if nfo['kitty_graphics'] else 'no'}",
-        f"[bold]Multiplexer:[/bold] "
+        "[bold]Terminal Info[/bold]",
+        f"  Terminal:    {nfo['terminal']}",
+        f"  True color:  {'yes' if nfo['true_color'] else 'no'}"
+        f"  (depth {nfo['color_depth']})",
+        f"  Hyperlinks:  {'yes' if nfo['hyperlinks'] else 'no'}",
+        f"  Unicode:     {'yes' if nfo['unicode'] else 'no'}",
+        f"  Mouse:       {'yes' if nfo['mouse'] else 'no'}",
+        f"  Kitty gfx:   {'yes' if nfo['kitty_graphics'] else 'no'}",
+        f"  Multiplexer: "
         f"{'tmux' if nfo['tmux'] else 'screen' if nfo['screen'] else 'none'}",
-        f"[bold]Size:[/bold]        {nfo['columns']}×{nfo['lines']}",
+        f"  Size:        {nfo['columns']}×{nfo['lines']}",
     ]
-    app.notify("\n".join(lines), title="Terminal Info", timeout=8)
+    try:
+        app.query_one(RigiBottomPanel).write_output("\n".join(lines))
+    except Exception:
+        app.notify("\n".join(lines), title="Terminal Info", timeout=8)
 
 
 async def cmd_help(app: RigiApp, **kwargs: Any) -> None:
+    from rigi.widgets.bottom_panel import RigiBottomPanel
+
     cmd_name = kwargs.get("command")
     registry = app.cmd_registry
+
+    def _output(text: str) -> None:
+        try:
+            app.query_one(RigiBottomPanel).write_output(text)
+        except Exception:
+            app.notify(text, title="Help", timeout=12)
 
     if cmd_name:
         cmd = registry.get(cmd_name)
         if cmd is None:
-            app.notify(f"Unknown command: {cmd_name}", severity="error", title="help")
+            _output(f"[red]Unknown command: {cmd_name}[/red]")
             return
 
         lines = [f"[bold cyan]{cmd.name}[/bold cyan]"]
@@ -60,7 +74,7 @@ async def cmd_help(app: RigiApp, **kwargs: Any) -> None:
                 if not sub.hidden:
                     lines.append(f"  [cyan]{sub.name}[/cyan] - {sub.help}")
 
-        app.notify("\n".join(lines), title=f"Help: {cmd.name}", timeout=15)
+        _output("\n".join(lines))
     else:
         lines = ["[bold]Available commands:[/bold]\n"]
         for cmd in registry.all():
@@ -69,7 +83,7 @@ async def cmd_help(app: RigiApp, **kwargs: Any) -> None:
                 lines.append(f"  [cyan]{cmd.name}[/cyan]{aliases} - {cmd.help}")
         lines.append("\n[dim]Type 'help <command>' for detailed information[/dim]")
         lines.append("[dim]Type '!<shell command>' to run shell commands[/dim]")
-        app.notify("\n".join(lines), title="Terminal Help", timeout=12)
+        _output("\n".join(lines))
 
 
 async def cmd_quit(app: RigiApp, **_: Any) -> None:
