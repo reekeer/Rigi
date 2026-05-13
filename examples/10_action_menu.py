@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
@@ -54,8 +56,8 @@ class EditableTable(Widget):
     def __init__(self) -> None:
         super().__init__()
         self._data: list[list[str]] = [list(r) for r in _ROWS]
-        self._col_keys: list[object] = []
-        self._row_keys: list[object] = []
+        self._col_keys: list[Any] = []
+        self._row_keys: list[Any] = []
         self._editing: tuple[int, int] | None = None
 
     def compose(self) -> ComposeResult:
