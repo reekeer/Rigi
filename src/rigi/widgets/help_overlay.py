@@ -52,6 +52,6 @@ class HelpOverlay(Widget):
 
     def on_click(self, event: Click) -> None:
         container = self.query_one("#help-container")
-        if not container.region.contains(event.x, event.y):
+        if not container.region.contains(event.screen_x, event.screen_y):
             self.remove()
             event.stop()

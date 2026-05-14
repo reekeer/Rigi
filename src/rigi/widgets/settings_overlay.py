@@ -147,6 +147,7 @@ class SettingsOverlay(Widget):
         super().__init__()
         self._settings = settings
         self._active_category = ""
+        self._pending_category = ""
         self._categories: list[str] = []
         seen: set[str] = set()
         for s in settings:
@@ -190,28 +191,32 @@ class SettingsOverlay(Widget):
         self._render_category(event.name)
 
     def _render_category(self, category: str) -> None:
-        try:
-            content = self.query_one("#s-content", _SettingsContent)
-            settings = [s for s in self._settings if s.category == category]
-            content.remove_children()
+        self._pending_category = category
+        settings = [s for s in self._settings if s.category == category]
 
-            def _mount() -> None:
-                try:
-                    content.mount(Label(category, classes="_cat-title"))
-                    for s in settings:
-                        content.mount(_SettingItem(s))
-                except Exception as e:
-                    _ui_log.error(f"Settings mount error: {e}", exc_info=True)
+        async def _do() -> None:
+            if self._pending_category != category:
+                return
+            try:
+                content = self.query_one("#s-content", _SettingsContent)
+                await content.query("*").remove()
+                if self._pending_category != category:
+                    return
+                await content.mount(Label(category, classes="_cat-title"))
+                for s in settings:
+                    if self._pending_category != category:
+                        return
+                    await content.mount(_SettingItem(s))
+            except Exception as e:
+                _ui_log.error(f"Settings render error: {e}", exc_info=True)
 
-            content.call_after_refresh(_mount)
-        except Exception as e:
-            _ui_log.error(f"Error rendering category: {e}", exc_info=True)
+        self.app.run_worker(_do(), name="rigi-settings-render", exclusive=True)
 
     def _refresh_content(self) -> None:
         self._render_category(self._active_category)
 
     def on_click(self, event: Click) -> None:
         container = self.query_one("#s-outer")
-        if not container.region.contains(event.x, event.y):
+        if not container.region.contains(event.screen_x, event.screen_y):
             self.remove()
             event.stop()
