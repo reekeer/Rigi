@@ -330,12 +330,12 @@ _SettingItem ._s-label { color: #c9d1d9; text-style: bold; height: 1; }
 _SettingItem ._s-desc { color: #6e7681; height: 1; }
 
 _SettingSwitch {
-    height: 1;
+    height: 3;
     width: auto;
     margin-top: 1;
     background: transparent;
 }
-_SettingSwitch Switch { height: 1; width: auto; }
+_SettingSwitch Switch { height: 3; width: 8; }
 
 _SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
 _SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
