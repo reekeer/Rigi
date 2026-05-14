@@ -335,7 +335,7 @@ class App(_TextualApp[None]):
                     r = int(bg[1:3], 16)
                     g = int(bg[3:5], 16)
                     b = int(bg[5:7], 16)
-                    rgba = f"rgb({r} {g} {b} / {alpha})"
+                    rgba = f"rgba({r},{g},{b},{alpha:.3f})"
                 else:
                     rgba = bg
                 css = f"""
