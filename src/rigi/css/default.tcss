@@ -8,6 +8,7 @@ Screen {
     layout: vertical;
     layers: base overlay;
     background: transparent;
+    overflow: hidden;
 }
 
 BorderFrame {
@@ -55,13 +56,14 @@ _HomeButton.--active { color: #58a6ff; }
 
 StatusBar {
     height: 2;
+    width: 100%;
     layout: horizontal;
     padding: 0 1;
     border-bottom: solid #21262d;
     background: transparent;
 }
 
-StatusItem {
+StatusBarItem {
     height: 1;
     padding: 0 1;
     width: auto;
@@ -517,7 +519,7 @@ BottomPanel Tab:hover { color: #e6edf3; }
 BottomPanel Tab.-active { color: #58a6ff; }
 BottomPanel #bp-switcher { height: 1fr; }
 BottomPanel #bp-terminal { layout: vertical; height: 1fr; }
-BottomPanel #term-history { height: 1fr; background: transparent; }
+BottomPanel #term-history { height: 1fr; background: #0d1117; }
 BottomPanel #input-row { height: 1; layout: horizontal; background: transparent; }
 BottomPanel #terminal-prompt {
     height: 1;
@@ -538,12 +540,9 @@ BottomPanel #terminal-input:focus { border: none; }
 
 NotificationRack {
     layer: overlay;
-    width: 1fr;
+    width: 50;
     height: auto;
     max-height: 80%;
-    dock: bottom;
-    align: right bottom;
-    margin-bottom: 3;
     background: transparent;
     layout: vertical;
 }
