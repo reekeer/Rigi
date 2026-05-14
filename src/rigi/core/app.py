@@ -799,12 +799,6 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         x: int | None = None,
         y: int | None = None,
     ) -> None:
-        try:
-            self.query_one("#rigi-action-panel", ActionMenuPanel).remove()
-        except Exception:
-            pass
-        panel = ActionMenuPanel(items, title=title, id="rigi-action-panel")
-        panel.styles.layer = "overlay"
         panel_w = max((len(item.label) + 6 for item in items), default=22)
         panel_h = min(2 + len(items), 20)
         app_w, app_h = self.size.width, self.size.height
@@ -814,6 +808,18 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
         else:
             px = max(0, (app_w - panel_w) // 2)
             py = max(0, (app_h - panel_h) // 2)
+        try:
+            existing = self.query_one("#rigi-action-panel", ActionMenuPanel)
+            existing.replace_items(items)
+            existing.styles.offset = (px, py)
+            existing.styles.width = panel_w
+            existing.styles.height = panel_h
+            existing.focus()
+            return
+        except Exception:
+            pass
+        panel = ActionMenuPanel(items, title=title, id="rigi-action-panel")
+        panel.styles.layer = "overlay"
         panel.styles.offset = (px, py)
         panel.styles.width = panel_w
         panel.styles.height = panel_h
