@@ -70,6 +70,13 @@ class ActionMenuPanel(Widget):
     def on_mount(self) -> None:
         self.focus()
 
+    def on_blur(self) -> None:
+        self.call_after_refresh(self._close_if_unfocused)
+
+    def _close_if_unfocused(self) -> None:
+        if self.is_mounted and not self.has_focus:
+            self.remove()
+
     def replace_items(self, items: list[ActionMenuItemData]) -> None:
         self._items = items
         self.remove_children()
