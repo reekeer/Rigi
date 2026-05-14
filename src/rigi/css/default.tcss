@@ -329,13 +329,38 @@ _SettingItem {
 _SettingItem ._s-label { color: #c9d1d9; text-style: bold; height: 1; }
 _SettingItem ._s-desc { color: #6e7681; height: 1; }
 
-_SettingSwitch {
-    height: 3;
-    width: auto;
+_Checkbox {
+    height: 1;
+    width: 3;
+    content-align: center middle;
+    color: #58a6ff;
+    background: transparent;
     margin-top: 1;
+}
+_Checkbox:focus { color: white; }
+
+_SliderRow {
+    layout: horizontal;
+    height: 1;
+    width: 100%;
+    margin-top: 1;
+}
+_Slider {
+    height: 1;
+    width: 1fr;
     background: transparent;
 }
-_SettingSwitch Switch { height: 3; width: 8; }
+_Slider:focus { background: #161b22; }
+_SliderRow Input {
+    width: 6;
+    height: 1;
+    border: solid #30363d;
+    background: #161b22;
+    color: #e6edf3;
+    padding: 0 1;
+    margin-left: 1;
+}
+_SliderRow Input:focus { border: solid #58a6ff; }
 
 _SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
 _SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
