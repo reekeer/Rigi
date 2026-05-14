@@ -17,12 +17,12 @@ if TYPE_CHECKING:
 
 class _TerminalInput(Input):
     def on_focus(self) -> None:
-        bar = next((w for w in self.ancestors if isinstance(w, RigiTerminalBar)), None)
+        bar = next((w for w in self.ancestors if isinstance(w, TerminalBar)), None)
         if bar is not None:
             bar._on_focus_changed(True)
 
     def on_blur(self) -> None:
-        bar = next((w for w in self.ancestors if isinstance(w, RigiTerminalBar)), None)
+        bar = next((w for w in self.ancestors if isinstance(w, TerminalBar)), None)
         if bar is not None:
             bar._on_focus_changed(False)
 
@@ -39,7 +39,7 @@ class _TerminalResizeHandle(Widget):
     def on_mouse_down(self, event: MouseDown) -> None:
         self.capture_mouse()
         self._drag_y = event.screen_y
-        bar = next((w for w in self.ancestors if isinstance(w, RigiTerminalBar)), None)
+        bar = next((w for w in self.ancestors if isinstance(w, TerminalBar)), None)
         if bar is not None:
             self._drag_h = bar.size.height
 
@@ -48,7 +48,7 @@ class _TerminalResizeHandle(Widget):
             return
         delta = self._drag_y - event.screen_y
         new_h = max(2, self._drag_h + delta)
-        bar = next((w for w in self.ancestors if isinstance(w, RigiTerminalBar)), None)
+        bar = next((w for w in self.ancestors if isinstance(w, TerminalBar)), None)
         if bar is not None:
             bar.styles.height = new_h
 
@@ -58,7 +58,7 @@ class _TerminalResizeHandle(Widget):
         self._drag_h = None
 
 
-class RigiTerminalBar(Widget):
+class TerminalBar(Widget):
     BINDINGS = [
         Binding("tab", "complete", "Complete", show=False),
     ]
@@ -156,7 +156,7 @@ class RigiTerminalBar(Widget):
             self._history_pos = -1
             self._input.value = ""
             self._completions = []
-            self.post_message(RigiTerminalBar.CommandSubmitted(text))
+            self.post_message(TerminalBar.CommandSubmitted(text))
 
     def action_complete(self) -> None:
         if not self._completions:

@@ -1,4 +1,4 @@
-"""RigiTheme data class — color palette for a Rigi application."""
+"""Theme data class — color palette for a Rigi application."""
 
 from __future__ import annotations
 
@@ -6,14 +6,18 @@ from dataclasses import dataclass
 
 
 @dataclass
-class RigiTheme:
-    """Color theme for a RigiApp.
+class Theme:
+    """Color theme for a App.
 
     All color values are CSS color strings (hex, named, rgb(), etc.).
     Call ``to_css()`` to get the complete override stylesheet.
     """
 
     name: str
+
+    # ── backgrounds ────────────────────────────────────────────────────────
+    bg_color: str = "#000000"
+    fg_color: str = "#ffffff"
 
     # ── borders / separators ───────────────────────────────────────────────
     border: str = "#30363d"
@@ -36,17 +40,25 @@ class RigiTheme:
 
     def to_css(self) -> str:
         return f"""/* rigi-theme: {self.name} */
-RigiBorderFrame {{
+App, Screen {{
+    background: {self.bg_color};
+    color: {self.fg_color};
+}}
+BorderFrame {{
     border: round {self.border};
+    background: {self.bg_color};
+    color: {self.fg_color};
 }}
-RigiStatusBar {{
+StatusBar {{
     border-bottom: solid {self.border_dim};
+    background: {self.bg_color};
 }}
-_RigiMainNav {{
-    border-right: solid {self.border_dim};
+_MainNav {{
+    background: {self.bg_color};
 }}
 _MainNavItem {{
     color: {self.text_dim};
+    background: {self.bg_color};
 }}
 _MainNavItem:hover {{
     color: {self.text};
@@ -55,11 +67,13 @@ _MainNavItem.--active {{
     color: {self.text_highlight};
     border-left: thick {self.text_highlight};
 }}
-_RigiSubNav {{
+_SubNav {{
+    background: {self.bg_color};
     border-right: solid {self.border_dim};
 }}
 _SubNavItem {{
     color: {self.text_dim};
+    background: {self.bg_color};
 }}
 _SubNavItem:hover {{
     color: {self.text};
@@ -67,34 +81,48 @@ _SubNavItem:hover {{
 _SubNavItem.--active {{
     color: {self.text_highlight2};
 }}
-RigiShortcutsBar {{
+ShortcutsBar {{
     border-top: solid {self.border_dim};
+    background: {self.bg_color};
 }}
-RigiShortcutsBar Label {{
+ShortcutsBar Label {{
     color: {self.text_dim};
 }}
-RigiTerminalBar Label {{
+TerminalBar {{
+    background: {self.bg_color};
+}}
+TerminalBar Label {{
     color: {self.terminal_color};
 }}
-RigiTerminalBar Input {{
+TerminalBar Input {{
     color: {self.text};
 }}
-RigiCard {{
+Card {{
     border: round {self.border_dim};
+    background: {self.bg_color};
 }}
-RigiCompletionList {{
+CompletionList {{
     border: solid {self.border};
     background: {self.completion_bg};
 }}
-RigiHelpScreen > #help-container {{
+HelpOverlay {{
+    background: transparent;
+}}
+HelpOverlay > #help-container {{
     border: round {self.border};
     background: {self.popup_bg};
 }}
-RigiHamburgerPanel {{
+ActionMenuScreen {{
+    background: transparent;
+}}
+SettingsOverlay {{
+    background: transparent;
+}}
+HamburgerPanel {{
     border: round {self.border};
     background: {self.popup_bg};
 }}
-RigiPaletteScreen > #palette-container {{
+PaletteScreen > #palette-container {{
     border: round {self.border};
     background: {self.popup_bg};
 }}
@@ -112,5 +140,26 @@ RigiPaletteScreen > #palette-container {{
 }}
 #help-dismiss {{
     color: {self.text_dim};
+}}
+_Body {{
+    background: {self.bg_color};
+}}
+Sidebar {{
+    background: {self.bg_color};
+}}
+ContentArea {{
+    background: {self.bg_color};
+}}
+BottomPanel {{
+    background: {self.bg_color};
+}}
+#content-main {{
+    background: {self.bg_color};
+}}
+_VerticalResizeHandle {{
+    background: {self.bg_color};
+}}
+_ContentResizeHandle {{
+    background: {self.bg_color};
 }}
 """

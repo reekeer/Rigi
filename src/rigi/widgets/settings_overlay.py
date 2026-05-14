@@ -1,3 +1,5 @@
+"""SettingsOverlay — transparent overlay widget with settings content."""
+
 from __future__ import annotations
 
 import logging
@@ -5,66 +7,14 @@ from typing import Callable
 
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding
+from textual.events import Click
 from textual.message import Message
-from textual.screen import ModalScreen
 from textual.widget import Widget
 from textual.widgets import Button, Input, Label, Switch
 
+from rigi.screens.settings import SettingDef
+
 _ui_log = logging.getLogger("rigi.ui")
-
-
-class SettingDef:
-    def __init__(
-        self,
-        category: str,
-        label: str,
-        description: str = "",
-        value_fn: Callable[[], str] | None = None,
-        action_fn: Callable[[], None] | None = None,
-        action_label: str = "Change",
-        write_fn: Callable[[str], None] | None = None,
-        checkbox_fn: Callable[[], bool] | None = None,
-        toggle_fn: Callable[[], None] | None = None,
-    ) -> None:
-        self.category = category
-        self.label = label
-        self.description = description
-        self.value_fn = value_fn
-        self.action_fn = action_fn
-        self.action_label = action_label
-        self.write_fn = write_fn
-        self.checkbox_fn = checkbox_fn
-        self.toggle_fn = toggle_fn
-        self._current_value: str | None = None
-
-    def get_value(self) -> str:
-        if self._current_value is not None:
-            return self._current_value
-        if self.value_fn is None:
-            return ""
-        try:
-            return str(self.value_fn())
-        except Exception as e:
-            _ui_log.error(f"Error getting setting value for {self.label}: {e}", exc_info=True)
-            return ""
-
-    def set_value(self, v: str) -> None:
-        self._current_value = v
-        if self.write_fn:
-            try:
-                self.write_fn(v)
-            except Exception as e:
-                _ui_log.error(f"Error setting value for {self.label}: {e}", exc_info=True)
-
-    def get_checked(self) -> bool:
-        if self.checkbox_fn is None:
-            return False
-        try:
-            return self.checkbox_fn()
-        except Exception as e:
-            _ui_log.error(f"Error getting checkbox value for {self.label}: {e}", exc_info=True)
-            return False
 
 
 class _CategoryClicked(Message):
@@ -104,9 +54,9 @@ class _ActionButton(Widget):
     def on_click(self) -> None:
         self._callback()
         try:
-            screen = self.app.screen
-            if isinstance(screen, SettingsScreen):
-                screen._refresh_content()
+            overlay = self.app.query_one("#rigi-settings-overlay")
+            if isinstance(overlay, SettingsOverlay):
+                overlay._refresh_content()
         except Exception as e:
             _ui_log.error(f"Error in action button click: {e}", exc_info=True)
 
@@ -157,7 +107,6 @@ class _SettingSwitch(Widget):
                 self._setting.toggle_fn()
             except Exception as e:
                 _ui_log.error(f"Error toggling setting {self._setting.label}: {e}", exc_info=True)
-        # Show/hide sibling input when present
         for sibling in self.siblings:
             if isinstance(sibling, _SettingInput):
                 sibling.display = event.value
@@ -191,8 +140,8 @@ class _SettingsContent(Widget):
         yield from []
 
 
-class SettingsScreen(ModalScreen[None]):
-    BINDINGS = [Binding("escape", "dismiss", show=False)]
+class SettingsOverlay(Widget):
+    can_focus = True
 
     def __init__(self, settings: list[SettingDef]) -> None:
         super().__init__()
@@ -228,7 +177,7 @@ class SettingsScreen(ModalScreen[None]):
     @on(Button.Pressed, "#s-close-btn")
     def on_close_pressed(self, event: Button.Pressed) -> None:
         event.stop()
-        self.dismiss(None)
+        self.remove()
 
     @on(_CategoryClicked)
     def on_category_clicked(self, event: _CategoryClicked) -> None:
@@ -250,3 +199,9 @@ class SettingsScreen(ModalScreen[None]):
 
     def _refresh_content(self) -> None:
         self._render_category(self._active_category)
+
+    def on_click(self, event: Click) -> None:
+        container = self.query_one("#s-outer")
+        if not container.region.contains(event.x, event.y):
+            self.remove()
+            event.stop()

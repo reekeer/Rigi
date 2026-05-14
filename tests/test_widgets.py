@@ -4,8 +4,8 @@ import pytest
 from textual.app import App
 from textual.widgets import Label
 
-from rigi.widgets.content_area import RigiContentArea
-from rigi.widgets.settings_screen import RigiSettingDef
+from rigi.widgets.content_area import ContentArea
+from rigi.widgets.settings_screen import SettingDef
 
 
 @pytest.mark.asyncio
@@ -14,11 +14,11 @@ async def test_content_area_show_widget():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiContentArea()
+            yield ContentArea()
 
     app = TestApp()
     async with app.run_test() as _:
-        content = app.query_one(RigiContentArea)
+        content = app.query_one(ContentArea)
         test_widget = Label("Test")
 
         content.show_widget(test_widget)
@@ -32,11 +32,11 @@ async def test_content_area_clear():
 
     class TestApp(App[None]):
         def compose(self):
-            yield RigiContentArea()
+            yield ContentArea()
 
     app = TestApp()
     async with app.run_test() as _:
-        content = app.query_one(RigiContentArea)
+        content = app.query_one(ContentArea)
         test_widget = Label("Test")
 
         content.show_widget(test_widget)
@@ -48,7 +48,7 @@ async def test_content_area_clear():
 
 def test_setting_def_get_value():
     """Test getting setting value."""
-    setting = RigiSettingDef(category="Test", label="Test Setting", value_fn=lambda: "test_value")
+    setting = SettingDef(category="Test", label="Test Setting", value_fn=lambda: "test_value")
 
     assert setting.get_value() == "test_value"
 
@@ -60,7 +60,7 @@ def test_setting_def_set_value():
     def write_fn(value: str) -> None:
         stored.append(value)
 
-    setting = RigiSettingDef(category="Test", label="Test Setting", write_fn=write_fn)
+    setting = SettingDef(category="Test", label="Test Setting", write_fn=write_fn)
 
     setting.set_value("new_value")
     assert stored == ["new_value"]
@@ -72,7 +72,7 @@ def test_setting_def_with_error():
     def error_fn():
         raise ValueError("Test error")
 
-    setting = RigiSettingDef(category="Test", label="Test Setting", value_fn=error_fn)
+    setting = SettingDef(category="Test", label="Test Setting", value_fn=error_fn)
 
     # Should not raise, should return empty string
     assert setting.get_value() == ""
@@ -86,7 +86,7 @@ def test_setting_def_cached_value():
         call_count.append(1)
         return "value"
 
-    setting = RigiSettingDef(category="Test", label="Test Setting", value_fn=value_fn)
+    setting = SettingDef(category="Test", label="Test Setting", value_fn=value_fn)
 
     # First call
     val1 = setting.get_value()

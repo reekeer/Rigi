@@ -15,12 +15,12 @@ from textual.message import Message
 from textual.widget import Widget
 
 
-class RigiMouseMixin:
+class MouseMixin:
     """
     Mixin for any Widget subclass to get convenient mouse event hooks.
 
     Usage:
-        class MyWidget(RigiMouseMixin, Widget):
+        class MyWidget(MouseMixin, Widget):
             def on_rigi_click(self, x, y, button):
                 ...
     """
@@ -81,12 +81,12 @@ class RigiMouseMixin:
                 await result
 
 
-class RigiClickable(RigiMouseMixin, Widget):
+class Clickable(MouseMixin, Widget):
     """
     Widget that fires a Clicked message and calls on_rigi_click.
 
     Usage:
-        btn = RigiClickable("Click me")
+        btn = Clickable("Click me")
         btn.on_rigi_click = lambda x, y, btn: print("clicked")
     """
 
@@ -105,11 +105,11 @@ class RigiClickable(RigiMouseMixin, Widget):
         return self._label
 
     def on_click(self, event: Click) -> None:
-        self.post_message(RigiClickable.Clicked(event.x, event.y, event.button))
+        self.post_message(Clickable.Clicked(event.x, event.y, event.button))
         super().on_click(event)
 
 
-class RigiDraggable(RigiMouseMixin, Widget):
+class Draggable(MouseMixin, Widget):
     """
     Widget that supports drag operations.
     """

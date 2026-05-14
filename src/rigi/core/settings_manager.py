@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Callable
 
-from rigi.screens.settings import RigiSettingDef
+from rigi.screens.settings import SettingDef
 
 
 class Setting:
@@ -29,8 +29,8 @@ class Setting:
         self.checkbox_fn = checkbox_fn
         self.toggle_fn = toggle_fn
 
-    def _to_def(self, category: str) -> RigiSettingDef:
-        return RigiSettingDef(
+    def _to_def(self, category: str) -> SettingDef:
+        return SettingDef(
             category=category,
             label=self.label,
             description=self.description,
@@ -48,10 +48,10 @@ class SettingsPage:
 
     def __init__(self, name: str) -> None:
         self.name = name
-        self._defs: list[RigiSettingDef] = []
+        self._defs: list[SettingDef] = []
 
     @property
-    def settings(self) -> list[RigiSettingDef]:
+    def settings(self) -> list[SettingDef]:
         return self._defs
 
     @settings.setter
@@ -79,8 +79,8 @@ class SettingsManager:
         self._pages.append(page)
         return page
 
-    def all_defs(self) -> list[RigiSettingDef]:
-        defs: list[RigiSettingDef] = []
+    def all_defs(self) -> list[SettingDef]:
+        defs: list[SettingDef] = []
         for page in self._pages:
             defs.extend(page._defs)
         return defs

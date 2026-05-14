@@ -5,27 +5,27 @@ from typing import Any
 from textual.widget import Widget
 
 
-class RigiPane(Widget):
+class Pane(Widget):
     def __init__(self, *children: Widget, **kwargs: Any) -> None:
         super().__init__(*children, **kwargs)
 
 
-class RigiHPane(Widget):
+class HPane(Widget):
     def __init__(self, *children: Widget, **kwargs: Any) -> None:
         super().__init__(*children, **kwargs)
 
 
-class RigiVPane(Widget):
+class VPane(Widget):
     def __init__(self, *children: Widget, **kwargs: Any) -> None:
         super().__init__(*children, **kwargs)
 
 
-class RigiScrollPane(Widget):
+class ScrollPane(Widget):
     def __init__(self, *children: Widget, **kwargs: Any) -> None:
         super().__init__(*children, **kwargs)
 
 
-class RigiCard(Widget):
+class Card(Widget):
     def __init__(self, *children: Widget, title: str = "", **kwargs: Any) -> None:
         super().__init__(*children, **kwargs)
         self._title = title
@@ -33,7 +33,7 @@ class RigiCard(Widget):
             self.border_title = title
 
 
-class RigiSplit(Widget):
+class Split(Widget):
     def __init__(self, *children: Widget, sizes: list[str] | None = None, **kwargs: Any) -> None:
         super().__init__(*children, **kwargs)
         self._sizes = sizes

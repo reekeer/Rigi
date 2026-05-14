@@ -189,7 +189,7 @@ def _make_fallback_strips(
     return strips
 
 
-class RigiImage(Widget):
+class Image(Widget):
     def __init__(
         self,
         source: str | Path | bytes | None = None,

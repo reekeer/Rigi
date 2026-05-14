@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiPane
+from rigi import App, TabDef
+from rigi.layout.pane import Card, Pane
 from rigi.widgets import DataTable, Label
 
-app = RigiApp(name="todo", version="1.0.0", description="Terminal todo manager", home_tab="Tasks")
+app = App(name="todo", version="1.0.0", description="Terminal todo manager", home_tab="Tasks")
 
 _tasks: list[dict[str, object]] = [
     {"id": 1, "text": "Set up project structure", "done": True, "priority": "high"},
@@ -28,9 +28,9 @@ def make_tasks():
         col = priority_color.get(pri, "white")
         task_text = f"[dim]{t['text']}[/dim]" if t["done"] else str(t["text"])
         table.add_row(str(t["id"]), done_mark, f"[{col}]{pri}[/{col}]", task_text, "today")
-    return RigiPane(
+    return Pane(
         table,
-        RigiCard(
+        Card(
             Label("[dim]add <text>        [/dim] Add new task"),
             Label("[dim]done <id>         [/dim] Mark complete"),
             Label("[dim]delete <id>       [/dim] Delete task"),
@@ -43,8 +43,8 @@ def make_tasks():
 
 def make_done():
     done = [t for t in _tasks if t["done"]]
-    return RigiPane(
-        RigiCard(
+    return Pane(
+        Card(
             *[Label(f"[green]✓[/green]  {t['text']}") for t in done]
             or [Label("[dim]No completed tasks yet[/dim]")],
             title=f" Completed ({len(done)})",
@@ -67,7 +67,7 @@ app.add_status(
 
 
 @app.command("add", help="Add a new task")
-async def cmd_add(app: RigiApp, **kwargs: object) -> None:
+async def cmd_add(app: App, **kwargs: object) -> None:
     global _next_id
     text = " ".join(str(v) for v in kwargs.values() if v)
     if not text:
@@ -80,7 +80,7 @@ async def cmd_add(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("done", help="Mark task as complete")
-async def cmd_done(app: RigiApp, **kwargs: object) -> None:
+async def cmd_done(app: App, **kwargs: object) -> None:
     try:
         tid = int(next(iter(kwargs.values())))  # type: ignore[arg-type]
         task = next(t for t in _tasks if t["id"] == tid)
@@ -92,7 +92,7 @@ async def cmd_done(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("delete", help="Delete a task", aliases=["del", "rm"])
-async def cmd_delete(app: RigiApp, **kwargs: object) -> None:
+async def cmd_delete(app: App, **kwargs: object) -> None:
     try:
         tid = int(next(iter(kwargs.values())))  # type: ignore[arg-type]
         task = next(t for t in _tasks if t["id"] == tid)
@@ -104,7 +104,7 @@ async def cmd_delete(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("clear", help="Remove all completed tasks")
-async def cmd_clear(app: RigiApp, **_: object) -> None:
+async def cmd_clear(app: App, **_: object) -> None:
     removed = sum(1 for t in _tasks if t["done"])
     _tasks[:] = [t for t in _tasks if not t["done"]]
     app.invalidate_tab_cache()
@@ -112,4 +112,4 @@ async def cmd_clear(app: RigiApp, **_: object) -> None:
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

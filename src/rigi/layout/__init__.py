@@ -1,10 +1,10 @@
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane, RigiScrollPane, RigiSplit, RigiVPane
+from rigi.layout.pane import Card, HPane, Pane, ScrollPane, Split, VPane
 
 __all__ = [
-    "RigiPane",
-    "RigiHPane",
-    "RigiVPane",
-    "RigiScrollPane",
-    "RigiCard",
-    "RigiSplit",
+    "Pane",
+    "HPane",
+    "VPane",
+    "ScrollPane",
+    "Card",
+    "Split",
 ]

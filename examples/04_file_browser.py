@@ -6,11 +6,11 @@ import os
 import stat
 from pathlib import Path
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiPane
+from rigi import App, TabDef
+from rigi.layout.pane import Card, Pane
 from rigi.widgets import DataTable, Label
 
-app = RigiApp(name="files", version="1.0.0", description="Local filesystem browser")
+app = App(name="files", version="1.0.0", description="Local filesystem browser")
 
 _cwd: Path = Path.cwd()
 
@@ -54,7 +54,7 @@ def make_browser():
         except OSError:
             table.add_row(f"[dim]{entry.name}[/dim]", "?", "?", "?")
 
-    info = RigiCard(
+    info = Card(
         Label(f"[bold]Path:[/bold]  {_cwd}"),
         Label(f"[bold]Items:[/bold] {len(entries)}"),
         Label(
@@ -63,7 +63,7 @@ def make_browser():
         title=" Current Directory",
     )
 
-    return RigiPane(info, table)
+    return Pane(info, table)
 
 
 def _file_type(p: Path) -> str:
@@ -91,7 +91,7 @@ app.add_status("path", "Path", lambda: str(_cwd), refresh_interval=1.0)
 
 
 @app.command("cd", help="Change directory")
-async def cmd_cd(app: RigiApp, **kwargs: object) -> None:
+async def cmd_cd(app: App, **kwargs: object) -> None:
     global _cwd
     target = str(next(iter(kwargs.values()), "~"))
     try:
@@ -106,13 +106,13 @@ async def cmd_cd(app: RigiApp, **kwargs: object) -> None:
 
 
 @app.command("ls", help="List current directory", aliases=["dir"])
-async def cmd_ls(app: RigiApp, **_: object) -> None:
+async def cmd_ls(app: App, **_: object) -> None:
     app.invalidate_tab_cache()
     app.navigate_to_tab("Browser")
 
 
 @app.command("home", help="Go to home directory")
-async def cmd_home(app: RigiApp, **_: object) -> None:
+async def cmd_home(app: App, **_: object) -> None:
     global _cwd
     _cwd = Path.home()
     app.invalidate_tab_cache()
@@ -120,4 +120,4 @@ async def cmd_home(app: RigiApp, **_: object) -> None:
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

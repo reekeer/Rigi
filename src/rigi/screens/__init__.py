@@ -1,13 +1,15 @@
 """Rigi screen classes."""
 
-from rigi.screens.hamburger import RigiHamburgerScreen
-from rigi.screens.help import BUILTIN_SHORTCUTS, RigiHelpScreen
-from rigi.screens.settings import RigiSettingDef, RigiSettingsScreen
+from rigi.screens.action_menu import ActionMenuScreen
+from rigi.screens.hamburger import HamburgerScreen
+from rigi.screens.help import BUILTIN_SHORTCUTS, HelpScreen
+from rigi.screens.settings import SettingDef, SettingsScreen
 
 __all__ = [
     "BUILTIN_SHORTCUTS",
-    "RigiHelpScreen",
-    "RigiSettingDef",
-    "RigiSettingsScreen",
-    "RigiHamburgerScreen",
+    "HelpScreen",
+    "SettingDef",
+    "SettingsScreen",
+    "HamburgerScreen",
+    "ActionMenuScreen",
 ]

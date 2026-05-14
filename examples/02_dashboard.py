@@ -6,11 +6,11 @@ import datetime
 import os
 import random
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane
+from rigi import App, TabDef
+from rigi.layout.pane import Card, HPane, Pane
 from rigi.widgets import DataTable, Label
 
-app = RigiApp(
+app = App(
     name="dashboard",
     version="2.0.0",
     description="Live metrics dashboard",
@@ -25,15 +25,15 @@ app.add_status("mem", "Mem", lambda: f"{random.randint(40, 70)}%", refresh_inter
 
 
 def make_overview():
-    return RigiPane(
-        RigiHPane(
-            RigiCard(
+    return Pane(
+        HPane(
+            Card(
                 Label(f"[bold green]{random.randint(100, 999)}[/bold green]  requests/s"),
                 Label(f"[bold yellow]{random.randint(1, 30)}ms[/bold yellow]  avg latency"),
                 Label(f"[bold cyan]{random.randint(5, 50)}[/bold cyan]  active users"),
                 title=" Overview",
             ),
-            RigiCard(
+            Card(
                 Label("[green]●[/green]  API          [dim]healthy[/dim]"),
                 Label("[green]●[/green]  Database     [dim]healthy[/dim]"),
                 Label("[yellow]●[/yellow]  Cache        [dim]degraded[/dim]"),
@@ -42,7 +42,7 @@ def make_overview():
                 title=" Services",
             ),
         ),
-        RigiCard(
+        Card(
             Label(f"Uptime:   [cyan]{random.randint(1, 99)}d {random.randint(0,23)}h[/cyan]"),
             Label(
                 f"Version:  [dim]v{random.randint(1,5)}.{random.randint(0,9)}.{random.randint(0,9)}[/dim]"
@@ -69,7 +69,7 @@ def make_metrics_table():
     ]
     for row in metrics:
         table.add_row(*row)
-    return RigiPane(table)
+    return Pane(table)
 
 
 def make_logs():
@@ -85,8 +85,8 @@ def make_logs():
             f"[{color}]{lvl:5}[/{color}]  [dim]{t.strftime('%H:%M:%S')}[/dim]  [bold]{svc}[/bold]  request handled"
         )
 
-    return RigiPane(
-        RigiCard(*[Label(line) for line in lines], title=" Recent Logs"),
+    return Pane(
+        Card(*[Label(line) for line in lines], title=" Recent Logs"),
     )
 
 
@@ -102,10 +102,10 @@ app.add_menu_item("Refresh all", lambda: app.invalidate_tab_cache(), section="Da
 
 
 @app.command("refresh", help="Refresh widget cache", aliases=["r"])
-async def cmd_refresh(app: RigiApp, **_: object) -> None:
+async def cmd_refresh(app: App, **_: object) -> None:
     app.invalidate_tab_cache()
     app.notify("Refreshed", timeout=2)
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

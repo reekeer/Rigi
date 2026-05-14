@@ -1,6 +1,6 @@
-from rigi.themes.base import RigiTheme
+from rigi.themes.base import Theme
 
-MONOKAI = RigiTheme(
+MONOKAI = Theme(
     name="monokai",
     border="#75715e",
     border_dim="#3e3d32",

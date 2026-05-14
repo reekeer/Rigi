@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import datetime
 
-from rigi import RigiApp, TabDef
-from rigi.layout.pane import RigiCard, RigiHPane, RigiPane, RigiSplit
+from rigi import App, TabDef
+from rigi.layout.pane import Card, HPane, Pane, Split
 from rigi.themes import DARK, LIGHT, MONOKAI, NORD
 from rigi.widgets import Label, Markdown
 
-app = RigiApp(
+app = App(
     name="themes",
     version="1.0.0",
     description="Theme & styling showcase",
@@ -24,9 +24,9 @@ app.add_status(
 
 
 def make_showcase():
-    return RigiPane(
-        RigiHPane(
-            RigiCard(
+    return Pane(
+        HPane(
+            Card(
                 Label("[bold red]Error[/bold red]        critical failure"),
                 Label("[bold yellow]Warning[/bold yellow]      disk space low"),
                 Label("[bold green]Success[/bold green]      deployment complete"),
@@ -35,7 +35,7 @@ def make_showcase():
                 Label("[bold magenta]Trace[/bold magenta]        entering fn foo"),
                 title=" Log Levels",
             ),
-            RigiCard(
+            Card(
                 Label("[dim]Disabled / secondary text[/dim]"),
                 Label("[bold]Bold / primary text[/bold]"),
                 Label("[italic]Italic annotation[/italic]"),
@@ -45,7 +45,7 @@ def make_showcase():
                 title=" Text Styles",
             ),
         ),
-        RigiCard(
+        Card(
             Markdown("""
 ## Color swatches
 
@@ -65,9 +65,9 @@ def make_showcase():
 
 
 def make_widgets():
-    return RigiPane(
-        RigiSplit(
-            RigiCard(
+    return Pane(
+        Split(
+            Card(
                 Label("  ● Active item"),
                 Label("  ○ Inactive item"),
                 Label("  ▶ Collapsed group"),
@@ -75,7 +75,7 @@ def make_widgets():
                 Label("  ─ Separator"),
                 title=" Sidebar Icons",
             ),
-            RigiCard(
+            Card(
                 Label("  ⌂  Home button (active: [cyan]blue[/cyan])"),
                 Label("  ☰  Hamburger menu"),
                 Label("  ●  Terminal focused"),
@@ -94,7 +94,7 @@ app.add_tab(widgets_tab)
 
 
 @app.command("theme", help="Switch theme: dark | light | monokai | nord")
-async def cmd_theme(app: RigiApp, **kwargs: object) -> None:
+async def cmd_theme(app: App, **kwargs: object) -> None:
     name = str(next(iter(kwargs.values()), "")).lower()
     themes = {"dark": DARK, "light": LIGHT, "monokai": MONOKAI, "nord": NORD}
     t = themes.get(name)
@@ -106,4 +106,4 @@ async def cmd_theme(app: RigiApp, **kwargs: object) -> None:
 
 
 if __name__ == "__main__":
-    RigiApp.run_cli(app)
+    App.run_cli(app)

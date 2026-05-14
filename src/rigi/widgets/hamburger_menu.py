@@ -13,22 +13,22 @@ from textual.widgets import Label
 
 
 @dataclass
-class RigiMenuItemData:
+class MenuItemData:
     label: str
     callback: Callable[[], Any] | None = None
     checked: bool = False
-    submenu: list[RigiMenuItemData] | None = None
+    submenu: list[MenuItemData] | None = None
     is_back: bool = False
 
 
 class _ItemClicked(Message):
-    def __init__(self, item: RigiMenuItemData) -> None:
+    def __init__(self, item: MenuItemData) -> None:
         super().__init__()
         self.item = item
 
 
-class RigiMenuItem(Widget):
-    def __init__(self, item: RigiMenuItemData) -> None:
+class MenuItem(Widget):
+    def __init__(self, item: MenuItemData) -> None:
         super().__init__()
         self._item = item
 
@@ -54,15 +54,16 @@ class _MenuSectionLabel(Widget):
         yield Label(f"── {self._title}")
 
 
-class RigiMenuPanel(Widget):
+class MenuPanel(Widget):
     def __init__(
         self,
-        sections: list[tuple[str, list[RigiMenuItemData]]],
+        sections: list[tuple[str, list[MenuItemData]]],
         title: str = "",
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self._sections = sections
+        self._sections_stack: list[list[tuple[str, list[MenuItemData]]]] = []
         if title:
             self.border_title = title
 
@@ -71,16 +72,43 @@ class RigiMenuPanel(Widget):
             if title:
                 yield _MenuSectionLabel(title)
             for item in items:
-                yield RigiMenuItem(item)
+                yield MenuItem(item)
 
-    def replace_sections(self, sections: list[tuple[str, list[RigiMenuItemData]]]) -> None:
+    def replace_sections(self, sections: list[tuple[str, list[MenuItemData]]]) -> None:
         self._sections = sections
         self.remove_children()
         for title, items in sections:
             if title:
                 self.mount(_MenuSectionLabel(title))
             for item in items:
-                self.mount(RigiMenuItem(item))
+                self.mount(MenuItem(item))
+
+    def on__item_clicked(self, event: _ItemClicked) -> None:
+        event.stop()
+        item = event.item
+        if item.is_back:
+            self._go_back()
+        elif item.submenu is not None:
+            self._enter_submenu(item)
+        elif item.callback is not None:
+            callback = item.callback
+            self.remove()
+            self.app.call_after_refresh(callback)
+
+    def _enter_submenu(self, item: MenuItemData) -> None:
+        self._sections_stack.append(self._sections)
+        back_item = MenuItemData("Back", is_back=True)
+        self._sections = [("", [back_item] + list(item.submenu or []))]
+        self.border_title = item.label
+        self.replace_sections(self._sections)
+
+    def _go_back(self) -> None:
+        if self._sections_stack:
+            self._sections = self._sections_stack.pop()
+            self.border_title = ""
+            self.replace_sections(self._sections)
+        else:
+            self.remove()
 
 
-RigiHamburgerPanel = RigiMenuPanel
+HamburgerPanel = MenuPanel

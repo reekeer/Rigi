@@ -9,14 +9,16 @@ from pathlib import Path
 from typing import Any, Awaitable, Callable
 
 from textual import on
-from textual.app import App, ComposeResult
+from textual.app import App as _TextualApp
+from textual.app import ComposeResult
 from textual.binding import Binding
+from textual.events import Key
 from textual.notifications import SeverityLevel
 from textual.widget import Widget
 
 from rigi.commands.command import Command
 from rigi.commands.parser import build_cli_parser, parse_inline
-from rigi.commands.provider import RigiCommandProvider
+from rigi.commands.provider import CommandProvider
 from rigi.commands.registry import CommandRegistry
 from rigi.core import console as _console
 from rigi.core import log_store
@@ -25,20 +27,21 @@ from rigi.core._cmd_handlers import cmd_clear, cmd_help, cmd_quit, cmd_terminal
 from rigi.core.dev_commands import register_dev_commands
 from rigi.core.settings_manager import SettingsManager
 from rigi.core.types import HandlerFn, HelpEntry, StatusItem, SubtabDef, TabDef
-from rigi.screens.hamburger import RigiHamburgerScreen
-from rigi.screens.help import RigiHelpScreen
-from rigi.screens.settings import RigiSettingDef, RigiSettingsScreen
+from rigi.screens.settings import SettingDef
 from rigi.themes import DARK as _DEFAULT_THEME
-from rigi.themes import RigiTheme
-from rigi.widgets.border_frame import RigiBorderFrame
-from rigi.widgets.bottom_panel import RigiBottomPanel
-from rigi.widgets.content_area import RigiContentArea
-from rigi.widgets.hamburger_menu import RigiMenuItemData
-from rigi.widgets.help_panel import RigiShortcutsBar, extract_help_annotation
-from rigi.widgets.notifications import RigiNotificationRack
-from rigi.widgets.sidebar import RigiSidebar
+from rigi.themes import Theme
+from rigi.widgets.action_menu import ActionMenuItemData, ActionMenuPanel
+from rigi.widgets.border_frame import BorderFrame
+from rigi.widgets.bottom_panel import BottomPanel
+from rigi.widgets.content_area import ContentArea
+from rigi.widgets.hamburger_menu import MenuItemData, MenuPanel
+from rigi.widgets.help_overlay import HelpOverlay
+from rigi.widgets.help_panel import ShortcutsBar, extract_help_annotation
+from rigi.widgets.notifications import NotificationRack
+from rigi.widgets.settings_overlay import SettingsOverlay
+from rigi.widgets.sidebar import Sidebar
 from rigi.widgets.statusbar import (
-    RigiStatusBar,
+    StatusBar,
     _HamburgerButton,
     _HomeButton,
 )
@@ -49,15 +52,15 @@ _terminal_log = logging.getLogger("rigi.terminal")
 _CSS_PATH = Path(__file__).parent.parent / "css" / "default.tcss"
 
 
-class _RigiBody(Widget):
+class _Body(Widget):
     def compose(self) -> ComposeResult:
         yield from []
 
 
-class RigiApp(App[None]):
+class App(_TextualApp[None]):
     CSS_PATH = str(_CSS_PATH)
 
-    COMMANDS = {RigiCommandProvider}
+    COMMANDS = {CommandProvider}
 
     BINDINGS = [
         Binding("ctrl+q", "quit", "Quit", priority=True),
@@ -78,7 +81,7 @@ class RigiApp(App[None]):
         username: str | None = None,
         sidebar_width: int = 20,
         terminal_label: str | None = None,
-        theme: RigiTheme | None = None,
+        theme: Theme | None = None,
         home_tab: str | None = None,
         persist_history: bool = True,
     ) -> None:
@@ -100,29 +103,30 @@ class RigiApp(App[None]):
             if env_theme:
                 from rigi.themes import DARK, LIGHT, MONOKAI, NORD
 
-                resolved_theme = {"dark": DARK, "light": LIGHT, "monokai": MONOKAI, "nord": NORD}.get(
-                    env_theme
-                )
-        self._theme: RigiTheme = resolved_theme if resolved_theme is not None else _DEFAULT_THEME
+                resolved_theme = {
+                    "dark": DARK,
+                    "light": LIGHT,
+                    "monokai": MONOKAI,
+                    "nord": NORD,
+                }.get(env_theme)
+        self._theme: Theme = resolved_theme if resolved_theme is not None else _DEFAULT_THEME
         self._theme_tie_breaker: int = 200
         self._home_tab_name: str | None = home_tab
 
         self._cmd_registry = CommandRegistry()
         self._rigi_tabs: list[TabDef] = []
         self._rigi_status_items: list[StatusItem] = []
-        self._rigi_startup_hooks: list[Callable[[RigiApp], Awaitable[None] | None]] = []
+        self._rigi_startup_hooks: list[Callable[[App], Awaitable[None] | None]] = []
         self._rigi_widget_cache: dict[tuple[int, ...], Widget] = {}
         self._rigi_extra_css: list[Path] = []
         self._rigi_help_entries: list[HelpEntry] = []
         self._rigi_menu_items: list[tuple[str, str, Callable[[], None]]] = []
         self._settings_manager = SettingsManager()
+        self._transparent_enabled: bool = False
+        self._transparent_percent: int = 50
 
         self._disable_notifications = True
         self._register_builtin_commands()
-
-    # ------------------------------------------------------------------ #
-    # Built-in commands                                                    #
-    # ------------------------------------------------------------------ #
 
     def _register_builtin_commands(self) -> None:
         help_cmd = Command(
@@ -165,23 +169,19 @@ class RigiApp(App[None]):
 
         register_dev_commands(self._cmd_registry)
 
-    # ------------------------------------------------------------------ #
-    # Composition & mount                                                  #
-    # ------------------------------------------------------------------ #
-
     def compose(self) -> ComposeResult:
-        status_bar = RigiStatusBar()
+        status_bar = StatusBar()
         for item in self._rigi_status_items:
             status_bar._items.append(item)
 
-        with RigiBorderFrame(self._prog_name, self._version):
+        with BorderFrame(self._prog_name, self._version):
             yield status_bar
 
-            with _RigiBody():
-                yield RigiSidebar()
-                yield RigiContentArea()
+            with _Body():
+                yield Sidebar()
+                yield ContentArea()
 
-            yield RigiShortcutsBar()
+            yield ShortcutsBar()
             prompt = self._terminal_label or f"{self._username}@{self._prog_name}"
             history_file: Path | None = None
             if self._persist_history:
@@ -189,12 +189,12 @@ class RigiApp(App[None]):
                     history_file = _platform_utils.config_dir(self._prog_name) / "terminal_history"
                 except Exception:
                     pass
-            yield RigiBottomPanel(
+            yield BottomPanel(
                 prompt_text=prompt,
                 registry=self._cmd_registry,
                 history_file=history_file,
             )
-        yield RigiNotificationRack()
+        yield NotificationRack()
 
     def on_mount(self) -> None:
         self.title = f"{self._prog_name} v{self._version}"
@@ -205,7 +205,7 @@ class RigiApp(App[None]):
         for css_path in self._rigi_extra_css:
             self._apply_css_file(css_path)
 
-        sidebar = self.query_one(RigiSidebar)
+        sidebar = self.query_one(Sidebar)
         sidebar.set_tabs(self._rigi_tabs)
 
         if self._rigi_tabs:
@@ -230,10 +230,6 @@ class RigiApp(App[None]):
         except Exception:
             pass
 
-    # ------------------------------------------------------------------ #
-    # Notifications & terminal info                                        #
-    # ------------------------------------------------------------------ #
-
     def notify(
         self,
         message: str,
@@ -247,7 +243,7 @@ class RigiApp(App[None]):
             message = message.replace("[", "\\[")
         effective_timeout = timeout if timeout is not None else 5.0
         try:
-            self.query_one(RigiNotificationRack).add_notification(
+            self.query_one(NotificationRack).add_notification(
                 title, message, severity, effective_timeout
             )
         except Exception:
@@ -263,10 +259,6 @@ class RigiApp(App[None]):
 
     def hyperlink(self, url: str, text: str) -> str:
         return _console.hyperlink(url, text)
-
-    # ------------------------------------------------------------------ #
-    # CSS & theme                                                          #
-    # ------------------------------------------------------------------ #
 
     def _apply_css_file(self, path: Path) -> None:
         try:
@@ -289,7 +281,7 @@ class RigiApp(App[None]):
         if self.is_running:
             self._apply_css_file(p)
 
-    def set_theme(self, theme: RigiTheme) -> None:
+    def set_theme(self, theme: Theme) -> None:
         try:
             self._theme = theme
             self._theme_tie_breaker += 1
@@ -303,10 +295,71 @@ class RigiApp(App[None]):
                 tie_breaker=self._theme_tie_breaker,
             )
             self.refresh_css(animate=False)
+            self._apply_transparency()
             _ui_log.info(f"Theme changed to: {theme.name}")
         except Exception as exc:
             _ui_log.error(f"Theme error: {exc}", exc_info=True)
             self.notify(f"Theme error: {exc}", severity="error")
+
+    def _toggle_transparency(self) -> None:
+        self._transparent_enabled = not self._transparent_enabled
+        self._apply_transparency()
+
+    def _set_transparency_percent(self, value: str) -> None:
+        try:
+            self._transparent_percent = max(0, min(100, int(value)))
+        except ValueError:
+            pass
+        self._apply_transparency()
+
+    def _apply_transparency(self) -> None:
+        if not self.is_running:
+            return
+        try:
+            if self._transparent_enabled:
+                alpha = max(0.0, min(1.0, 1.0 - (self._transparent_percent / 100.0)))
+                bg = self._theme.bg_color
+                if bg.startswith("#") and len(bg) == 7:
+                    r = int(bg[1:3], 16)
+                    g = int(bg[3:5], 16)
+                    b = int(bg[5:7], 16)
+                    rgba = f"rgb({r} {g} {b} / {alpha})"
+                else:
+                    rgba = bg
+                css = f"""
+App, Screen {{
+    background: transparent;
+}}
+BorderFrame, _Body, Sidebar, ContentArea, #content-main,
+_MainNav, _SubNav, BottomPanel, TerminalBar,
+StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
+    background: {rgba};
+}}
+"""
+            else:
+                css = f"""
+App, Screen {{
+    background: {self._theme.bg_color};
+}}
+BorderFrame, _Body, Sidebar, ContentArea, #content-main,
+_MainNav, _SubNav, BottomPanel, TerminalBar,
+StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
+    background: {self._theme.bg_color};
+}}
+"""
+            self._theme_tie_breaker += 1
+            self.stylesheet.add_source(
+                css,
+                read_from=(
+                    f"__rigi_transparency_{self._theme_tie_breaker}__",
+                    f"__rigi_transparency_{self._theme_tie_breaker}__",
+                ),
+                is_default_css=False,
+                tie_breaker=self._theme_tie_breaker,
+            )
+            self.refresh_css(animate=False)
+        except Exception as exc:
+            _ui_log.error(f"Transparency error: {exc}", exc_info=True)
 
     def _cycle_theme(self) -> None:
         from rigi.themes import DARK, LIGHT, MONOKAI, NORD
@@ -319,12 +372,8 @@ class RigiApp(App[None]):
             idx = 0
         self.set_theme(_themes[idx])
 
-    # ------------------------------------------------------------------ #
-    # Navigation                                                           #
-    # ------------------------------------------------------------------ #
-
-    @on(RigiSidebar.NavigationChanged)
-    def on_sidebar_nav(self, event: RigiSidebar.NavigationChanged) -> None:
+    @on(Sidebar.NavigationChanged)
+    def on_sidebar_nav(self, event: Sidebar.NavigationChanged) -> None:
         self._navigate_to(event.tab_idx, event.subtab_path)
         self._update_home_button()
 
@@ -337,9 +386,9 @@ class RigiApp(App[None]):
 
     def _update_home_button(self) -> None:
         try:
-            sidebar = self.query_one(RigiSidebar)
+            sidebar = self.query_one(Sidebar)
             on_home = sidebar._active_tab == self._home_tab_idx() and sidebar._active_path == []
-            self.query_one(RigiStatusBar).set_home_active(on_home)
+            self.query_one(StatusBar).set_home_active(on_home)
         except Exception:
             pass
 
@@ -367,7 +416,7 @@ class RigiApp(App[None]):
                     return
                 self._rigi_widget_cache[cache_key] = factory()
 
-            self.query_one(RigiContentArea).show_widget(self._rigi_widget_cache[cache_key])
+            self.query_one(ContentArea).show_widget(self._rigi_widget_cache[cache_key])
         except Exception as e:
             _ui_log.error(f"Error navigating to tab {tab_idx}: {e}", exc_info=True)
             self.notify("Navigation error - check logs", severity="error")
@@ -386,13 +435,13 @@ class RigiApp(App[None]):
     def navigate_to_tab(self, name: str) -> bool:
         for idx, tab in enumerate(self._rigi_tabs):
             if tab.name.lower() == name.lower():
-                self.query_one(RigiSidebar).jump_to_tab_by_key(tab.key or "")
+                self.query_one(Sidebar).jump_to_tab_by_key(tab.key or "")
                 self._navigate_to(idx, [])
                 return True
         return False
 
     def invalidate_tab_cache(self, tab_name: str | None = None) -> None:
-        content = self.query_one(RigiContentArea) if self.is_running else None
+        content = self.query_one(ContentArea) if self.is_running else None
 
         def _evict(widget: Widget) -> None:
             if content and widget is content._current:
@@ -412,12 +461,8 @@ class RigiApp(App[None]):
                     if key[0] == idx:
                         _evict(self._rigi_widget_cache.pop(key))
 
-    # ------------------------------------------------------------------ #
-    # Terminal command processing                                          #
-    # ------------------------------------------------------------------ #
-
-    @on(RigiBottomPanel.CommandSubmitted)
-    def on_command_submitted(self, event: RigiBottomPanel.CommandSubmitted) -> None:
+    @on(BottomPanel.CommandSubmitted)
+    def on_command_submitted(self, event: BottomPanel.CommandSubmitted) -> None:
         self.run_worker(self._handle_command(event.text), name="rigi-cmd", exclusive=False)
 
     async def _handle_command(self, text: str) -> None:
@@ -447,9 +492,7 @@ class RigiApp(App[None]):
         if cmd is None:
             return
 
-        nav_tab = next(
-            (t for t in self._rigi_tabs if t.name.lower() == cmd.name.lower()), None
-        )
+        nav_tab = next((t for t in self._rigi_tabs if t.name.lower() == cmd.name.lower()), None)
         if nav_tab is not None and cmd.handler is None:
             self.navigate_to_tab(nav_tab.name)
             _terminal_log.info(f"Navigated to tab: {nav_tab.name}")
@@ -485,32 +528,42 @@ class RigiApp(App[None]):
             display = (raw[:1200] if raw else "(no output)").replace("[", "\\[")
             _terminal_log.info(f"Shell command completed: {cmd}")
             try:
-                self.query_one(RigiBottomPanel).write_output(display)
+                self.query_one(BottomPanel).write_output(display)
             except Exception:
                 self.notify(display, title=f"$ {cmd[:40]}", timeout=12)
         except Exception as exc:
             msg = str(exc).replace("[", "\\[")
             _terminal_log.error(f"Shell command failed: {cmd}", exc_info=True)
             try:
-                self.query_one(RigiBottomPanel).write_output(f"[red]{msg}[/red]")
+                self.query_one(BottomPanel).write_output(f"[red]{msg}[/red]")
             except Exception:
                 self.notify(msg, severity="error", title=f"$ {cmd[:30]}")
-
-    # ------------------------------------------------------------------ #
-    # Hamburger menu                                                       #
-    # ------------------------------------------------------------------ #
 
     @on(_HamburgerButton.Clicked)
     def on_hamburger_clicked(self, event: _HamburgerButton.Clicked) -> None:
         event.stop()
-        self.push_screen(RigiHamburgerScreen(self._build_hamburger_sections()))
+        self._open_hamburger()
 
-    def _build_hamburger_sections(self) -> list[tuple[str, list[RigiMenuItemData]]]:
+    def _open_hamburger(self) -> None:
+        try:
+            existing = self.query_one("#rigi-main-menu", MenuPanel)
+            existing.remove()
+            return
+        except Exception:
+            pass
+        panel = MenuPanel(self._build_hamburger_sections(), id="rigi-main-menu")
+        panel.styles.layer = "overlay"
+        panel_w = 16
+        x = max(0, self.size.width - panel_w - 1)
+        panel.styles.offset = (x, 3)
+        self.mount(panel)
+
+    def _build_hamburger_sections(self) -> list[tuple[str, list[MenuItemData]]]:
         from rigi.themes import DARK, LIGHT, MONOKAI, NORD
 
         builtin_themes = [DARK, LIGHT, MONOKAI, NORD]
         theme_submenu = [
-            RigiMenuItemData(
+            MenuItemData(
                 label=t.name.capitalize(),
                 callback=lambda _t=t: self.set_theme(_t),
                 checked=(t.name == self._theme.name),
@@ -518,35 +571,31 @@ class RigiApp(App[None]):
             for t in builtin_themes
         ]
 
-        main_items: list[RigiMenuItemData] = [
-            RigiMenuItemData("Theme", submenu=theme_submenu),
-            RigiMenuItemData("Settings", callback=self._open_settings),
-            RigiMenuItemData(
+        main_items: list[MenuItemData] = [
+            MenuItemData("Theme", submenu=theme_submenu),
+            MenuItemData("Settings", callback=self._open_settings),
+            MenuItemData(
                 "Help",
                 callback=lambda: self.run_worker(self.action_show_help(), name="rigi-help"),
             ),
         ]
 
-        by_section: dict[str, list[RigiMenuItemData]] = {}
+        by_section: dict[str, list[MenuItemData]] = {}
         for sec, lbl, cb in self._rigi_menu_items:
-            by_section.setdefault(sec, []).append(RigiMenuItemData(lbl, cb))
+            by_section.setdefault(sec, []).append(MenuItemData(lbl, cb))
 
-        sections: list[tuple[str, list[RigiMenuItemData]]] = [("", main_items)]
+        sections: list[tuple[str, list[MenuItemData]]] = [("", main_items)]
         for sec_name, items in by_section.items():
             sections.append((sec_name, items))
         return sections
-
-    # ------------------------------------------------------------------ #
-    # Settings screen                                                      #
-    # ------------------------------------------------------------------ #
 
     @property
     def settings(self) -> SettingsManager:
         return self._settings_manager
 
     def _open_settings(self) -> None:
-        builtin: list[RigiSettingDef] = [
-            RigiSettingDef(
+        builtin: list[SettingDef] = [
+            SettingDef(
                 category="Appearance",
                 label="Theme",
                 description="Color theme for the interface",
@@ -554,25 +603,25 @@ class RigiApp(App[None]):
                 action_fn=self._cycle_theme,
                 action_label="Cycle",
             ),
-            RigiSettingDef(
+            SettingDef(
                 category="Terminal",
                 label="Emulator",
                 description="Detected terminal application",
                 value_fn=lambda: _console.detect_terminal(),
             ),
-            RigiSettingDef(
+            SettingDef(
                 category="Terminal",
                 label="True color",
                 description="24-bit color support",
                 value_fn=lambda: "yes" if _console.supports_true_color() else "no",
             ),
-            RigiSettingDef(
+            SettingDef(
                 category="Terminal",
                 label="Hyperlinks",
                 description="OSC 8 clickable link support",
                 value_fn=lambda: "yes" if _console.supports_hyperlinks() else "no",
             ),
-            RigiSettingDef(
+            SettingDef(
                 category="Terminal",
                 label="Multiplexer",
                 description="Running inside tmux or screen",
@@ -580,18 +629,31 @@ class RigiApp(App[None]):
                     "tmux" if _console.IS_TMUX else ("screen" if _console.IS_SCREEN else "none")
                 ),
             ),
-            RigiSettingDef(
+            SettingDef(
                 category="Terminal",
                 label="Unicode",
                 description="UTF-8 output encoding",
                 value_fn=lambda: "yes" if _console.supports_unicode() else "no",
             ),
+            SettingDef(
+                category="Appearance",
+                label="Transparent",
+                description="Enable transparent background with adjustable opacity",
+                value_fn=lambda: str(self._transparent_percent),
+                checkbox_fn=lambda: self._transparent_enabled,
+                toggle_fn=self._toggle_transparency,
+                write_fn=self._set_transparency_percent,
+            ),
         ]
-        self.push_screen(RigiSettingsScreen(builtin + self._settings_manager.all_defs()))
-
-    # ------------------------------------------------------------------ #
-    # Keyboard actions                                                     #
-    # ------------------------------------------------------------------ #
+        try:
+            existing = self.query_one("#rigi-settings-overlay", SettingsOverlay)
+            existing.remove()
+            return
+        except Exception:
+            pass
+        overlay = SettingsOverlay(builtin + self._settings_manager.all_defs())
+        overlay.styles.layer = "overlay"
+        self.mount(overlay)
 
     def _terminal_input_focused(self) -> bool:
         try:
@@ -601,25 +663,33 @@ class RigiApp(App[None]):
 
     def action_nav_up(self) -> None:
         if not self._terminal_input_focused():
-            self.query_one(RigiSidebar).navigate(-1)
+            self.query_one(Sidebar).navigate(-1)
 
     def action_nav_down(self) -> None:
         if not self._terminal_input_focused():
-            self.query_one(RigiSidebar).navigate(1)
+            self.query_one(Sidebar).navigate(1)
 
     def action_nav_right(self) -> None:
         if not self._terminal_input_focused():
-            self.query_one(RigiSidebar).navigate_right()
+            self.query_one(Sidebar).navigate_right()
 
     def action_nav_left(self) -> None:
         if not self._terminal_input_focused():
-            self.query_one(RigiSidebar).navigate_left()
+            self.query_one(Sidebar).navigate_left()
 
     def action_focus_terminal(self) -> None:
-        self.query_one(RigiBottomPanel).focus_input()
+        self.query_one(BottomPanel).focus_input()
 
     async def action_show_help(self) -> None:
-        await self.push_screen(RigiHelpScreen(self._rigi_help_entries))
+        try:
+            existing = self.query_one("#rigi-help-overlay", HelpOverlay)
+            existing.remove()
+            return
+        except Exception:
+            pass
+        overlay = HelpOverlay(self._rigi_help_entries)
+        overlay.styles.layer = "overlay"
+        self.mount(overlay)
 
     def action_copy_focused(self) -> None:
         text = self._extract_focused_text()
@@ -675,14 +745,10 @@ class RigiApp(App[None]):
 
     async def action_quit(self) -> None:
         try:
-            self.query_one(RigiBottomPanel).save_history()
+            self.query_one(BottomPanel).save_history()
         except Exception:
             pass
         self.exit()
-
-    # ------------------------------------------------------------------ #
-    # Public API                                                           #
-    # ------------------------------------------------------------------ #
 
     def add_tab(self, tab: TabDef) -> TabDef:
         self._rigi_tabs.append(tab)
@@ -701,7 +767,7 @@ class RigiApp(App[None]):
         )
         self._rigi_status_items.append(item)
         if self.is_running:
-            self.query_one(RigiStatusBar).add_item(item)
+            self.query_one(StatusBar).add_item(item)
         return item
 
     def add_menu_item(
@@ -715,7 +781,7 @@ class RigiApp(App[None]):
     def set_terminal_label(self, label: str) -> None:
         self._terminal_label = label
         try:
-            self.query_one(RigiBottomPanel).prompt_text = label
+            self.query_one(BottomPanel).prompt_text = label
         except Exception:
             pass
 
@@ -725,6 +791,92 @@ class RigiApp(App[None]):
 
     def open_path(self, path: str | Path) -> bool:
         return _platform_utils.open_path(path)
+
+    def show_action_menu(
+        self,
+        items: list[ActionMenuItemData],
+        title: str = "",
+        x: int | None = None,
+        y: int | None = None,
+    ) -> None:
+        panel_w = max((len(item.label) + 6 for item in items), default=22)
+        panel_h = min(2 + len(items), 20)
+        app_w, app_h = self.size.width, self.size.height
+        if x is not None and y is not None:
+            px = min(x, max(0, app_w - panel_w - 1))
+            py = min(y, max(0, app_h - panel_h - 1))
+        else:
+            px = max(0, (app_w - panel_w) // 2)
+            py = max(0, (app_h - panel_h) // 2)
+        try:
+            existing = self.query_one("#rigi-action-panel", ActionMenuPanel)
+            existing.replace_items(items)
+            existing.styles.offset = (px, py)
+            existing.styles.width = panel_w
+            existing.styles.height = panel_h
+            existing.focus()
+            return
+        except Exception:
+            pass
+        panel = ActionMenuPanel(items, title=title, id="rigi-action-panel")
+        panel.styles.layer = "overlay"
+        panel.styles.offset = (px, py)
+        panel.styles.width = panel_w
+        panel.styles.height = panel_h
+        self.mount(panel)
+
+    def on_click(self, event: Any) -> None:
+        if hasattr(event, "button") and event.button == 3:
+            items = self._context_menu_items()
+            if items:
+                self.show_action_menu(items, x=event.x, y=event.y)
+                return
+        try:
+            panel = self.query_one("#rigi-main-menu", MenuPanel)
+            if panel not in event.chain:
+                panel.remove()
+        except Exception:
+            pass
+        try:
+            overlay = self.query_one("#rigi-help-overlay", HelpOverlay)
+            if overlay not in event.chain:
+                overlay.remove()
+        except Exception:
+            pass
+        try:
+            overlay = self.query_one("#rigi-settings-overlay", SettingsOverlay)
+            if overlay not in event.chain:
+                overlay.remove()
+        except Exception:
+            pass
+        try:
+            panel = self.query_one("#rigi-action-panel", ActionMenuPanel)
+            if panel not in event.chain:
+                panel.remove()
+        except Exception:
+            pass
+
+    def on_key(self, event: Key) -> None:
+        if event.key == "escape":
+            for selector, cls in (
+                ("#rigi-action-panel", ActionMenuPanel),
+                ("#rigi-main-menu", MenuPanel),
+                ("#rigi-settings-overlay", SettingsOverlay),
+                ("#rigi-help-overlay", HelpOverlay),
+            ):
+                try:
+                    widget = self.query_one(selector, cls)
+                    widget.remove()
+                    event.stop()
+                    return
+                except Exception:
+                    pass
+
+    def _context_menu_items(self) -> list[ActionMenuItemData]:
+        return []
+
+    def set_context_menu(self, items: list[ActionMenuItemData]) -> None:
+        self._context_menu_items = lambda: items
 
     def notify_desktop(self, title: str, body: str = "", urgency: str = "normal") -> bool:
         return _platform_utils.notify_desktop(title, body, urgency)
@@ -743,10 +895,6 @@ class RigiApp(App[None]):
             return result
 
         return asyncio.create_task(_wrapped(), name=name)
-
-    # ------------------------------------------------------------------ #
-    # Commands & hooks                                                     #
-    # ------------------------------------------------------------------ #
 
     def command(
         self,
@@ -774,8 +922,8 @@ class RigiApp(App[None]):
         return cmd
 
     def on_startup(
-        self, fn: Callable[[RigiApp], Awaitable[None] | None]
-    ) -> Callable[[RigiApp], Awaitable[None] | None]:
+        self, fn: Callable[[App], Awaitable[None] | None]
+    ) -> Callable[[App], Awaitable[None] | None]:
         self._rigi_startup_hooks.append(fn)
         return fn
 
@@ -783,12 +931,8 @@ class RigiApp(App[None]):
     def cmd_registry(self) -> CommandRegistry:
         return self._cmd_registry
 
-    # ------------------------------------------------------------------ #
-    # CLI entry point                                                      #
-    # ------------------------------------------------------------------ #
-
     @classmethod
-    def run_cli(cls, app_instance: RigiApp) -> None:
+    def run_cli(cls, app_instance: App) -> None:
         parser = build_cli_parser(
             prog_name=app_instance._prog_name,
             version=app_instance._version,
@@ -814,9 +958,7 @@ class RigiApp(App[None]):
             parser.print_help()
             sys.exit(1)
 
-        tab = next(
-            (t for t in app_instance._rigi_tabs if t.name.lower() == cmd_name.lower()), None
-        )
+        tab = next((t for t in app_instance._rigi_tabs if t.name.lower() == cmd_name.lower()), None)
         if tab and cmd.handler is None:
 
             async def _nav() -> None:

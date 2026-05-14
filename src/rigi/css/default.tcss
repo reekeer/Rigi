@@ -1,5 +1,7 @@
 App {
     background: transparent;
+    scrollbar-size-vertical: 1;
+    scrollbar-size-horizontal: 1;
 }
 
 Screen {
@@ -8,7 +10,7 @@ Screen {
     background: transparent;
 }
 
-RigiBorderFrame {
+BorderFrame {
     width: 100%;
     height: 100%;
     border: round #30363d;
@@ -51,7 +53,7 @@ _HomeButton {
 _HomeButton:hover { color: #c9d1d9; }
 _HomeButton.--active { color: #58a6ff; }
 
-RigiStatusBar {
+StatusBar {
     height: 2;
     layout: horizontal;
     padding: 0 1;
@@ -59,7 +61,7 @@ RigiStatusBar {
     background: transparent;
 }
 
-RigiStatusItem {
+StatusItem {
     height: 1;
     padding: 0 1;
     width: auto;
@@ -67,21 +69,21 @@ RigiStatusItem {
     background: transparent;
 }
 
-_RigiBody {
+_Body {
     layout: horizontal;
     height: 1fr;
     width: 100%;
     background: transparent;
 }
 
-RigiSidebar {
+Sidebar {
     layout: horizontal;
     height: 100%;
     width: auto;
     background: transparent;
 }
 
-_RigiMainNav {
+_MainNav {
     width: 20;
     height: 100%;
     overflow-y: auto;
@@ -103,7 +105,7 @@ _MainNavItem.--active {
     text-style: bold;
 }
 
-_RigiSubNav {
+_SubNav {
     width: 18;
     height: 100%;
     overflow-y: auto;
@@ -134,14 +136,14 @@ _SubNavItem {
 _SubNavItem:hover { color: #c9d1d9; }
 _SubNavItem.--active { color: #79c0ff; text-style: bold; }
 
-_RigiEmptyState {
+_EmptyState {
     height: 100%;
     width: 100%;
     content-align: center middle;
 }
-_RigiEmptyState Label { color: #3d444d; width: auto; }
+_EmptyState Label { color: #3d444d; width: auto; }
 
-RigiContentArea {
+ContentArea {
     height: 1fr;
     width: 1fr;
     layout: horizontal;
@@ -151,22 +153,22 @@ RigiContentArea {
 }
 #content-main { width: 1fr; height: 100%; }
 
-RigiShortcutsBar {
+ShortcutsBar {
     height: 1;
     layout: horizontal;
     padding: 0 1;
     border-top: solid #21262d;
     background: transparent;
 }
-RigiShortcutsBar Label { color: #6e7681; padding: 0 1; }
+ShortcutsBar Label { color: #6e7681; padding: 0 1; }
 
-RigiTerminalBar {
+TerminalBar {
     height: 2;
     layout: vertical;
     background: #0d1117;
 }
 
-RigiTerminalBar #input-row {
+TerminalBar #input-row {
     height: 1;
     background: transparent;
 }
@@ -179,7 +181,7 @@ _TerminalResizeHandle {
 }
 _TerminalResizeHandle:hover { color: #58a6ff; }
 
-RigiTerminalBar Label {
+TerminalBar Label {
     height: 1;
     color: #3fb950;
     padding: 0 0 0 1;
@@ -187,7 +189,7 @@ RigiTerminalBar Label {
     content-align: left middle;
 }
 
-RigiTerminalBar Input {
+TerminalBar Input {
     height: 1;
     width: 1fr;
     border: none;
@@ -195,35 +197,35 @@ RigiTerminalBar Input {
     background: transparent;
     color: #e6edf3;
 }
-RigiTerminalBar Input:focus { border: none; }
+TerminalBar Input:focus { border: none; }
 
-RigiPane {
+Pane {
     height: 100%;
     width: 100%;
     padding: 1 2;
     layout: vertical;
 }
 
-RigiHPane {
+HPane {
     layout: horizontal;
     height: auto;
     width: 100%;
 }
 
-RigiVPane {
+VPane {
     layout: vertical;
     height: 100%;
     width: 100%;
 }
 
-RigiScrollPane {
+ScrollPane {
     height: 100%;
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
 }
 
-RigiCard {
+Card {
     border: round #21262d;
     border-title-color: #c9d1d9;
     border-title-align: left;
@@ -233,17 +235,20 @@ RigiCard {
     width: 1fr;
 }
 
-RigiSplit {
+Split {
     layout: horizontal;
     height: 100%;
     width: 100%;
 }
-RigiSplit > Widget { width: 1fr; height: 100%; }
+Split > Widget { width: 1fr; height: 100%; }
 
-RigiHamburgerScreen { background: transparent; }
-
-RigiHelpScreen { align: center middle; }
-RigiHelpScreen > #help-container {
+HelpOverlay {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    align: center middle;
+}
+HelpOverlay > #help-container {
     width: 60;
     height: auto;
     max-height: 80%;
@@ -252,7 +257,7 @@ RigiHelpScreen > #help-container {
     padding: 1 2;
     overflow-y: auto;
 }
-RigiHelpScreen #help-title {
+HelpOverlay #help-title {
     text-style: bold;
     color: #58a6ff;
     width: 100%;
@@ -260,11 +265,11 @@ RigiHelpScreen #help-title {
     margin-bottom: 1;
     height: 1;
 }
-RigiHelpScreen .help-category { color: #30363d; text-style: bold; margin-top: 1; height: 1; }
-RigiHelpScreen .help-row { layout: horizontal; height: 1; width: 100%; }
-RigiHelpScreen .help-key { width: 16; color: #e3b341; text-style: bold; }
-RigiHelpScreen .help-desc { width: 1fr; color: #8b949e; }
-RigiHelpScreen #help-dismiss {
+HelpOverlay .help-category { color: #30363d; text-style: bold; margin-top: 1; height: 1; }
+HelpOverlay .help-row { layout: horizontal; height: 1; width: 100%; }
+HelpOverlay .help-key { width: 16; color: #e3b341; text-style: bold; }
+HelpOverlay .help-desc { width: 1fr; color: #8b949e; }
+HelpOverlay #help-dismiss {
     margin-top: 1;
     color: #6e7681;
     content-align: center middle;
@@ -272,9 +277,9 @@ RigiHelpScreen #help-dismiss {
     height: 1;
 }
 
-RigiGauge { height: 1; width: 100%; }
-RigiSparkline { height: 1; width: 100%; }
-RigiImage { height: auto; width: auto; }
+Gauge { height: 1; width: 100%; }
+Sparkline { height: 1; width: 100%; }
+Image { height: auto; width: auto; }
 
 _CategoryRow {
     height: 2;
@@ -333,8 +338,13 @@ _SettingSwitch Switch { height: 1; width: auto; }
 _SettingsContent { width: 1fr; height: 100%; padding: 1 2; overflow-y: auto; background: transparent; }
 _SettingsContent ._cat-title { color: #58a6ff; text-style: bold; height: 1; margin-bottom: 1; }
 
-RigiSettingsScreen { align: center middle; background: transparent; }
-#s-outer {
+SettingsOverlay {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    align: center middle;
+}
+SettingsOverlay > #s-outer {
     width: 90%;
     height: 85%;
     border: round #30363d;
@@ -381,8 +391,8 @@ RigiSettingsScreen { align: center middle; background: transparent; }
 _ContentResizeHandle { width: 1; height: 100%; background: transparent; color: #30363d; }
 _ContentResizeHandle:hover { color: #58a6ff; }
 
-RigiMenuItem { height: 1; width: 100%; padding: 0 1; background: transparent; }
-RigiMenuItem:hover { background: #1c2128; }
+MenuItem { height: 1; width: 100%; padding: 0 1; background: transparent; }
+MenuItem:hover { background: #1c2128; }
 
 _MenuSectionLabel {
     height: 1;
@@ -393,15 +403,72 @@ _MenuSectionLabel {
     background: transparent;
 }
 
-RigiMenuPanel {
-    width: 26;
+MenuPanel {
+    width: 16;
     height: auto;
-    max-height: 24;
+    max-height: 14;
+    border: round #30363d;
+    border-title-color: #c9d1d9;
+    background: #0d1117;
+    padding: 0;
+    overflow-y: hidden;
+}
+
+ActionMenuPanel {
+    width: 30;
+    height: auto;
+    max-height: 20;
     border: round #30363d;
     border-title-color: #c9d1d9;
     background: #0d1117;
     padding: 0;
     overflow-y: auto;
+}
+ActionMenuItem { height: 1; width: 100%; padding: 0 1; background: transparent; }
+ActionMenuItem:hover { background: #1c2128; }
+ActionMenuItem.--disabled { color: #3d444d; }
+ActionMenuScreen { background: transparent; }
+
+TabGroup {
+    height: 100%;
+    width: 100%;
+    layout: vertical;
+    background: transparent;
+}
+TabGroup #tabgroup-nav {
+    layout: horizontal;
+    width: 100%;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background: transparent;
+    border-bottom: solid #21262d;
+}
+_TabItem {
+    height: 1;
+    box-sizing: content-box;
+    width: auto;
+    padding: 0 2;
+    color: #6e7681;
+    background: transparent;
+}
+_TabItem:hover { color: #c9d1d9; background: #161b22; }
+_TabItem.--active {
+    color: #58a6ff;
+    text-style: bold;
+    border-bottom: solid #58a6ff;
+}
+TabGroup #tabgroup-switcher {
+    width: 100%;
+    height: 1fr;
+    background: transparent;
+}
+TabGroup #tabgroup-switcher > Widget {
+    height: 100%;
+    width: 100%;
+    background: transparent;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 _ResizeHandle {
@@ -413,8 +480,8 @@ _ResizeHandle {
 }
 _ResizeHandle:hover { color: #58a6ff; }
 
-_LogsView { layout: horizontal; height: 1fr; background: #0d1117; }
-_LogsView #logs-output { width: 1fr; height: 1fr; background: #0d1117; }
+_LogsView { layout: horizontal; height: 1fr; background: #0d1117; overflow: hidden; }
+_LogsView #logs-output { width: 1fr; height: 1fr; background: #0d1117; overflow-y: auto; overflow-x: hidden; }
 _LogsView #logs-controls {
     width: 18;
     height: 1fr;
@@ -441,23 +508,25 @@ _LogsView #logs-controls Button {
     padding: 0 1;
 }
 
-RigiBottomPanel { height: 12; layout: vertical; background: #0d1117; }
-RigiBottomPanel Tabs { height: 3; background: #161b22; padding: 0; dock: none; }
-RigiBottomPanel Tab { color: #8b949e; min-width: 12; }
-RigiBottomPanel Tab:hover { color: #e6edf3; }
-RigiBottomPanel Tab.-active { color: #58a6ff; }
-RigiBottomPanel #bp-switcher { height: 1fr; }
-RigiBottomPanel #bp-terminal { layout: vertical; height: 1fr; }
-RigiBottomPanel #term-history { height: 1fr; background: transparent; }
-RigiBottomPanel #input-row { height: 1; layout: horizontal; background: transparent; }
-RigiBottomPanel #terminal-prompt {
+BottomPanel { height: 12; layout: vertical; background: #0d1117; overflow: hidden; }
+#bp-logs { height: 1fr; layout: vertical; overflow: hidden; }
+#bp-terminal { height: 1fr; layout: vertical; overflow: hidden; }
+BottomPanel Tabs { height: 3; background: #161b22; padding: 0; dock: none; }
+BottomPanel Tab { color: #8b949e; min-width: 12; }
+BottomPanel Tab:hover { color: #e6edf3; }
+BottomPanel Tab.-active { color: #58a6ff; }
+BottomPanel #bp-switcher { height: 1fr; }
+BottomPanel #bp-terminal { layout: vertical; height: 1fr; }
+BottomPanel #term-history { height: 1fr; background: transparent; }
+BottomPanel #input-row { height: 1; layout: horizontal; background: transparent; }
+BottomPanel #terminal-prompt {
     height: 1;
     color: #3fb950;
     padding: 0 0 0 1;
     width: auto;
     content-align: left middle;
 }
-RigiBottomPanel #terminal-input {
+BottomPanel #terminal-input {
     height: 1;
     width: 1fr;
     border: none;
@@ -465,9 +534,9 @@ RigiBottomPanel #terminal-input {
     background: transparent;
     color: #e6edf3;
 }
-RigiBottomPanel #terminal-input:focus { border: none; }
+BottomPanel #terminal-input:focus { border: none; }
 
-RigiNotificationRack {
+NotificationRack {
     layer: overlay;
     width: 1fr;
     height: auto;
@@ -479,7 +548,7 @@ RigiNotificationRack {
     layout: vertical;
 }
 
-RigiNotificationWidget {
+NotificationWidget {
     width: 44;
     max-width: 50%;
     height: auto;
@@ -489,8 +558,8 @@ RigiNotificationWidget {
     background: #161b22;
     border-left: thick #58a6ff;
 }
-RigiNotificationWidget.notif--warning { border-left: thick #e3b341; }
-RigiNotificationWidget.notif--error { border-left: thick #f85149; }
+NotificationWidget.notif--warning { border-left: thick #e3b341; }
+NotificationWidget.notif--error { border-left: thick #f85149; }
 
 .notif-header {
     layout: horizontal;

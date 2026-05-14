@@ -1,10 +1,9 @@
-"""HelpScreen — full-screen keyboard-shortcut reference."""
+"""HelpOverlay — transparent overlay widget with help content."""
 
 from __future__ import annotations
 
 from textual.app import ComposeResult
-from textual.binding import Binding
-from textual.screen import ModalScreen
+from textual.events import Click
 from textual.widget import Widget
 from textual.widgets import Label
 
@@ -24,12 +23,8 @@ BUILTIN_SHORTCUTS: list[HelpEntry] = [
 ]
 
 
-class HelpScreen(ModalScreen[None]):
-    BINDINGS = [
-        Binding("escape", "dismiss", "Close", show=False),
-        Binding("ctrl+h", "dismiss", "Close", show=False),
-        Binding("q", "dismiss", "Close", show=False),
-    ]
+class HelpOverlay(Widget):
+    can_focus = True
 
     def __init__(self, entries: list[HelpEntry]) -> None:
         super().__init__()
@@ -53,7 +48,10 @@ class HelpScreen(ModalScreen[None]):
                         classes="help-row",
                     )
 
-            yield Label("Esc / Ctrl+H / q  →  close", id="help-dismiss")
+            yield Label("Esc  →  close", id="help-dismiss")
 
-    def on_click(self) -> None:
-        self.dismiss()
+    def on_click(self, event: Click) -> None:
+        container = self.query_one("#help-container")
+        if not container.region.contains(event.x, event.y):
+            self.remove()
+            event.stop()

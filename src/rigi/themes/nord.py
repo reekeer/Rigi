@@ -1,6 +1,6 @@
-from rigi.themes.base import RigiTheme
+from rigi.themes.base import Theme
 
-NORD = RigiTheme(
+NORD = Theme(
     name="nord",
     border="#4c566a",
     border_dim="#3b4252",
