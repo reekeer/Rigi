@@ -190,12 +190,22 @@ class SettingsOverlay(Widget):
         self._render_category(event.name)
 
     def _render_category(self, category: str) -> None:
-        content = self.query_one("#s-content", _SettingsContent)
-        content.remove_children()
-        content.mount(Label(category, classes="_cat-title"))
-        for s in self._settings:
-            if s.category == category:
-                content.mount(_SettingItem(s))
+        try:
+            content = self.query_one("#s-content", _SettingsContent)
+            settings = [s for s in self._settings if s.category == category]
+            content.remove_children()
+
+            def _mount() -> None:
+                try:
+                    content.mount(Label(category, classes="_cat-title"))
+                    for s in settings:
+                        content.mount(_SettingItem(s))
+                except Exception as e:
+                    _ui_log.error(f"Settings mount error: {e}", exc_info=True)
+
+            content.call_after_refresh(_mount)
+        except Exception as e:
+            _ui_log.error(f"Error rendering category: {e}", exc_info=True)
 
     def _refresh_content(self) -> None:
         self._render_category(self._active_category)
