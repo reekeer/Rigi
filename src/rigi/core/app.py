@@ -221,6 +221,18 @@ class App(_TextualApp[None]):
         self._set_terminal_title()
         self.set_focus(None)
         log_store.install()
+        self._reposition_notifications()
+
+    def on_resize(self) -> None:
+        self._reposition_notifications()
+
+    def _reposition_notifications(self) -> None:
+        try:
+            rack = self.query_one(NotificationRack)
+            rack_w = 52
+            rack.styles.offset = (max(0, self.size.width - rack_w), 3)
+        except Exception:
+            pass
 
     def _set_terminal_title(self) -> None:
         seq = _console.set_title(f"{self._prog_name} {self._version}")
@@ -323,7 +335,7 @@ class App(_TextualApp[None]):
                     r = int(bg[1:3], 16)
                     g = int(bg[3:5], 16)
                     b = int(bg[5:7], 16)
-                    rgba = f"rgb({r} {g} {b} / {alpha})"
+                    rgba = f"rgba({r},{g},{b},{alpha:.3f})"
                 else:
                     rgba = bg
                 css = f"""
@@ -376,6 +388,10 @@ StatusBar, ShortcutsBar, _VerticalResizeHandle, _ContentResizeHandle {{
     def on_sidebar_nav(self, event: Sidebar.NavigationChanged) -> None:
         self._navigate_to(event.tab_idx, event.subtab_path)
         self._update_home_button()
+        try:
+            self.query_one("#rigi-action-panel", ActionMenuPanel).remove()
+        except Exception:
+            pass
 
     def _home_tab_idx(self) -> int:
         if self._home_tab_name:

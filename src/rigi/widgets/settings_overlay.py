@@ -5,12 +5,13 @@ from __future__ import annotations
 import logging
 from typing import Callable
 
+from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
-from textual.events import Click
+from textual.events import Click, Key, MouseDown, MouseMove, MouseUp
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import Button, Input, Label, Switch
+from textual.widgets import Button, Input, Label
 
 from rigi.screens.settings import SettingDef
 
@@ -91,27 +92,153 @@ class _SettingInput(Input):
         self.app.set_focus(None)
 
 
-class _SettingSwitch(Widget):
+class _Checkbox(Widget):
+    can_focus = True
+
+    class Changed(Message):
+        def __init__(self, value: bool) -> None:
+            super().__init__()
+            self.value = value
+
+    def __init__(self, setting: SettingDef) -> None:
+        super().__init__()
+        self._setting = setting
+        self._checked = setting.get_checked()
+
+    def render(self) -> str:
+        return "☑" if self._checked else "☐"
+
+    def on_click(self) -> None:
+        self._toggle()
+
+    def on_key(self, event: Key) -> None:
+        if event.key in ("space", "enter"):
+            self._toggle()
+            event.stop()
+
+    def _toggle(self) -> None:
+        if self._setting.toggle_fn:
+            try:
+                self._setting.toggle_fn()
+            except Exception as e:
+                _ui_log.error(f"Toggle error: {e}", exc_info=True)
+        self._checked = self._setting.get_checked()
+        self.refresh()
+        self.post_message(self.Changed(self._checked))
+
+
+class _Slider(Widget):
+    can_focus = True
+
+    class Changed(Message):
+        def __init__(self, value: int) -> None:
+            super().__init__()
+            self.value = value
+
+    def __init__(self, value: int = 50, min_val: int = 0, max_val: int = 100) -> None:
+        super().__init__()
+        self._value = max(min_val, min(max_val, value))
+        self._min = min_val
+        self._max = max_val
+        self._dragging = False
+
+    @property
+    def value(self) -> int:
+        return self._value
+
+    @value.setter
+    def value(self, v: int) -> None:
+        new = max(self._min, min(self._max, int(v)))
+        if new != self._value:
+            self._value = new
+            self.refresh()
+            self.post_message(self.Changed(self._value))
+
+    def render(self) -> Text:
+        w = max(3, self.size.width)
+        frac = (self._value - self._min) / max(1, self._max - self._min)
+        thumb = max(0, min(w - 1, int(frac * (w - 1))))
+        t = Text()
+        t.append("─" * thumb, style="dim #6e7681")
+        t.append("●", style="bold #58a6ff")
+        t.append("─" * (w - 1 - thumb), style="dim #6e7681")
+        return t
+
+    def _set_from_x(self, x: int) -> None:
+        w = max(3, self.size.width)
+        frac = max(0.0, min(1.0, x / max(1, w - 1)))
+        self.value = int(self._min + frac * (self._max - self._min))
+
+    def on_mouse_down(self, event: MouseDown) -> None:
+        self._dragging = True
+        self.capture_mouse()
+        self._set_from_x(event.x)
+
+    def on_mouse_move(self, event: MouseMove) -> None:
+        if self._dragging:
+            self._set_from_x(event.x)
+
+    def on_mouse_up(self, _event: MouseUp) -> None:
+        self._dragging = False
+        self.release_mouse()
+
+    def on_key(self, event: Key) -> None:
+        if event.key == "left":
+            self.value = self._value - 1
+            event.stop()
+        elif event.key == "right":
+            self.value = self._value + 1
+            event.stop()
+
+
+class _SliderRow(Widget):
     def __init__(self, setting: SettingDef) -> None:
         super().__init__()
         self._setting = setting
 
     def compose(self) -> ComposeResult:
-        yield Switch(value=self._setting.get_checked(), classes="_s-switch")
+        try:
+            initial = max(0, min(100, int(self._setting.get_value())))
+        except (ValueError, TypeError):
+            initial = 50
+        yield _Slider(value=initial, min_val=0, max_val=100)
+        yield Input(value=str(initial), restrict=r"\d*", max_length=3, id="sr-input")
 
-    @on(Switch.Changed)
-    def on_changed(self, event: Switch.Changed) -> None:
+    @on(_Slider.Changed)
+    def on_slider_changed(self, event: _Slider.Changed) -> None:
         event.stop()
-        if self._setting.toggle_fn:
+        try:
+            self.query_one("#sr-input", Input).value = str(event.value)
+        except Exception:
+            pass
+        self._setting.set_value(str(event.value))
+
+    @on(Input.Changed, "#sr-input")
+    def on_input_changed(self, event: Input.Changed) -> None:
+        event.stop()
+        raw = event.value.strip()
+        if raw.isdigit():
+            val = max(0, min(100, int(raw)))
             try:
-                self._setting.toggle_fn()
-            except Exception as e:
-                _ui_log.error(f"Error toggling setting {self._setting.label}: {e}", exc_info=True)
-        for sibling in self.siblings:
-            if isinstance(sibling, _SettingInput):
-                sibling.display = event.value
-                if event.value:
-                    sibling.focus()
+                self.query_one(_Slider).value = val
+            except Exception:
+                pass
+
+    @on(Input.Submitted, "#sr-input")
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        event.stop()
+        self._commit_input()
+
+    def _commit_input(self) -> None:
+        try:
+            inp = self.query_one("#sr-input", Input)
+            raw = inp.value.strip()
+            val = max(0, min(100, int(raw))) if raw.isdigit() else 50
+            inp.value = str(val)
+            self.query_one(_Slider).value = val
+            self._setting.set_value(str(val))
+        except Exception:
+            pass
 
 
 class _SettingItem(Widget):
@@ -123,16 +250,19 @@ class _SettingItem(Widget):
         yield Label(self._setting.label, classes="_s-label")
         if self._setting.description:
             yield Label(self._setting.description, classes="_s-desc")
-        if self._setting.checkbox_fn is not None:
-            yield _SettingSwitch(self._setting)
-        if self._setting.write_fn is not None:
-            inp = _SettingInput(self._setting)
-            if self._setting.checkbox_fn is not None:
-                inp.display = self._setting.get_checked()
-            yield inp
-        elif self._setting.value_fn is not None or self._setting.action_fn is not None:
-            if self._setting.checkbox_fn is None:
-                yield _ValueRow(self._setting)
+        if self._setting.checkbox_fn is not None and self._setting.write_fn is not None:
+            yield _Checkbox(self._setting)
+            yield _SliderRow(self._setting)
+        elif self._setting.checkbox_fn is not None:
+            yield _Checkbox(self._setting)
+        elif self._setting.write_fn is not None:
+            yield _SettingInput(self._setting)
+        if (
+            (self._setting.value_fn is not None or self._setting.action_fn is not None)
+            and self._setting.checkbox_fn is None
+            and self._setting.write_fn is None
+        ):
+            yield _ValueRow(self._setting)
 
 
 class _SettingsContent(Widget):
@@ -147,6 +277,7 @@ class SettingsOverlay(Widget):
         super().__init__()
         self._settings = settings
         self._active_category = ""
+        self._pending_category = ""
         self._categories: list[str] = []
         seen: set[str] = set()
         for s in settings:
@@ -190,18 +321,32 @@ class SettingsOverlay(Widget):
         self._render_category(event.name)
 
     def _render_category(self, category: str) -> None:
-        content = self.query_one("#s-content", _SettingsContent)
-        content.remove_children()
-        content.mount(Label(category, classes="_cat-title"))
-        for s in self._settings:
-            if s.category == category:
-                content.mount(_SettingItem(s))
+        self._pending_category = category
+        settings = [s for s in self._settings if s.category == category]
+
+        async def _do() -> None:
+            if self._pending_category != category:
+                return
+            try:
+                content = self.query_one("#s-content", _SettingsContent)
+                await content.query("*").remove()
+                if self._pending_category != category:
+                    return
+                await content.mount(Label(category, classes="_cat-title"))
+                for s in settings:
+                    if self._pending_category != category:
+                        return
+                    await content.mount(_SettingItem(s))
+            except Exception as e:
+                _ui_log.error(f"Settings render error: {e}", exc_info=True)
+
+        self.app.run_worker(_do(), name="rigi-settings-render", exclusive=True)
 
     def _refresh_content(self) -> None:
         self._render_category(self._active_category)
 
     def on_click(self, event: Click) -> None:
         container = self.query_one("#s-outer")
-        if not container.region.contains(event.x, event.y):
+        if not container.region.contains(event.screen_x, event.screen_y):
             self.remove()
             event.stop()
