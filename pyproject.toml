@@ -3,14 +3,17 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "rigi"
-version = "1.3.2"
+name = "rigi-reekeer"
+version = "1.3.3"
 description = "Rigi isn't a graphics interface, it's terminal. A high-level TUI framework built on Textual."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
     { name = "reekeer" },
+]
+mainteiners = [
+    { name = "delewer" },
 ]
 dependencies = [
     "textual>=8.2.5",

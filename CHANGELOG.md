@@ -7,6 +7,28 @@ and this project adheres to Semantic Versioning.
 
 
 
+
+## [dev] - 2026-05-15
+
+### Changed
+
+- **README:** remove info about pypi ([`bb31f1d`](https://github.com/reekeer/Rigi/commit/bb31f1dd2d8aff4f983201f72874fa6a03ff004d))
+
+### Changed
+
+- bump 1.3.3 ([`50f6b68`](https://github.com/reekeer/Rigi/commit/50f6b687e95b9464fd9d6541ea89e8b7be648328))
+
+### Changed
+
+- add build and release to pypi ([`3b57fda`](https://github.com/reekeer/Rigi/commit/3b57fda734f1acbeb8465f7c177550112d5980a9))
+- remove verify in workflow ([`5ffb40f`](https://github.com/reekeer/Rigi/commit/5ffb40f4ac18652c03d0b0850370a3c1a51c9e0d))
+
+### Changed
+
+- **pyproject:** rename project for pypi ([`ffa708b`](https://github.com/reekeer/Rigi/commit/ffa708b4405cbca3f63fbd9304bb06b0832f69fa))
+
+
+
 ## [dev] - 2026-05-15
 
 ### Added
