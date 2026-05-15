@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate PR summary
         id: summary
@@ -308,6 +309,44 @@ jobs:
 
             core.setOutput("body", body);
 
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const version = pr.head.ref.replace(/[^a-zA-Z0-9.-]/g, '-');
+
+            let changelogEntry = `## [${version}] - ${dateStr}\n\n`;
+
+            for (const [type, items] of Object.entries(groups)) {
+              if (!items.length) continue;
+
+              const sectionTitles = {
+                feat: "Added",
+                fix: "Fixed",
+                refactor: "Changed",
+                perf: "Changed",
+                docs: "Changed",
+                test: "Changed",
+                chore: "Changed",
+                ci: "Changed",
+                style: "Changed",
+                build: "Changed",
+                revert: "Removed",
+                other: "Changed"
+              };
+
+              changelogEntry += `### ${sectionTitles[type] || "Changed"}\n\n`;
+
+              for (const item of items) {
+                const scope = item.scope ? `**${item.scope}:** ` : "";
+                changelogEntry += `- ${scope}${item.description} ([\`${item.sha}\`](${item.url}))\n`;
+              }
+
+              changelogEntry += `\n`;
+            }
+
+            core.setOutput("changelog", changelogEntry);
+            core.setOutput("version", version);
+            core.setOutput("date", dateStr);
+
       - name: Create or update comment
         uses: actions/github-script@v7
         env:
@@ -344,3 +383,63 @@ jobs:
                 body: process.env.BODY
               });
             }
+
+      - name: Update CHANGELOG.md
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const changelogPath = path.join(process.cwd(), 'CHANGELOG.md');
+            const version = '${{ steps.summary.outputs.version }}';
+            const date = '${{ steps.summary.outputs.date }}';
+            const entry = `${{ steps.summary.outputs.changelog }}`;
+
+            const header = `# Changelog\n\nAll notable changes to this project will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n\n`;
+
+            let content;
+
+            if (fs.existsSync(changelogPath)) {
+              content = fs.readFileSync(changelogPath, 'utf8');
+
+              const lines = content.split('\n');
+              let insertIndex = 0;
+
+              for (let i = 0; i < lines.length; i++) {
+                if (lines[i].includes('semver.org') || lines[i].includes('1.1.0')) {
+                  insertIndex = i + 1;
+                  // Skip empty lines
+                  while (insertIndex < lines.length && lines[insertIndex].trim() === '') {
+                    insertIndex++;
+                  }
+                  break;
+                }
+              }
+
+              const newEntry = `## [${version}] - ${date}\n\n${entry}\n`;
+              lines.splice(insertIndex, 0, '', newEntry);
+              content = lines.join('\n');
+            } else {
+              content = header + `## [${version}] - ${date}\n\n${entry}\n`;
+            }
+
+            fs.writeFileSync(changelogPath, content);
+
+            console.log('CHANGELOG.md updated successfully');
+
+      - name: Commit CHANGELOG.md to PR branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add CHANGELOG.md
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "docs: update CHANGELOG.md for PR #${{ github.event.pull_request.number }}"
+
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
