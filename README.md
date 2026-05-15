@@ -18,21 +18,12 @@
 
 A high-level TUI framework built on top of [Textual](https://github.com/Textualize/textual). Rigi is an **internal library** - used across all CLI tools to maintain a consistent, polished terminal interface.
 
-> **This project will never be published to PyPI, uv, or any other package registry.**
-> It is available exclusively on GitHub. Install it directly from the repository.
-
 ---
 
 ## 📦 Installation
 
 ```bash
-pip install git+https://github.com/reekeer/Rigi.git
-```
-
-Or with [uv](https://github.com/astral-sh/uv):
-
-```bash
-uv add git+https://github.com/reekeer/Rigi.git
+pip install rigi-reekeer
 ```
 
 ---
@@ -176,7 +167,6 @@ Rigi/
 This is a **personal library**, not a general-purpose open-source project.
 
 - **No documentation.** Learn from the source code and the [`examples/`](examples/) directory.
-- **No PyPI.** Never published, never will be. Install from GitHub only.
 - **No issues or discussions.** GitHub Issues and Discussions are disabled. Questions, feature requests, and support will not be answered.
 - **Pull requests are welcome** - but only for: bug fixes, code optimization, cross-platform improvements, and features that expose missing Textual capabilities. Everything else will be closed without review.
 
