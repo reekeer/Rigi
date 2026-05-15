@@ -79,7 +79,7 @@ from rigi.widgets.statusbar import StatusBar, StatusBarItem
 from rigi.widgets.tab_group import TabGroup
 from rigi.widgets.terminal_bar import TerminalBar
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 __all__ = [
     # Textual primitives
     "Widget",
