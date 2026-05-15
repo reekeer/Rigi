@@ -83,7 +83,12 @@ def install() -> None:
 
     if not _installed_logging:
         root = logging.getLogger()
+        for h in list(root.handlers):
+            root.removeHandler(h)
         root.addHandler(_intercept_handler)
+        root.setLevel(logging.DEBUG)
+        for noisy in ("textual", "asyncio", "PIL"):
+            logging.getLogger(noisy).setLevel(logging.WARNING)
         _installed_logging = True
 
     if not _loguru_installed:
