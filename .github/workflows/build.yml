@@ -121,7 +121,7 @@ jobs:
             dist/*
 
       - name: Publish to PyPI
-        if: github.event.inputs.publish_pypi == true
+        if: github.event.inputs.publish_pypi == 'true'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           attestations: false
