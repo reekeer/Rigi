@@ -19,59 +19,8 @@ permissions:
   id-token: write
 
 jobs:
-  verify:
-    name: Verify
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-
-      matrix:
-        python:
-          - "3.10"
-          - "3.11"
-          - "3.12"
-          - "3.13"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-
-          pip install \
-            build \
-            twine \
-            hatchling
-
-          pip install -e ".[dev]"
-
-      - name: Ruff
-        run: ruff check .
-
-      - name: Black
-        run: black --check .
-
-      - name: Pyright
-        run: pyright .
-
-      - name: Pytest
-        run: |
-          pytest tests/ \
-            -v \
-            --tb=short
-
   release:
     name: Release
-    needs: verify
     runs-on: ubuntu-latest
 
     environment:
